@@ -1,0 +1,114 @@
+﻿<Window x:Class="Skriptorium.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Skriptorium" Height="450" Width="800"
+        Icon="pack://application:,,,/Skriptorium.ico">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- komplette Menüleiste inline mit Icons, ohne Unterstriche -->
+        <Menu Grid.Row="0" BorderBrush="Gray" BorderThickness="0,1,0,1">
+            <MenuItem Header="Skriptorium">
+                <MenuItem Header="Über Skriptorium" Click="MenuSkriptoriumUeber_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE946;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Einstellungen" InputGestureText="Strg + ," Click="MenuSkriptoriumEinstellungen_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Beenden" InputGestureText="Alt + F4" Click="MenuSkriptoriumBeenden_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE711;" FontSize="13"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+
+            <MenuItem Header="Datei">
+                <MenuItem Header="Neues Skript" InputGestureText="Strg + N" Click="MenuDateiNeuesSkript_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE710;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                
+                <MenuItem Header="Öffnen" InputGestureText="Strg + O" Click="MenuDateiÖffnen_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED25;" FontSize="17"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="MenuDateiZuletztGeoeffnet" Header="Zuletzt geöffnet">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE81C;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                
+                <Separator/>
+                
+                <MenuItem Header="Speichern" InputGestureText="Strg + S" Click="MenuDateiSpeichern_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE105;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Speichern unter…" InputGestureText="Strg + Shift + S" Click="MenuDateiSpeichernUnter_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE792;" FontSize="17"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                
+                <MenuItem Header="Alles speichern" InputGestureText="Strg + Alt + S" Click="MenuDateiAllesSpeichern_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE105;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                
+                <MenuItem Header="Schließen" InputGestureText="Strg + W" Click="MenuDateiSchließen_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8BB;" FontSize="13"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+
+            <MenuItem Header="Bearbeiten">
+                <MenuItem Header="Rückgängig" InputGestureText="Strg + Z" Click="MenuBearbeitenRueckgaengig_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A7;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Wiederholen" InputGestureText="Strg + Y" Click="MenuBearbeitenWiederholen_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                
+                <Separator/>
+                
+                <MenuItem Header="Ausschneiden" InputGestureText="Strg + X" Click="MenuBearbeitenAusschneiden_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C6;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                
+                <MenuItem Header="Kopieren" InputGestureText="Strg + C" Click="MenuBearbeitenKopieren_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C8;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                
+                <MenuItem Header="Einfügen" InputGestureText="Strg + V" Click="MenuBearbeitenEinfuegen_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77F;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <!-- TabControl für mehrere Skripte -->
+        <TabControl x:Name="tabControlScripts" Grid.Row="1"/>
+    </Grid>
+</Window>
