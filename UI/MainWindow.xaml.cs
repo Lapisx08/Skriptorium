@@ -51,6 +51,8 @@ namespace Skriptorium.UI
                                       () => MenuDateiSpeichernUnter_Click(null, null));
             _shortcutManager.Register(Key.S, ModifierKeys.Control | ModifierKeys.Shift,
                                       () => MenuDateiAllesSpeichern_Click(null, null));
+            _shortcutManager.Register(Key.F, ModifierKeys.Control,
+                                      () => FindInEditor_Click(null, null));
 
             // 3. Letzte Dateien laden und erstes Tab öffnen
             DataManager.LoadRecentFiles();
@@ -211,19 +213,19 @@ namespace Skriptorium.UI
 
         #region Menü "Bearbeiten"
         private void MenuBearbeitenRueckgaengig_Click(object? sender, RoutedEventArgs? e)
-            => _tabManager.GetActiveScriptEditor()?.TextBox?.Undo();
+            => _tabManager.GetActiveScriptEditor()?.Avalon?.Undo();
 
         private void MenuBearbeitenWiederholen_Click(object? sender, RoutedEventArgs? e)
-            => _tabManager.GetActiveScriptEditor()?.TextBox?.Redo();
+            => _tabManager.GetActiveScriptEditor()?.Avalon?.Redo();
 
         private void MenuBearbeitenAusschneiden_Click(object? sender, RoutedEventArgs? e)
-            => _tabManager.GetActiveScriptEditor()?.TextBox?.Cut();
+            => _tabManager.GetActiveScriptEditor()?.Avalon?.Cut();
 
         private void MenuBearbeitenKopieren_Click(object? sender, RoutedEventArgs? e)
-            => _tabManager.GetActiveScriptEditor()?.TextBox?.Copy();
+            => _tabManager.GetActiveScriptEditor()?.Avalon?.Copy();
 
         private void MenuBearbeitenEinfuegen_Click(object? sender, RoutedEventArgs? e)
-            => _tabManager.GetActiveScriptEditor()?.TextBox?.Paste();
+            => _tabManager.GetActiveScriptEditor()?.Avalon?.Paste();
 
         private void MenuBearbeitenDuplizieren_Click(object? sender, RoutedEventArgs? e)
             => _editMenuManager.Duplicate();

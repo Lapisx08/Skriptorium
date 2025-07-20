@@ -1,13 +1,15 @@
-﻿using Microsoft.Win32;  // Für OpenFileDialog
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace Skriptorium.UI.Views
 {
     public partial class SettingsView : Window
     {
         private bool _isInitializing = true;
+
         public SettingsView()
         {
             InitializeComponent();
@@ -31,7 +33,7 @@ namespace Skriptorium.UI.Views
             // Voreinstellung: Tagmodus
             string saved = Properties.Settings.Default.Theme ?? "Light";
 
-            // Skript-Pfad laden
+            // Skript-Ordnerpfad laden
             TxtScriptPath.Text = Properties.Settings.Default.ScriptSearchPath;
         }
 
@@ -46,7 +48,6 @@ namespace Skriptorium.UI.Views
             if (ComboTheme.SelectedItem is ComboBoxItem item
                 && item.Tag is string themeKey)
             {
-
                 Properties.Settings.Default.Theme = themeKey;
                 Properties.Settings.Default.Save();
 
@@ -59,18 +60,20 @@ namespace Skriptorium.UI.Views
 
         private void BtnBrowse_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new OpenFileDialog
+            var dialog = new CommonOpenFileDialog
             {
-                Filter = "Skripte (*.txt)|*.txt|Alle Dateien (*.*)|*.*"
+                IsFolderPicker = true,
+                Title = "Wähle den Skript-Ordner"
             };
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 TxtScriptPath.Text = dialog.FileName;
                 Properties.Settings.Default.ScriptSearchPath = dialog.FileName;
                 Properties.Settings.Default.Save();
             }
         }
+
 
         // Schließen-Button
         private void Close_Click(object sender, RoutedEventArgs e)

@@ -1,77 +1,84 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Rendering;
 using Skriptorium.UI.Views;
 
 namespace Skriptorium.UI
 {
     public partial class ScriptEditor : UserControl
     {
-        private string _originalText = "";              // Originaltext zur Prüfung der Änderungen
-        private bool _suppressChangeTracking = false;   // Verhindert die Änderungstracking bei bestimmten Aktionen
-        private string _filePath = "";                  // Dateipfad zum Skript
+        private string _originalText = "";
+        private bool _suppressChangeTracking = false;
+        private string _filePath = "";
+
+        // Highlighting-Marker
+        private TextSegmentCollection<TextMarker>? _markers;
+        private TextMarkerRenderer? _markerRenderer;
 
         public ScriptEditor()
         {
             InitializeComponent();
-            myTextBox.TextChanged += MyTextBox_TextChanged;  // Event abonnieren, um Textänderungen zu erkennen
+            avalonEditor.TextChanged += AvalonEditor_TextChanged;
+
+            // Marker-Dienste initialisieren
+            _markers = new TextSegmentCollection<TextMarker>(avalonEditor.Document);
+            _markerRenderer = new TextMarkerRenderer(avalonEditor.TextArea.TextView, _markers);
+            avalonEditor.TextArea.TextView.BackgroundRenderers.Add(_markerRenderer);
         }
 
-        // Methode, die Textänderungen verfolgt
-        private void MyTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+        private void AvalonEditor_TextChanged(object? sender, EventArgs e)
         {
             if (_suppressChangeTracking)
                 return;
 
-            // Prüfen, ob der Text geändert wurde
-            IsModified = myTextBox.Text != _originalText;
-
-            // Event nach außen auslösen
-            TextChanged?.Invoke(this, e);
+            IsModified = avalonEditor.Text != _originalText;
+            TextChanged?.Invoke(this, null);
         }
 
-        // Property, die angibt, ob der Text geändert wurde
         public bool IsModified { get; private set; } = false;
 
-        // Nur Leserechte auf den Text – zum Setzen die Methoden verwenden
-        public string Text => myTextBox.Text;
+        public string Text => avalonEditor.Text;
 
-        // Den Pfad der Datei setzen
         public string FilePath
         {
             get => _filePath;
             set
             {
                 _filePath = value;
-                _originalText = myTextBox.Text;  // Text mit dem Originaltext abgleichen
+                _originalText = avalonEditor.Text;
+                ResetModifiedFlag();
             }
         }
 
-        // Text setzen und als unverändert markieren (z. B. nach Laden einer Datei)
         public void SetTextAndResetModified(string text)
         {
             _suppressChangeTracking = true;
-            myTextBox.Text = text;
+            avalonEditor.Text = text;
             _originalText = text;
             _suppressChangeTracking = false;
             IsModified = false;
+            ClearHighlighting();  // Alte Marker entfernen
         }
 
-        // Text setzen und als verändert markieren (z. B. nach ReplaceAll)
         public void SetTextAndMarkAsModified(string text)
         {
             _suppressChangeTracking = true;
-            myTextBox.Text = text;
+            avalonEditor.Text = text;
             _suppressChangeTracking = false;
             IsModified = true;
-
-            // TextChanged-Event manuell auslösen
-            TextChanged?.Invoke(this, new TextChangedEventArgs(TextBox.TextChangedEvent, UndoAction.None));
+            TextChanged?.Invoke(this, null);
+            ClearHighlighting();  // Alte Marker entfernen, damit bei neuer Suche keine Restmarker bleiben
         }
 
-        // Methode zum Zurücksetzen des Änderungs-Flags (z. B. nach dem Speichern)
         public void ResetModifiedFlag()
         {
-            _originalText = myTextBox.Text;
+            _originalText = avalonEditor.Text;
             IsModified = false;
 
             if (TitleTextBlock != null && TitleTextBlock.Text.EndsWith("*"))
@@ -80,13 +87,117 @@ namespace Skriptorium.UI
             }
         }
 
-        // Event für Textänderungen
         public event TextChangedEventHandler? TextChanged;
 
-        // Zugriff auf internes TextBox-Element
-        public TextBox TextBox => myTextBox;
+        public TextEditor Avalon => avalonEditor;
 
-        // Für den Tab-Header
         public TextBlock? TitleTextBlock { get; set; }
+
+        /// <summary>
+        /// Markiert alle Vorkommen eines Suchbegriffs im Text.
+        /// </summary>
+        /// <param name="searchText">Suchbegriff</param>
+        /// <param name="matchCase">Groß-/Kleinschreibung beachten</param>
+        /// <param name="wholeWord">Nur ganzes Wort markieren</param>
+        public void HighlightAllOccurrences(string searchText, bool matchCase = false, bool wholeWord = false)
+        {
+            if (string.IsNullOrWhiteSpace(searchText) || _markers == null || _markerRenderer == null)
+                return;
+
+            // Alte Marker entfernen
+            foreach (var m in _markers.ToList())
+                _markers.Remove(m);
+
+            string fullText = avalonEditor.Text;
+            StringComparison cmp = matchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+            int offset = 0;
+
+            while ((offset = fullText.IndexOf(searchText, offset, cmp)) >= 0)
+            {
+                if (wholeWord)
+                {
+                    bool leftOk = offset == 0 || !Char.IsLetterOrDigit(fullText[offset - 1]);
+                    int afterIndex = offset + searchText.Length;
+                    bool rightOk = afterIndex >= fullText.Length || !Char.IsLetterOrDigit(fullText[afterIndex]);
+
+                    if (!(leftOk && rightOk))
+                    {
+                        offset++;
+                        continue;
+                    }
+                }
+
+                var marker = new TextMarker(avalonEditor.Document, offset, searchText.Length)
+                {
+                    BackgroundColor = Colors.Yellow,
+                    ForegroundColor = Colors.Black
+                };
+                _markers.Add(marker);
+
+                offset += searchText.Length;
+            }
+
+            avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+            avalonEditor.TextArea.TextView.InvalidateVisual();
+        }
+
+        /// <summary>
+        /// Entfernt alle Hervorhebungen im Editor.
+        /// </summary>
+        public void ClearHighlighting()
+        {
+            if (_markers == null || _markerRenderer == null)
+                return;
+
+            foreach (var marker in _markers.ToList())
+                _markers.Remove(marker);
+
+            avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+            avalonEditor.TextArea.TextView.InvalidateVisual();
+        }
+    }
+
+    // Marker-Datenstruktur
+    public class TextMarker : TextSegment
+    {
+        public TextMarker(IDocument document, int startOffset, int length)
+        {
+            StartOffset = startOffset;
+            Length = length;
+        }
+
+        public Color BackgroundColor { get; set; } = Colors.Yellow;
+        public Color ForegroundColor { get; set; } = Colors.Black;
+    }
+
+    // Zeichnet Marker im Editor
+    public class TextMarkerRenderer : IBackgroundRenderer
+    {
+        private readonly TextView _textView;
+        private readonly TextSegmentCollection<TextMarker> _markers;
+
+        public TextMarkerRenderer(TextView textView, TextSegmentCollection<TextMarker> markers)
+        {
+            _textView = textView;
+            _markers = markers;
+        }
+
+        public void Draw(TextView textView, DrawingContext drawingContext)
+        {
+            if (!_textView.VisualLinesValid)
+                return;
+
+            foreach (var marker in _markers)
+            {
+                foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, marker))
+                {
+                    var brush = new SolidColorBrush(marker.BackgroundColor) { Opacity = 0.4 };
+                    drawingContext.DrawRectangle(brush, null, rect);
+                }
+            }
+        }
+
+        public KnownLayer Layer => KnownLayer.Selection;
     }
 }

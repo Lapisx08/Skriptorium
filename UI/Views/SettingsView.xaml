@@ -45,9 +45,6 @@
                         <ComboBoxItem Content="Tagmodus" Tag="Light"/>
                         <ComboBoxItem Content="Nachtmodus" Tag="Dark"/>
                     </ComboBox>
-
-                    <!-- Weitere Optionen -->
-                    <TextBlock Text="Weitere Optionen folgen hier..." Grid.Row="1" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"/>
                 </Grid>
             </TabItem>
 
@@ -70,7 +67,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Skript-Pfad Auswahl -->
-                    <TextBlock Text="Skript-Pfad:" Grid.Row="0" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"/>
+                    <TextBlock Text="Pfad zu Gothic Skripts:" Grid.Row="0" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"/>
                     <TextBox x:Name="TxtScriptPath"
                              Grid.Row="0" Grid.Column="1" Margin="0,0,5,5"
                              IsReadOnly="True"/>
@@ -80,9 +77,6 @@
                             Content="…"
                             Width="25" Margin="0,0,0,5"
                             Click="BtnBrowse_Click"/>
-
-                    <!-- Weitere Pfad-Einstellungen -->
-                    <TextBlock Text="Weitere Pfad-Einstellungen folgen hier..." Grid.Row="1" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"/>
                 </Grid>
             </TabItem>
         </TabControl>

@@ -20,24 +20,24 @@ namespace Skriptorium.Managers
         public void FindNext(string searchText, bool matchCase = false)
         {
             var editor = _tabManager.GetActiveScriptEditor();
-            var textBox = editor?.TextBox;
+            var Avalon = editor?.Avalon;
 
-            if (textBox == null || string.IsNullOrEmpty(searchText))
+            if (Avalon == null || string.IsNullOrEmpty(searchText))
             {
                 MessageBox.Show("Kein Skript geöffnet oder kein Suchtext eingegeben.");
                 return;
             }
 
-            var content = textBox.Text;
-            var currentIndex = textBox.SelectionStart + textBox.SelectionLength;
+            var content = Avalon.Text;
+            var currentIndex = Avalon.SelectionStart + Avalon.SelectionLength;
             var comparison = matchCase ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
 
             int foundIndex = content.IndexOf(searchText, currentIndex, comparison);
 
             if (foundIndex >= 0)
             {
-                textBox.Select(foundIndex, searchText.Length);
-                textBox.Focus();
+                Avalon.Select(foundIndex, searchText.Length);
+                Avalon.Focus();
             }
             else
             {
@@ -48,9 +48,9 @@ namespace Skriptorium.Managers
         public void Replace(string searchText, string replaceText, bool matchCase = false)
         {
             var editor = _tabManager.GetActiveScriptEditor();
-            var textBox = editor?.TextBox;
+            var Avalon = editor?.Avalon;
 
-            if (textBox == null || string.IsNullOrEmpty(searchText))
+            if (Avalon == null || string.IsNullOrEmpty(searchText))
             {
                 MessageBox.Show("Kein Skript geöffnet oder kein Suchtext eingegeben.");
                 return;
@@ -58,9 +58,9 @@ namespace Skriptorium.Managers
 
             var comparison = matchCase ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
 
-            if (string.Equals(textBox.SelectedText, searchText, comparison))
+            if (string.Equals(Avalon.SelectedText, searchText, comparison))
             {
-                textBox.SelectedText = replaceText; // Löst TextChanged aus → Stern erscheint
+                Avalon.SelectedText = replaceText; // Löst TextChanged aus → Stern erscheint
             }
 
             FindNext(searchText, matchCase);

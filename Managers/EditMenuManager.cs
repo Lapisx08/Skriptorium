@@ -21,9 +21,9 @@ namespace Skriptorium.Managers
                 return;
             }
 
-            if (editor.TextBox.CanUndo)
+            if (editor.Avalon.CanUndo)
             {
-                editor.TextBox.Undo();
+                editor.Avalon.Undo();
             }
         }
 
@@ -36,9 +36,9 @@ namespace Skriptorium.Managers
                 return;
             }
 
-            if (editor.TextBox.CanRedo)
+            if (editor.Avalon.CanRedo)
             {
-                editor.TextBox.Redo();
+                editor.Avalon.Redo();
             }
         }
 
@@ -51,9 +51,9 @@ namespace Skriptorium.Managers
                 return;
             }
 
-            if (editor.TextBox.SelectionLength > 0)
+            if (editor.Avalon.SelectionLength > 0)
             {
-                editor.TextBox.Cut();
+                editor.Avalon.Cut();
             }
         }
 
@@ -66,9 +66,9 @@ namespace Skriptorium.Managers
                 return;
             }
 
-            if (editor.TextBox.SelectionLength > 0)
+            if (editor.Avalon.SelectionLength > 0)
             {
-                editor.TextBox.Copy();
+                editor.Avalon.Copy();
             }
         }
 
@@ -81,44 +81,44 @@ namespace Skriptorium.Managers
                 return;
             }
 
-            editor.TextBox.Paste();
+            editor.Avalon.Paste();
         }
 
         public void Duplicate()
         {
             var editor = _tabManager.GetActiveScriptEditor();
-            var textBox = editor?.TextBox;
+            var Avalon = editor?.Avalon;
 
-            if (textBox == null)
+            if (Avalon == null)
             {
                 MessageBox.Show("Kein Skript geöffnet.");
                 return;
             }
 
-            if (!string.IsNullOrEmpty(textBox.SelectedText))
+            if (!string.IsNullOrEmpty(Avalon.SelectedText))
             {
-                int caretIndex = textBox.SelectionStart + textBox.SelectionLength;
-                textBox.Text = textBox.Text.Insert(caretIndex, textBox.SelectedText);
-                textBox.SelectionStart = caretIndex;
+                int caretIndex = Avalon.SelectionStart + Avalon.SelectionLength;
+                Avalon.Text = Avalon.Text.Insert(caretIndex, Avalon.SelectedText);
+                Avalon.SelectionStart = caretIndex;
             }
         }
 
         public void Delete()
         {
             var editor = _tabManager.GetActiveScriptEditor();
-            var textBox = editor?.TextBox;
+            var Avalon = editor?.Avalon;
 
-            if (textBox == null)
+            if (Avalon == null)
             {
                 MessageBox.Show("Kein Skript geöffnet.");
                 return;
             }
 
-            if (!string.IsNullOrEmpty(textBox.SelectedText))
+            if (!string.IsNullOrEmpty(Avalon.SelectedText))
             {
-                int start = textBox.SelectionStart;
-                textBox.Text = textBox.Text.Remove(start, textBox.SelectionLength);
-                textBox.SelectionStart = start;
+                int start = Avalon.SelectionStart;
+                Avalon.Text = Avalon.Text.Remove(start, Avalon.SelectionLength);
+                Avalon.SelectionStart = start;
             }
         }
 
@@ -131,7 +131,7 @@ namespace Skriptorium.Managers
                 return;
             }
 
-            editor.TextBox.SelectAll();
+            editor.Avalon.SelectAll();
         }
 
     }
