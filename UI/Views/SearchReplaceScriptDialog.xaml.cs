@@ -26,6 +26,7 @@ namespace Skriptorium.UI.Views
         {
             InitializeComponent();
             _scriptEditor = scriptEditor;
+            _scriptEditor.Avalon.TextArea.SelectionChanged += Avalon_SelectionChanged; // Event-Handler für Textauswahl
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -59,6 +60,40 @@ namespace Skriptorium.UI.Views
             var replaceTextBox = GetComboBoxTextBox(ComboReplaceText);
             if (replaceTextBox != null)
                 replaceTextBox.TextChanged += ComboReplaceText_TextChanged;
+
+            // Initiale Aktivierung/Deaktivierung von ChkSelectionOnly
+            UpdateSelectionOnlyCheckbox();
+        }
+
+        private void Avalon_SelectionChanged(object sender, EventArgs e)
+        {
+            UpdateSelectionOnlyCheckbox();
+        }
+
+        private void UpdateSelectionOnlyCheckbox()
+        {
+            // Checkbox nur aktivieren, wenn Text markiert ist
+            ChkSelectionOnly.IsEnabled = _scriptEditor.Avalon.SelectionLength > 0;
+            if (_scriptEditor.Avalon.SelectionLength == 0)
+            {
+                ChkSelectionOnly.IsChecked = false; // Deaktivieren, wenn keine Auswahl
+            }
+        }
+
+        private void ChkSelectionOnly_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(SearchText))
+            {
+                FindAllOccurrences(); // Suche aktualisieren
+            }
+        }
+
+        private void ChkSelectionOnly_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(SearchText))
+            {
+                FindAllOccurrences(); // Suche aktualisieren
+            }
         }
 
         private TextBox? GetComboBoxTextBox(ComboBox comboBox)
@@ -137,7 +172,20 @@ namespace Skriptorium.UI.Views
                 return;
             }
 
-            string text = _scriptEditor.Text;
+            string text;
+            int offsetBase = 0;
+
+            // Prüfen, ob "Nur markierter Text" aktiviert ist und Text markiert ist
+            bool restrictToSelection = ChkSelectionOnly.IsChecked == true && _scriptEditor.Avalon.SelectionLength > 0;
+            if (restrictToSelection)
+            {
+                text = _scriptEditor.Avalon.SelectedText;
+                offsetBase = _scriptEditor.Avalon.SelectionStart;
+            }
+            else
+            {
+                text = _scriptEditor.Text;
+            }
 
             int offset = 0;
             var comparison = ChkCase.IsChecked == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
@@ -156,12 +204,19 @@ namespace Skriptorium.UI.Views
                     }
                 }
 
-                _searchOffsets.Add(offset);
+                _searchOffsets.Add(offsetBase + offset);
                 offset += searchText.Length;
             }
 
-            // Übergabe von matchCase und wholeWord an HighlightAllOccurrences
-            _scriptEditor.HighlightAllOccurrences(searchText, ChkCase.IsChecked == true, ChkWholeWord.IsChecked == true);
+            // Übergabe der Auswahlparameter an HighlightAllOccurrences
+            _scriptEditor.HighlightAllOccurrences(
+                searchText,
+                ChkCase.IsChecked == true,
+                ChkWholeWord.IsChecked == true,
+                restrictToSelection,
+                _scriptEditor.Avalon.SelectionStart,
+                _scriptEditor.Avalon.SelectionLength
+            );
         }
 
         private void BtnFindNext_Click(object? sender, RoutedEventArgs? e)
@@ -206,14 +261,52 @@ namespace Skriptorium.UI.Views
             int offset = _searchOffsets[_currentIndex];
             int length = SearchText.Length;
 
+            // Ursprüngliche Auswahl speichern, wenn "Nur markierter Text" aktiviert
+            int originalSelectionStart = _scriptEditor.Avalon.SelectionStart;
+            int originalSelectionLength = _scriptEditor.Avalon.SelectionLength;
+            bool restrictToSelection = ChkSelectionOnly.IsChecked == true && originalSelectionLength > 0;
+
+            // Prüfen, ob der Offset im markierten Bereich liegt, wenn "Nur markierter Text" aktiviert
+            if (restrictToSelection)
+            {
+                int selectionStart = _scriptEditor.Avalon.SelectionStart;
+                int selectionEnd = selectionStart + _scriptEditor.Avalon.SelectionLength;
+                if (offset < selectionStart || offset + length > selectionEnd)
+                {
+                    MessageBox.Show("Der nächste Treffer liegt außerhalb der Auswahl.", "Ersetzen", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _currentIndex = -1;
+                    _searchOffsets.Clear();
+                    FindAllOccurrences();
+                    return;
+                }
+            }
+
             var doc = _scriptEditor.Avalon.Document;
             doc.Replace(offset, length, ReplaceText);
             _scriptEditor.SetTextAndMarkAsModified(doc.Text);
+
+            // Anpassen der Auswahl basierend auf der Längenänderung
+            int lengthDifference = ReplaceText.Length - SearchText.Length;
+            int newSelectionLength = restrictToSelection ? originalSelectionLength + lengthDifference : originalSelectionLength;
+
+            // Sicherstellen, dass die neue Auswahl gültig ist
+            if (restrictToSelection && newSelectionLength >= 0)
+            {
+                _scriptEditor.Avalon.Select(originalSelectionStart, newSelectionLength);
+            }
 
             string text = doc.Text;
             int searchStart = offset + ReplaceText.Length;
 
             _searchOffsets.Clear();
+
+            int offsetBase = 0;
+            if (restrictToSelection)
+            {
+                text = _scriptEditor.Avalon.SelectedText;
+                offsetBase = _scriptEditor.Avalon.SelectionStart;
+                searchStart = Math.Max(0, searchStart - offsetBase);
+            }
 
             var comparison = ChkCase.IsChecked == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
             int pos = searchStart;
@@ -231,7 +324,7 @@ namespace Skriptorium.UI.Views
                         continue;
                     }
                 }
-                _searchOffsets.Add(pos);
+                _searchOffsets.Add(offsetBase + pos);
                 pos += SearchText.Length;
             }
 
@@ -240,18 +333,40 @@ namespace Skriptorium.UI.Views
                 MessageBox.Show("Keine weiteren Treffer gefunden.", "Ersetzen", MessageBoxButton.OK, MessageBoxImage.Information);
                 _currentIndex = -1;
                 _scriptEditor.ClearHighlighting();
+                // Auswahl beibehalten, wenn noch innerhalb der markierten Suche
+                if (restrictToSelection && newSelectionLength >= 0)
+                {
+                    _scriptEditor.Avalon.Select(originalSelectionStart, newSelectionLength);
+                }
                 return;
             }
 
             _currentIndex = 0;
 
             int nextOffset = _searchOffsets[_currentIndex];
-            _scriptEditor.Avalon.Select(nextOffset, SearchText.Length);
+
+            // Auswahl des nächsten Treffers nur, wenn nicht eingeschränkt, sonst ursprüngliche Auswahl beibehalten
+            if (!restrictToSelection)
+            {
+                _scriptEditor.Avalon.Select(nextOffset, SearchText.Length);
+            }
+            else if (newSelectionLength >= 0)
+            {
+                _scriptEditor.Avalon.Select(originalSelectionStart, newSelectionLength);
+            }
+
             _scriptEditor.Avalon.ScrollToLine(_scriptEditor.Avalon.Document.GetLineByOffset(nextOffset).LineNumber);
             _scriptEditor.Avalon.Focus();
 
-            // Übergabe von matchCase und wholeWord an HighlightAllOccurrences
-            _scriptEditor.HighlightAllOccurrences(SearchText, ChkCase.IsChecked == true, ChkWholeWord.IsChecked == true);
+            // Übergabe der Auswahlparameter an HighlightAllOccurrences
+            _scriptEditor.HighlightAllOccurrences(
+                SearchText,
+                ChkCase.IsChecked == true,
+                ChkWholeWord.IsChecked == true,
+                restrictToSelection,
+                _scriptEditor.Avalon.SelectionStart,
+                _scriptEditor.Avalon.SelectionLength
+            );
         }
 
         private void BtnReplaceAll_Click(object sender, RoutedEventArgs e)
@@ -264,7 +379,19 @@ namespace Skriptorium.UI.Views
             }
 
             var doc = _scriptEditor.Avalon.Document;
-            string text = doc.Text;
+            string text;
+            int offsetBase = 0;
+
+            bool restrictToSelection = ChkSelectionOnly.IsChecked == true && _scriptEditor.Avalon.SelectionLength > 0;
+            if (restrictToSelection)
+            {
+                text = _scriptEditor.Avalon.SelectedText;
+                offsetBase = _scriptEditor.Avalon.SelectionStart;
+            }
+            else
+            {
+                text = doc.Text;
+            }
 
             var comparison = ChkCase.IsChecked == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
@@ -285,8 +412,10 @@ namespace Skriptorium.UI.Views
                     }
                 }
 
-                doc.Replace(index, searchText.Length, ReplaceText);
-                text = doc.Text;
+                doc.Replace(offsetBase + index, searchText.Length, ReplaceText);
+                text = restrictToSelection && _scriptEditor.Avalon.SelectionLength > 0
+                    ? _scriptEditor.Avalon.SelectedText
+                    : doc.Text;
                 index += ReplaceText.Length;
                 replacedCount++;
             }
@@ -301,7 +430,6 @@ namespace Skriptorium.UI.Views
                 MessageBox.Show($"{replacedCount} Treffer wurden ersetzt.", "Ersetzen Alle", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
-            // Übergabe von matchCase und wholeWord an HighlightAllOccurrences
             FindAllOccurrences();
             _currentIndex = -1;
         }
@@ -314,6 +442,7 @@ namespace Skriptorium.UI.Views
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             _scriptEditor.ClearHighlighting();
+            _scriptEditor.Avalon.TextArea.SelectionChanged -= Avalon_SelectionChanged;
 
             // Suchhistorie aktualisieren und speichern
             if (!string.IsNullOrWhiteSpace(SearchText) && !_searchHistory.Contains(SearchText))

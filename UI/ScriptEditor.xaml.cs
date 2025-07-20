@@ -63,7 +63,7 @@ namespace Skriptorium.UI
             _originalText = text;
             _suppressChangeTracking = false;
             IsModified = false;
-            ClearHighlighting();  // Alte Marker entfernen
+            ClearHighlighting();
         }
 
         public void SetTextAndMarkAsModified(string text)
@@ -73,7 +73,7 @@ namespace Skriptorium.UI
             _suppressChangeTracking = false;
             IsModified = true;
             TextChanged?.Invoke(this, null);
-            ClearHighlighting();  // Alte Marker entfernen, damit bei neuer Suche keine Restmarker bleiben
+            ClearHighlighting();
         }
 
         public void ResetModifiedFlag()
@@ -99,7 +99,10 @@ namespace Skriptorium.UI
         /// <param name="searchText">Suchbegriff</param>
         /// <param name="matchCase">Groß-/Kleinschreibung beachten</param>
         /// <param name="wholeWord">Nur ganzes Wort markieren</param>
-        public void HighlightAllOccurrences(string searchText, bool matchCase = false, bool wholeWord = false)
+        /// <param name="restrictToSelection">Nur markierter Text einschränken</param>
+        /// <param name="selectionStart">Start-Offset der Auswahl</param>
+        /// <param name="selectionLength">Länge der Auswahl</param>
+        public void HighlightAllOccurrences(string searchText, bool matchCase = false, bool wholeWord = false, bool restrictToSelection = false, int selectionStart = 0, int selectionLength = 0)
         {
             if (string.IsNullOrWhiteSpace(searchText) || _markers == null || _markerRenderer == null)
                 return;
@@ -108,18 +111,20 @@ namespace Skriptorium.UI
             foreach (var m in _markers.ToList())
                 _markers.Remove(m);
 
-            string fullText = avalonEditor.Text;
+            string text = restrictToSelection && selectionLength > 0 ? avalonEditor.SelectedText : avalonEditor.Text;
+            int offsetBase = restrictToSelection && selectionLength > 0 ? selectionStart : 0;
+
             StringComparison cmp = matchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
             int offset = 0;
 
-            while ((offset = fullText.IndexOf(searchText, offset, cmp)) >= 0)
+            while ((offset = text.IndexOf(searchText, offset, cmp)) >= 0)
             {
                 if (wholeWord)
                 {
-                    bool leftOk = offset == 0 || !Char.IsLetterOrDigit(fullText[offset - 1]);
+                    bool leftOk = offset == 0 || !Char.IsLetterOrDigit(text[offset - 1]);
                     int afterIndex = offset + searchText.Length;
-                    bool rightOk = afterIndex >= fullText.Length || !Char.IsLetterOrDigit(fullText[afterIndex]);
+                    bool rightOk = afterIndex >= text.Length || !Char.IsLetterOrDigit(text[afterIndex]);
 
                     if (!(leftOk && rightOk))
                     {
@@ -128,7 +133,7 @@ namespace Skriptorium.UI
                     }
                 }
 
-                var marker = new TextMarker(avalonEditor.Document, offset, searchText.Length)
+                var marker = new TextMarker(avalonEditor.Document, offsetBase + offset, searchText.Length)
                 {
                     BackgroundColor = Colors.Yellow,
                     ForegroundColor = Colors.Black
