@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Skriptorium.Managers;
+using Skriptorium.UI.Views;
 
 namespace Skriptorium.UI
 {
@@ -10,23 +12,62 @@ namespace Skriptorium.UI
     {
         private readonly ScriptTabManager _tabManager;
         private readonly ShortcutManager _shortcutManager;
+        private readonly EditMenuManager _editMenuManager;
+        private readonly SearchManager _searchManager;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Tab‑Manager initialisieren
-            _tabManager = new ScriptTabManager(tabControlScripts);
+            this.AddHandler(
+                Keyboard.PreviewKeyDownEvent,
+                new KeyEventHandler(MainWindow_PreviewKeyDown),
+                handledEventsToo: true);
 
-            // Shortcut‑Manager initialisieren
+            // 1. Manager initialisieren
+            _tabManager = new ScriptTabManager(tabControlScripts);
+            _editMenuManager = new EditMenuManager(_tabManager);
+            _searchManager = new SearchManager(_tabManager);
             _shortcutManager = new ShortcutManager(this);
 
-            // Letzte Dateien laden
+            // 2. Shortcuts registrieren
+            _shortcutManager.Register(Key.N, ModifierKeys.Control,
+                                      () => _tabManager.AddNewTab());
+            _shortcutManager.Register(Key.O, ModifierKeys.Control,
+                                      () => MenuDateiÖffnen_Click(null, null));
+            _shortcutManager.Register(Key.S, ModifierKeys.Control,
+                                      () => MenuDateiSpeichern_Click(null, null));
+            _shortcutManager.Register(Key.S, ModifierKeys.Control | ModifierKeys.Shift,
+                                      () => MenuDateiSpeichernUnter_Click(null, null));
+            _shortcutManager.Register(Key.W, ModifierKeys.Control,
+                                      () => _tabManager.CloseActiveTab());
+            _shortcutManager.Register(Key.OemComma, ModifierKeys.Control,
+                                      () => MenuSkriptoriumEinstellungen_Click(null, null));
+            _shortcutManager.Register(Key.D, ModifierKeys.Control,
+                                      () => _editMenuManager.Duplicate());
+            _shortcutManager.Register(Key.A, ModifierKeys.Control,
+                                      () => _editMenuManager.SelectAll());
+            _shortcutManager.Register(Key.S,ModifierKeys.Control | ModifierKeys.Shift,
+                                      () => MenuDateiSpeichernUnter_Click(null, null));
+            _shortcutManager.Register(Key.S, ModifierKeys.Control | ModifierKeys.Shift,
+                                      () => MenuDateiAllesSpeichern_Click(null, null));
+
+            // 3. Letzte Dateien laden und erstes Tab öffnen
             DataManager.LoadRecentFiles();
             UpdateRecentFilesMenu();
-
-            // Start mit leerem Tab
             _tabManager.AddNewTab();
+        }
+
+        private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Strg+Alt+S → Alle speichern
+            if ((e.SystemKey == Key.S || e.Key == Key.S) &&
+                (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt))
+                    == (ModifierKeys.Control | ModifierKeys.Alt))
+            {
+                MenuDateiAllesSpeichern_Click(this, new RoutedEventArgs());
+                e.Handled = true;
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -43,10 +84,16 @@ namespace Skriptorium.UI
 
         #region Menü "Skriptorium"
         private void MenuSkriptoriumUeber_Click(object? sender, RoutedEventArgs? e)
-            => SkriptoriumManager.ShowAboutDialog();
+            => SkriptoriumMenuManager.ShowAboutDialog();
 
         private void MenuSkriptoriumEinstellungen_Click(object? sender, RoutedEventArgs? e)
-            => MessageBox.Show("Einstellungen sind noch nicht implementiert.", "Einstellungen");
+        {
+            var settings = new SettingsView
+            {
+                Owner = this    // Owner auf MainWindow setzen
+            };
+            settings.ShowDialog();
+        }
 
         private void MenuSkriptoriumBeenden_Click(object? sender, RoutedEventArgs? e)
             => Close();
@@ -60,10 +107,7 @@ namespace Skriptorium.UI
         {
             DataManager.OpenFile((content, path) =>
             {
-                _tabManager.AddNewTab(
-                    content,
-                    tabTitle: System.IO.Path.GetFileName(path),
-                    filePath: path);
+                _tabManager.AddNewTab(content, System.IO.Path.GetFileName(path), path);
                 UpdateRecentFilesMenu();
             });
         }
@@ -77,6 +121,7 @@ namespace Skriptorium.UI
                 MenuDateiZuletztGeoeffnet.Items.Add(new MenuItem { Header = "(Keine)", IsEnabled = false });
                 return;
             }
+
             foreach (var path in recent)
             {
                 var item = new MenuItem
@@ -106,14 +151,29 @@ namespace Skriptorium.UI
         {
             var ed = _tabManager.GetActiveScriptEditor();
             if (ed != null && DataManager.SaveFile(ed))
+            {
                 UpdateRecentFilesMenu();
+
+                // Tab‑Titel sofort auf aktuellen Dateinamen ohne „*“ setzen
+                if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
+                {
+                    ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
+                }
+            }
         }
 
         private void MenuDateiSpeichernUnter_Click(object? sender, RoutedEventArgs? e)
         {
             var ed = _tabManager.GetActiveScriptEditor();
             if (ed != null && DataManager.SaveFileAs(ed))
+            {
                 UpdateRecentFilesMenu();
+
+                if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
+                {
+                    ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
+                }
+            }
         }
 
         private void MenuDateiAllesSpeichern_Click(object? sender, RoutedEventArgs? e)
@@ -121,11 +181,16 @@ namespace Skriptorium.UI
             var editors = _tabManager.GetAllOpenEditors()
                                      .Where(ed => ed.FilePath != null)
                                      .ToList();
-
             bool allSaved = true;
             foreach (var editor in editors)
             {
-                if (!DataManager.SaveFile(editor))
+                if (DataManager.SaveFile(editor))
+                {
+                    // Auch hier den Titel aktualisieren
+                    if (editor.TitleTextBlock != null)
+                        editor.TitleTextBlock.Text = System.IO.Path.GetFileName(editor.FilePath);
+                }
+                else
                 {
                     allSaved = false;
                     break;
@@ -136,6 +201,8 @@ namespace Skriptorium.UI
                 MessageBox.Show("Alle Dateien wurden erfolgreich gespeichert.", "Speichern");
             else
                 MessageBox.Show("Einige Dateien konnten nicht gespeichert werden.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            UpdateRecentFilesMenu();
         }
 
         private void MenuDateiSchließen_Click(object? sender, RoutedEventArgs? e)
@@ -157,16 +224,52 @@ namespace Skriptorium.UI
 
         private void MenuBearbeitenEinfuegen_Click(object? sender, RoutedEventArgs? e)
             => _tabManager.GetActiveScriptEditor()?.TextBox?.Paste();
+
+        private void MenuBearbeitenDuplizieren_Click(object? sender, RoutedEventArgs? e)
+            => _editMenuManager.Duplicate();
+
+        private void MenuBearbeitenLoeschen_Click(object? sender, RoutedEventArgs? e)
+            => _editMenuManager.Delete();
+
+        private void MenuBearbeitenAllesAuswaehlen_Click(object? sender, RoutedEventArgs? e)
+            => _editMenuManager.SelectAll();
         #endregion
 
-        #region Shortcut-Wrapper
-        // Diese parameterlosen Methoden werden per Reflection aufgerufen
-        private void NewScript() => MenuDateiNeuesSkript_Click(null, null);
-        private void OpenScript() => MenuDateiÖffnen_Click(null, null);
-        private void SaveScript() => MenuDateiSpeichern_Click(null, null);
-        private void SaveScriptAs() => MenuDateiSpeichernUnter_Click(null, null);
-        private void CloseActiveTab() => MenuDateiSchließen_Click(null, null);
-        private void OpenSettings() => MenuSkriptoriumEinstellungen_Click(null, null);
+        #region Menü "Suchen"
+        private void FindInEditor_Click(object sender, RoutedEventArgs e)
+        {
+            var ed = _tabManager.GetActiveScriptEditor();
+            if (ed != null)
+            {
+                var dialog = new SearchReplaceScriptDialog(ed);
+                if (dialog.ShowDialog() == true)
+                    _searchManager.FindNext(dialog.SearchText);
+            }
+        }
+
+        private void ReplaceInEditor_Click(object sender, RoutedEventArgs e)
+        {
+            var ed = _tabManager.GetActiveScriptEditor();
+            if (ed != null)
+            {
+                var dialog = new SearchReplaceScriptDialog(ed);
+                if (dialog.ShowDialog() == true)
+                    _searchManager.ReplaceAll(dialog.SearchText, dialog.ReplaceText);
+            }
+        }
         #endregion
+
+        public void SetTheme(string themeName)
+        {
+            var dicts = Application.Current.Resources.MergedDictionaries;
+            dicts.Clear();
+
+            // ACHTUNG: Assembly-Name korrekt angeben!
+            string assembly = "Skriptorium";
+            var uri = new Uri($"pack://application:,,,/{assembly};component/UI/Themes/{themeName}.xaml",
+                              UriKind.Absolute);
+
+            dicts.Add(new ResourceDictionary { Source = uri });
+        }
     }
 }

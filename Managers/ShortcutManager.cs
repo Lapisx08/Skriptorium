@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
 
@@ -11,33 +11,23 @@ namespace Skriptorium.Managers
         public ShortcutManager(Window window)
         {
             _window = window;
-            RegisterShortcuts();
         }
 
-        private void RegisterShortcuts()
-        {
-            Register(Key.N, ModifierKeys.Control, "NewScript");        // Strg+N
-            Register(Key.O, ModifierKeys.Control, "OpenScript");       // Strg+O
-            Register(Key.S, ModifierKeys.Control, "SaveScript");       // Strg+S
-            Register(Key.S, ModifierKeys.Control | ModifierKeys.Shift, "SaveScriptAs");   // Strg+Shift+S
-            Register(Key.W, ModifierKeys.Control, "CloseActiveTab");   // Strg+W
-            Register(Key.OemComma, ModifierKeys.Control, "OpenSettings");     // Strg+,
-        }
-
-        private void Register(Key key, ModifierKeys modifiers, string methodName)
+        /// <summary>
+        /// Registriert eine Tastenkombination, die beim Auslösen die Aktion action aufruft.
+        /// </summary>
+        public void Register(Key key, ModifierKeys modifiers, Action action)
         {
             var command = new RoutedCommand();
 
-            // Executed-Handler
+            // Executed-Handler ruft direkt die übergebene Action auf
             var binding = new CommandBinding(command, (s, e) =>
             {
-                var mi = _window.GetType()
-                                .GetMethod(methodName,
-                                           BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                mi?.Invoke(_window, null);
+                action();
+                e.Handled = true;
             });
 
-            // CanExecute-Handler (erlaubt die Ausführung)
+            // CanExecute immer true
             binding.CanExecute += (s, e) =>
             {
                 e.CanExecute = true;

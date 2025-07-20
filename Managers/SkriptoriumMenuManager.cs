@@ -3,7 +3,7 @@ using System.Windows;
 
 namespace Skriptorium.Managers
 {
-    public static class SkriptoriumManager
+    public static class SkriptoriumMenuManager
     {
         // Programmname
         public static string ProgramName => "Skriptorium";

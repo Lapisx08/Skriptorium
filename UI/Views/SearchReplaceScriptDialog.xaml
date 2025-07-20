@@ -1,0 +1,112 @@
+﻿<Window x:Class="Skriptorium.UI.Views.SearchReplaceScriptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Suchen" Height="360" Width="480"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="35*"/>
+            <ColumnDefinition Width="57*"/>
+        </Grid.ColumnDefinitions>
+        <TabControl Grid.ColumnSpan="2">
+            <TabItem Header="Suchen">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Suchen -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Ersetzen -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Suchen in -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Pfad-Auswahl -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Optionen -->
+                        <RowDefinition Height="*"/>
+                        <!-- Filler -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Buttons -->
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Suchen -->
+                    <TextBlock Text="Suchen:" Grid.Row="0" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="ComboSearchText"
+                              Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"
+                              IsEditable="True"
+                              StaysOpenOnEdit="True"
+                              IsTextSearchEnabled="False"/>
+
+                    <!-- Ersetzen durch -->
+                    <TextBlock Text="Ersetzen durch:" Grid.Row="1" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="ComboReplaceText"
+                              Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
+                              IsEditable="True"
+                              StaysOpenOnEdit="True"
+                              IsTextSearchEnabled="False"/>
+
+                    <!-- Suchen in -->
+                    <CheckBox x:Name="ChkSearchIn"
+                              Content="Suchen in:" Grid.Row="2" Grid.Column="0" Margin="0,5,5,5"
+                              Checked="ChkSearchIn_Checked"
+                              Unchecked="ChkSearchIn_Unchecked"/>
+                    <ComboBox x:Name="ComboSearchIn"
+                              Grid.Row="2" Grid.Column="1" Margin="0,5,0,5"
+                              IsEnabled="False"
+                              SelectionChanged="ComboSearchIn_SelectionChanged">
+                        <ComboBoxItem>Alle offenen Skripte</ComboBoxItem>
+                        <ComboBoxItem>Skripte in Pfad</ComboBoxItem>
+                    </ComboBox>
+
+                    <!-- Pfad-Auswahl nur sichtbar, wenn "Skripte in Pfad" gewählt -->
+                    <TextBox x:Name="TxtPath"
+                             Grid.Row="3" Grid.Column="1" Margin="0,0,5,5"
+                             Visibility="Collapsed"
+                             ToolTip="Pfad eingeben…"/>
+                    <Button x:Name="BtnBrowse"
+                            Grid.Row="3" Grid.Column="2"
+                            Content="…"
+                            Width="25" Margin="0,0,0,5"
+                            Visibility="Collapsed"
+                            Click="BtnBrowse_Click"/>
+
+                    <!-- Optionen -->
+                    <GroupBox Header="Optionen" Grid.Row="4" Grid.ColumnSpan="3" Margin="0,10,0,0">
+                        <StackPanel Orientation="Vertical" Margin="10,5,0,5">
+                            <CheckBox x:Name="ChkCase" Content="Groß-/Kleinschreibung"/>
+                            <CheckBox x:Name="ChkWholeWord" Content="Nur ganzes Wort suchen"/>
+                            <CheckBox x:Name="ChkSelectionOnly" Content="Nur markierter Text" IsEnabled="False"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Buttons -->
+                    <StackPanel Grid.Row="6" Grid.ColumnSpan="3"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Margin="0,10,0,0">
+                        <Button Content="OK"
+                                Width="75"
+                                Margin="0,0,10,0"
+                                IsDefault="True"
+                                Click="OK_Click"/>
+                        <Button Content="Abbrechen"
+                                Width="75"
+                                IsCancel="True"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Ersetzen">
+                <TextBlock Text="Noch nicht implementiert"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

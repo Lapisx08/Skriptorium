@@ -24,12 +24,11 @@ namespace Skriptorium.Managers
 
             var scriptEditor = new ScriptEditor
             {
-                Text = content,
                 FilePath = filePath ?? ""
             };
-            scriptEditor.ResetModifiedFlag();
+            scriptEditor.SetTextAndResetModified(content);
 
-            string baseTitle = tabTitle ?? $"Neues Skript {_newScriptCounter++}";
+            string baseTitle = tabTitle ?? $"Neu{_newScriptCounter++}";
             var titleText = new TextBlock
             {
                 Text = baseTitle,

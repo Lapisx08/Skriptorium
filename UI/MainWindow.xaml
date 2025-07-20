@@ -2,7 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Skriptorium" Height="450" Width="800"
-        Icon="pack://application:,,,/Skriptorium.ico">
+        Icon="pack://application:,,,/Skriptorium.ico"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource TextBrush}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -85,26 +87,59 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                
+
                 <Separator/>
-                
+
                 <MenuItem Header="Ausschneiden" InputGestureText="Strg + X" Click="MenuBearbeitenAusschneiden_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C6;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                
+
                 <MenuItem Header="Kopieren" InputGestureText="Strg + C" Click="MenuBearbeitenKopieren_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C8;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                
+
                 <MenuItem Header="Einfügen" InputGestureText="Strg + V" Click="MenuBearbeitenEinfuegen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77F;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
+
+                <Separator/>
+                
+                <MenuItem Header="Duplizieren" InputGestureText="Strg + D" Click="MenuBearbeitenDuplizieren_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C8;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+
+                <MenuItem Header="Löschen" InputGestureText="Entf" Click="MenuBearbeitenLoeschen_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xe750;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+
+                <MenuItem Header="Alles auswählen" InputGestureText="Strg + A" Click="MenuBearbeitenAllesAuswaehlen_Click">
+                </MenuItem>
+            </MenuItem>
+
+            <MenuItem Header="Suchen">
+                <MenuItem Header="Suchen und Ersetzen" InputGestureText="Strg + F" Click="FindInEditor_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE721;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+
+            <MenuItem Header="Lesezeichen">
+
+            </MenuItem>
+
+            <MenuItem Header="Tools">
+
             </MenuItem>
         </Menu>
 
