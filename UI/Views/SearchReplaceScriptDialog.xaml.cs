@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using Skriptorium.Properties;
 using Skriptorium.UI;
 
@@ -40,18 +39,6 @@ namespace Skriptorium.UI.Views
 
             ComboSearchText.ItemsSource = _searchHistory;
             ComboReplaceText.ItemsSource = _searchHistory;
-
-            ComboSearchIn.SelectedIndex = 0;
-
-            var savedPath = Settings.Default.ScriptSearchPath;
-            if (!string.IsNullOrWhiteSpace(savedPath))
-            {
-                TxtPath.Text = savedPath;
-            }
-
-            ChkSearchIn.IsChecked = false;
-            ComboSearchIn.SelectedIndex = 0;
-            UpdatePathControls();
 
             var searchTextBox = GetComboBoxTextBox(ComboSearchText);
             if (searchTextBox != null)
@@ -99,46 +86,6 @@ namespace Skriptorium.UI.Views
         private TextBox? GetComboBoxTextBox(ComboBox comboBox)
         {
             return comboBox.Template.FindName("PART_EditableTextBox", comboBox) as TextBox;
-        }
-
-        private void ChkSearchIn_Checked(object sender, RoutedEventArgs e)
-        {
-            ComboSearchIn.IsEnabled = true;
-            UpdatePathControls();
-        }
-
-        private void ChkSearchIn_Unchecked(object sender, RoutedEventArgs e)
-        {
-            ComboSearchIn.IsEnabled = false;
-            TxtPath.Visibility = BtnBrowse.Visibility = Visibility.Collapsed;
-        }
-
-        private void ComboSearchIn_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            UpdatePathControls();
-        }
-
-        private void UpdatePathControls()
-        {
-            bool pathMode = ChkSearchIn.IsChecked == true
-                && (ComboSearchIn.SelectedItem as ComboBoxItem)?.Content.ToString() == "Skripte in Pfad";
-
-            TxtPath.Visibility = BtnBrowse.Visibility = pathMode
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-        }
-
-        private void BtnBrowse_Click(object sender, RoutedEventArgs e)
-        {
-            using var dlg = new CommonOpenFileDialog
-            {
-                IsFolderPicker = true,
-                Title = "Ordner auswählen"
-            };
-            if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                TxtPath.Text = dlg.FileName;
-            }
         }
 
         private void ComboSearchText_TextChanged(object sender, TextChangedEventArgs e)
@@ -445,19 +392,13 @@ namespace Skriptorium.UI.Views
             _scriptEditor.Avalon.TextArea.SelectionChanged -= Avalon_SelectionChanged;
 
             // Suchhistorie aktualisieren und speichern
-            if (!string.IsNullOrWhiteSpace(SearchText) && !_searchHistory.Contains(SearchText))
+            if (!string.IsNullOrEmpty(SearchText) && !_searchHistory.Contains(SearchText))
             {
                 _searchHistory.Insert(0, SearchText);
             }
 
             _searchHistory = _searchHistory.Distinct().Take(MaxHistory).ToList();
             Settings.Default.SearchHistory = string.Join(";", _searchHistory);
-
-            // Suchpfad speichern
-            if (ChkSearchIn.IsChecked == true && TxtPath.Visibility == Visibility.Visible)
-            {
-                Settings.Default.ScriptSearchPath = TxtPath.Text;
-            }
 
             Settings.Default.Save();
         }

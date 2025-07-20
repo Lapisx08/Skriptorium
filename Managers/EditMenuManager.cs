@@ -103,25 +103,6 @@ namespace Skriptorium.Managers
             }
         }
 
-        public void Delete()
-        {
-            var editor = _tabManager.GetActiveScriptEditor();
-            var Avalon = editor?.Avalon;
-
-            if (Avalon == null)
-            {
-                MessageBox.Show("Kein Skript geöffnet.");
-                return;
-            }
-
-            if (!string.IsNullOrEmpty(Avalon.SelectedText))
-            {
-                int start = Avalon.SelectionStart;
-                Avalon.Text = Avalon.Text.Remove(start, Avalon.SelectionLength);
-                Avalon.SelectionStart = start;
-            }
-        }
-
         public void SelectAll()
         {
             var editor = _tabManager.GetActiveScriptEditor();
@@ -133,6 +114,5 @@ namespace Skriptorium.Managers
 
             editor.Avalon.SelectAll();
         }
-
     }
 }

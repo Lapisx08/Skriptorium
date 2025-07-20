@@ -31,6 +31,10 @@ namespace Skriptorium.UI
             _shortcutManager = new ShortcutManager(this);
 
             // 2. Shortcuts registrieren
+            _shortcutManager.Register(Key.I, ModifierKeys.Control,
+                          () => MenuSkriptoriumUeber_Click(null, null));
+            _shortcutManager.Register(Key.OemComma, ModifierKeys.Control,
+                                      () => MenuSkriptoriumEinstellungen_Click(null, null));
             _shortcutManager.Register(Key.N, ModifierKeys.Control,
                                       () => _tabManager.AddNewTab());
             _shortcutManager.Register(Key.O, ModifierKeys.Control,
@@ -39,18 +43,14 @@ namespace Skriptorium.UI
                                       () => MenuDateiSpeichern_Click(null, null));
             _shortcutManager.Register(Key.S, ModifierKeys.Control | ModifierKeys.Shift,
                                       () => MenuDateiSpeichernUnter_Click(null, null));
+            _shortcutManager.Register(Key.S, ModifierKeys.Control | ModifierKeys.Alt,
+                                      () => MenuDateiAllesSpeichern_Click(null, null));
             _shortcutManager.Register(Key.W, ModifierKeys.Control,
                                       () => _tabManager.CloseActiveTab());
-            _shortcutManager.Register(Key.OemComma, ModifierKeys.Control,
-                                      () => MenuSkriptoriumEinstellungen_Click(null, null));
             _shortcutManager.Register(Key.D, ModifierKeys.Control,
                                       () => _editMenuManager.Duplicate());
             _shortcutManager.Register(Key.A, ModifierKeys.Control,
                                       () => _editMenuManager.SelectAll());
-            _shortcutManager.Register(Key.S,ModifierKeys.Control | ModifierKeys.Shift,
-                                      () => MenuDateiSpeichernUnter_Click(null, null));
-            _shortcutManager.Register(Key.S, ModifierKeys.Control | ModifierKeys.Shift,
-                                      () => MenuDateiAllesSpeichern_Click(null, null));
             _shortcutManager.Register(Key.F, ModifierKeys.Control,
                                       () => FindInEditor_Click(null, null));
 
@@ -68,6 +68,13 @@ namespace Skriptorium.UI
                     == (ModifierKeys.Control | ModifierKeys.Alt))
             {
                 MenuDateiAllesSpeichern_Click(this, new RoutedEventArgs());
+                e.Handled = true;
+            }
+
+            // Strg+I → Skriptorium-Info
+            if (e.Key == Key.I && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                MenuSkriptoriumUeber_Click(null, null);
                 e.Handled = true;
             }
         }
@@ -209,6 +216,7 @@ namespace Skriptorium.UI
 
         private void MenuDateiSchließen_Click(object? sender, RoutedEventArgs? e)
             => _tabManager.CloseActiveTab();
+
         #endregion
 
         #region Menü "Bearbeiten"
@@ -229,9 +237,6 @@ namespace Skriptorium.UI
 
         private void MenuBearbeitenDuplizieren_Click(object? sender, RoutedEventArgs? e)
             => _editMenuManager.Duplicate();
-
-        private void MenuBearbeitenLoeschen_Click(object? sender, RoutedEventArgs? e)
-            => _editMenuManager.Delete();
 
         private void MenuBearbeitenAllesAuswaehlen_Click(object? sender, RoutedEventArgs? e)
             => _editMenuManager.SelectAll();

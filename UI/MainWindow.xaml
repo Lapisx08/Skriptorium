@@ -14,7 +14,7 @@
         <!-- komplette Menüleiste inline mit Icons, ohne Unterstriche -->
         <Menu Grid.Row="0" BorderBrush="Gray" BorderThickness="0,1,0,1">
             <MenuItem Header="Skriptorium">
-                <MenuItem Header="Über Skriptorium" Click="MenuSkriptoriumUeber_Click">
+                <MenuItem Header="Über Skriptorium" InputGestureText="Strg + I" Click="MenuSkriptoriumUeber_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE946;" FontSize="14"/>
                     </MenuItem.Icon>
@@ -109,16 +109,10 @@
                 </MenuItem>
 
                 <Separator/>
-                
+
                 <MenuItem Header="Duplizieren" InputGestureText="Strg + D" Click="MenuBearbeitenDuplizieren_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C8;" FontSize="15"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="Löschen" InputGestureText="Entf" Click="MenuBearbeitenLoeschen_Click">
-                    <MenuItem.Icon>
-                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xe750;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
 

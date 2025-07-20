@@ -13,11 +13,9 @@
             <RowDefinition Height="Auto"/>
             <!-- Ersetzen -->
             <RowDefinition Height="Auto"/>
-            <!-- Suchen in -->
+            <!-- Buttons -->
             <RowDefinition Height="Auto"/>
-            <!-- Buttons unter Suchen in -->
-            <RowDefinition Height="Auto"/>
-            <!-- Optionen unter Buttons -->
+            <!-- Optionen -->
             <RowDefinition Height="*"/>
             <!-- Filler -->
             <RowDefinition Height="Auto"/>
@@ -28,8 +26,6 @@
             <!-- Label-Spalte -->
             <ColumnDefinition Width="*"/>
             <!-- Eingabefelder links -->
-            <ColumnDefinition Width="Auto"/>
-            <!-- Pfad-Browse Button -->
             <ColumnDefinition Width="250"/>
             <!-- Optionen rechts -->
         </Grid.ColumnDefinitions>
@@ -42,6 +38,7 @@
         <ComboBox x:Name="ComboSearchText"
                   Grid.Row="0" Grid.Column="1" 
                   Margin="0,0,0,5"
+                  Height="25"
                   IsEditable="True"
                   StaysOpenOnEdit="True"
                   IsTextSearchEnabled="False"/>
@@ -54,29 +51,13 @@
         <ComboBox x:Name="ComboReplaceText"
                   Grid.Row="1" Grid.Column="1" 
                   Margin="0,0,0,5"
+                  Height="25"
                   IsEditable="True"
                   StaysOpenOnEdit="True"
                   IsTextSearchEnabled="False"/>
 
-        <!-- Suchen in -->
-        <CheckBox x:Name="ChkSearchIn"
-                  Content="Suchen in:" 
-                  Grid.Row="2" Grid.Column="0" 
-                  Margin="0,5,5,5"
-                  VerticalAlignment="Center"
-                  Checked="ChkSearchIn_Checked"
-                  Unchecked="ChkSearchIn_Unchecked"/>
-        <ComboBox x:Name="ComboSearchIn"
-                  Grid.Row="2" Grid.Column="1" 
-                  Margin="0,5,0,5"
-                  IsEnabled="False"
-                  SelectionChanged="ComboSearchIn_SelectionChanged">
-            <ComboBoxItem>Alle offenen Skripte</ComboBoxItem>
-            <ComboBoxItem>Skripte in Pfad</ComboBoxItem>
-        </ComboBox>
-
-        <!-- Buttons unter "Suchen in" links bündig -->
-        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+        <!-- Buttons links bündig -->
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Margin="0,15,0,10">
@@ -86,22 +67,8 @@
             <Button x:Name="BtnReplaceAll" Content="Alle Ersetzen" Width="90" Margin="10,0,0,0" Click="BtnReplaceAll_Click"/>
         </StackPanel>
 
-        <!-- Pfad-Auswahl rechts von Buttons -->
-        <TextBox x:Name="TxtPath"
-                 Grid.Row="3" Grid.Column="1" 
-                 Margin="0,0,5,5"
-                 Visibility="Collapsed"
-                 ToolTip="Pfad eingeben…"/>
-        <Button x:Name="BtnBrowse"
-                Grid.Row="3" Grid.Column="2"
-                Content="…"
-                Width="25" 
-                Margin="0,0,0,5"
-                Visibility="Collapsed"
-                Click="BtnBrowse_Click"/>
-
-        <!-- Optionen unter Buttons, rechts in Spalte 3 -->
-        <GroupBox Header="Optionen" Grid.Column="3" 
+        <!-- Optionen rechts in Spalte 2 -->
+        <GroupBox Header="Optionen" Grid.Column="2" 
                   Margin="14,-11,-4,19" Grid.RowSpan="3">
             <StackPanel Orientation="Vertical" Margin="10,5,0,5">
                 <CheckBox x:Name="ChkCase" Content="Groß-/Kleinschreibung"/>
@@ -112,10 +79,10 @@
         </GroupBox>
 
         <!-- Filler (leeres Grid um Platz zu beanspruchen) -->
-        <Grid Grid.Row="5" Grid.ColumnSpan="4"/>
+        <Grid Grid.Row="4" Grid.ColumnSpan="3"/>
 
         <!-- Schließen Button unten rechts -->
-        <StackPanel Grid.Row="6" Grid.Column="3"
+        <StackPanel Grid.Row="5" Grid.Column="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,10,0,0">
