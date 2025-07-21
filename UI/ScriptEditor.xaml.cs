@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows;
-using ICSharpCode.AvalonEdit;
+﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
+using Skriptorium.Managers;
 using Skriptorium.UI.Views;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Skriptorium.UI
 {
@@ -21,6 +22,9 @@ namespace Skriptorium.UI
         private TextSegmentCollection<TextMarker>? _markers;
         private TextMarkerRenderer? _markerRenderer;
 
+        // Bookmark-Manager
+        private BookmarkManager? _bookmarkManager;
+
         public ScriptEditor()
         {
             InitializeComponent();
@@ -30,6 +34,9 @@ namespace Skriptorium.UI
             _markers = new TextSegmentCollection<TextMarker>(avalonEditor.Document);
             _markerRenderer = new TextMarkerRenderer(avalonEditor.TextArea.TextView, _markers);
             avalonEditor.TextArea.TextView.BackgroundRenderers.Add(_markerRenderer);
+
+            // Bookmark-Manager initialisieren
+            _bookmarkManager = new BookmarkManager(avalonEditor);
         }
 
         private void AvalonEditor_TextChanged(object? sender, EventArgs e)
@@ -93,21 +100,12 @@ namespace Skriptorium.UI
 
         public TextBlock? TitleTextBlock { get; set; }
 
-        /// <summary>
-        /// Markiert alle Vorkommen eines Suchbegriffs im Text.
-        /// </summary>
-        /// <param name="searchText">Suchbegriff</param>
-        /// <param name="matchCase">Groß-/Kleinschreibung beachten</param>
-        /// <param name="wholeWord">Nur ganzes Wort markieren</param>
-        /// <param name="restrictToSelection">Nur markierter Text einschränken</param>
-        /// <param name="selectionStart">Start-Offset der Auswahl</param>
-        /// <param name="selectionLength">Länge der Auswahl</param>
+        // Markiert alle Vorkommen eines Suchbegriffs im Text.
         public void HighlightAllOccurrences(string searchText, bool matchCase = false, bool wholeWord = false, bool restrictToSelection = false, int selectionStart = 0, int selectionLength = 0)
         {
             if (string.IsNullOrWhiteSpace(searchText) || _markers == null || _markerRenderer == null)
                 return;
 
-            // Alte Marker entfernen
             foreach (var m in _markers.ToList())
                 _markers.Remove(m);
 
@@ -147,9 +145,7 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
 
-        /// <summary>
-        /// Entfernt alle Hervorhebungen im Editor.
-        /// </summary>
+        // Entfernt alle Hervorhebungen im Editor.
         public void ClearHighlighting()
         {
             if (_markers == null || _markerRenderer == null)
@@ -160,6 +156,31 @@ namespace Skriptorium.UI
 
             avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
             avalonEditor.TextArea.TextView.InvalidateVisual();
+        }
+
+        // Entfernt alle Lesezeichen im Editor.
+        public void ClearAllBookmarks()
+        {
+            _bookmarkManager?.ClearAll();
+        }
+
+        // Navigiert zum nächsten Lesezeichen im Editor.
+        public void GotoNextBookmark()
+        {
+            _bookmarkManager?.GotoNext();
+        }
+
+        // Navigiert zum vorherigen Lesezeichen im Editor.
+        public void GotoPreviousBookmark()
+        {
+            _bookmarkManager?.GotoPrevious();
+        }
+
+        // Schaltet ein Lesezeichen an der aktuellen Caret-Position um.
+        public void ToggleBookmarkAtCaret()
+        {
+            int lineNumber = avalonEditor.TextArea.Caret.Line;
+            _bookmarkManager?.ToggleBookmark(lineNumber);
         }
     }
 

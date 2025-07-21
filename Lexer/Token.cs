@@ -13,10 +13,26 @@ namespace Skriptorium.Lexer
         IntegerLiteral,
         FloatLiteral,
         StringLiteral,
-        Operator,
-        Separator,
-        Comment,
+
+        // Operatoren
+        Operator,       // z.B. +, -, *, /, %, <, >, !
+        Assignment,     // =
+
+        // Symbole
+        Separator,      // <<< HIER HINZUFÜGEN: für , ; ( ) { }
+
+        // Symbole
+        Bracket,        // { }
+        Parenthesis,    // ( )
+        Comma,          // ,
+        Semicolon,      // ;
+
+        // Kommentare
+        Comment,        // Zeilenkommentar //
+        CommentBlock,   // Blockkommentar /* */
+
         Whitespace,
+
         Unknown
     }
 
@@ -27,6 +43,6 @@ namespace Skriptorium.Lexer
         public int Line { get; set; }
         public int Column { get; set; }
 
-        public override string ToString() => $"{Type}('{Value}')";
+        public override string ToString() => $"{Type}('{Value}') at {Line}:{Column}";
     }
 }

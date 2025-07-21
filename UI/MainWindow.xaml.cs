@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -53,6 +54,16 @@ namespace Skriptorium.UI
                                       () => _editMenuManager.SelectAll());
             _shortcutManager.Register(Key.F, ModifierKeys.Control,
                                       () => FindInEditor_Click(null, null));
+
+            // Lesezeichen-Shortcuts
+            _shortcutManager.Register(Key.F2, ModifierKeys.None,
+                                      () => GetActiveScriptEditor()?.ToggleBookmarkAtCaret());
+            _shortcutManager.Register(Key.F2, ModifierKeys.Control,
+                                      () => GetActiveScriptEditor()?.GotoNextBookmark());
+            _shortcutManager.Register(Key.F2, ModifierKeys.Control | ModifierKeys.Shift,
+                                      () => GetActiveScriptEditor()?.GotoPreviousBookmark());
+            _shortcutManager.Register(Key.F2, ModifierKeys.Control | ModifierKeys.Alt,
+                                      () => GetActiveScriptEditor()?.ClearAllBookmarks());
 
             // 3. Letzte Dateien laden und erstes Tab öffnen
             DataManager.LoadRecentFiles();
@@ -162,12 +173,8 @@ namespace Skriptorium.UI
             if (ed != null && DataManager.SaveFile(ed))
             {
                 UpdateRecentFilesMenu();
-
-                // Tab‑Titel sofort auf aktuellen Dateinamen ohne „*“ setzen
                 if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
-                {
                     ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
-                }
             }
         }
 
@@ -177,11 +184,8 @@ namespace Skriptorium.UI
             if (ed != null && DataManager.SaveFileAs(ed))
             {
                 UpdateRecentFilesMenu();
-
                 if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
-                {
                     ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
-                }
             }
         }
 
@@ -195,7 +199,6 @@ namespace Skriptorium.UI
             {
                 if (DataManager.SaveFile(editor))
                 {
-                    // Auch hier den Titel aktualisieren
                     if (editor.TitleTextBlock != null)
                         editor.TitleTextBlock.Text = System.IO.Path.GetFileName(editor.FilePath);
                 }
@@ -216,7 +219,6 @@ namespace Skriptorium.UI
 
         private void MenuDateiSchließen_Click(object? sender, RoutedEventArgs? e)
             => _tabManager.CloseActiveTab();
-
         #endregion
 
         #region Menü "Bearbeiten"
@@ -264,6 +266,23 @@ namespace Skriptorium.UI
                     _searchManager.ReplaceAll(dialog.SearchText, dialog.ReplaceText);
             }
         }
+        #endregion
+
+        #region Menü "Lesezeichen"
+        private ScriptEditor? GetActiveScriptEditor()
+            => _tabManager.GetActiveScriptEditor();
+
+        private void MenuLesezeichenUmschalten_Click(object sender, RoutedEventArgs e)
+            => GetActiveScriptEditor()?.ToggleBookmarkAtCaret();
+
+        private void MenuLesezeichenNaechstes_Click(object sender, RoutedEventArgs e)
+            => GetActiveScriptEditor()?.GotoNextBookmark();
+
+        private void MenuLesezeichenVorheriges_Click(object sender, RoutedEventArgs e)
+            => GetActiveScriptEditor()?.GotoPreviousBookmark();
+
+        private void MenuLesezeichenAlleLoeschen_Click(object sender, RoutedEventArgs e)
+            => GetActiveScriptEditor()?.ClearAllBookmarks();
         #endregion
 
         public void SetTheme(string themeName)
