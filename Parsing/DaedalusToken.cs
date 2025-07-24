@@ -31,10 +31,14 @@ namespace Skriptorium.Parsing
         Assignment,        // =
 
         // Symbole
-        Bracket,           // {, }
-        Parenthesis,       // (, )
-        Comma,             // ,
-        Semicolon,         // ;
+        OpenBracket,        // {
+        CloseBracket,       // }
+        OpenParenthesis,    // (
+        CloseParenthesis,   // )
+        OpenSquareBracket,  // [
+        CloseSquareBracket, // ]
+        Comma,              // ,
+        Semicolon,          // ;
 
         // Kommentare
         Comment,           // //

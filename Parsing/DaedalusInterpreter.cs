@@ -1,8 +1,9 @@
 ﻿using Skriptorium.Parsing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace TestProgram.Interpreter
+namespace Skriptorium.Interpreter
 {
     public class DaedalusInterpreter
     {
@@ -34,6 +35,44 @@ namespace TestProgram.Interpreter
             "bool" => false,
             _ => null,
         };
+
+        /// <summary>
+        /// Semantikprüfung der geladenen Funktionen und Variablen.
+        /// </summary>
+        /// <returns>Liste der gefundenen Fehler, leer wenn keine Fehler</returns>
+        public List<string> SemanticCheck()
+        {
+            var errors = new List<string>();
+
+            // Prüfe auf doppelte Funktionsnamen
+            var duplicateFuncs = _functions
+                .GroupBy(f => f.Key)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key);
+            foreach (var d in duplicateFuncs)
+                errors.Add($"Doppelte Funktionsdefinition: '{d}'");
+
+            // Prüfe, ob jede Funktion einen Körper hat
+            foreach (var func in _functions.Values)
+            {
+                if (func.Body == null || func.Body.Count == 0)
+                    errors.Add($"Funktion '{func.Name}' hat keinen Körper.");
+            }
+
+            // Prüfe auf doppelte globale Variablen
+            var globalVarNames = _globals.Keys.ToList();
+            var duplicateGlobals = globalVarNames
+                .GroupBy(n => n)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key);
+            foreach (var d in duplicateGlobals)
+                errors.Add($"Doppelte globale Variable: '{d}'");
+
+            // Hier kannst du noch mehr Checks einbauen,
+            // z.B. ob in Funktionen Variablen verwendet werden, die nicht deklariert sind.
+
+            return errors;
+        }
 
         public object CallFunction(string name, params object[] args)
         {

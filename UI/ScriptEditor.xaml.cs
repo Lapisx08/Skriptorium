@@ -1,11 +1,14 @@
 ﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
+using Skriptorium.Interpreter;
 using Skriptorium.Managers;
+using Skriptorium.Parsing;
 using Skriptorium.UI.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -18,24 +21,22 @@ namespace Skriptorium.UI
         private bool _suppressChangeTracking = false;
         private string _filePath = "";
 
-        // Highlighting-Marker
         private TextSegmentCollection<TextMarker>? _markers;
         private TextMarkerRenderer? _markerRenderer;
 
-        // Bookmark-Manager
         private BookmarkManager? _bookmarkManager;
+
+        private DaedalusInterpreter? _interpreter;
 
         public ScriptEditor()
         {
             InitializeComponent();
             avalonEditor.TextChanged += AvalonEditor_TextChanged;
 
-            // Marker-Dienste initialisieren
             _markers = new TextSegmentCollection<TextMarker>(avalonEditor.Document);
             _markerRenderer = new TextMarkerRenderer(avalonEditor.TextArea.TextView, _markers);
             avalonEditor.TextArea.TextView.BackgroundRenderers.Add(_markerRenderer);
 
-            // Bookmark-Manager initialisieren
             _bookmarkManager = new BookmarkManager(avalonEditor);
         }
 
@@ -46,6 +47,9 @@ namespace Skriptorium.UI
 
             IsModified = avalonEditor.Text != _originalText;
             TextChanged?.Invoke(this, null);
+
+            // Optional: Automatisches Parsen nach jeder Änderung
+            // ParseAndHighlightErrors(); // Vorsicht: Kann performance-intensiv sein!
         }
 
         public bool IsModified { get; private set; } = false;
@@ -100,7 +104,6 @@ namespace Skriptorium.UI
 
         public TextBlock? TitleTextBlock { get; set; }
 
-        // Markiert alle Vorkommen eines Suchbegriffs im Text.
         public void HighlightAllOccurrences(string searchText, bool matchCase = false, bool wholeWord = false, bool restrictToSelection = false, int selectionStart = 0, int selectionLength = 0)
         {
             if (string.IsNullOrWhiteSpace(searchText) || _markers == null || _markerRenderer == null)
@@ -145,46 +148,108 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
 
-        // Entfernt alle Hervorhebungen im Editor.
-        public void ClearHighlighting()
-        {
-            if (_markers == null || _markerRenderer == null)
-                return;
-
-            foreach (var marker in _markers.ToList())
-                _markers.Remove(marker);
-
-            avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
-            avalonEditor.TextArea.TextView.InvalidateVisual();
-        }
-
-        // Entfernt alle Lesezeichen im Editor.
         public void ClearAllBookmarks()
         {
             _bookmarkManager?.ClearAll();
         }
 
-        // Navigiert zum nächsten Lesezeichen im Editor.
         public void GotoNextBookmark()
         {
             _bookmarkManager?.GotoNext();
         }
 
-        // Navigiert zum vorherigen Lesezeichen im Editor.
         public void GotoPreviousBookmark()
         {
             _bookmarkManager?.GotoPrevious();
         }
 
-        // Schaltet ein Lesezeichen an der aktuellen Caret-Position um.
         public void ToggleBookmarkAtCaret()
         {
             int lineNumber = avalonEditor.TextArea.Caret.Line;
             _bookmarkManager?.ToggleBookmark(lineNumber);
         }
+
+
+
+
+
+        public void ClearHighlighting()
+        {
+            if (_markers == null) return;
+            foreach (var m in _markers.ToList()) _markers.Remove(m);
+            avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+            avalonEditor.TextArea.TextView.InvalidateVisual();
+        }
+
+        public void HighlightError(int line, int column, int length)
+        {
+            if (_markers == null) return;
+            try
+            {
+                int offset = avalonEditor.Document.GetOffset(line, column);
+                var marker = new TextMarker(avalonEditor.Document, offset, length)
+                {
+                    BackgroundColor = Colors.Red,
+                    ForegroundColor = Colors.White
+                };
+                _markers.Add(marker);
+                avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+            }
+            catch { }
+        }
+
+        // GeneratedRegex für Semantik-Fehler
+        [GeneratedRegex(@"Zeile\s+(\d+),\s*Spalte\s+(\d+)")]
+        private static partial Regex ErrorPositionRegex();
+
+        // Führt Syntax-Check und Semantik-Check durch
+        public List<string> CheckAll()
+        {
+            ClearHighlighting();
+            var errors = new List<string>();
+
+            // --- Syntax-Check ---
+            try
+            {
+                var lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                var tokens = new DaedalusLexer().Tokenize(lines);
+                new DaedalusParser(tokens).ParseScript();
+            }
+            catch (ParseException ex)
+            {
+                HighlightError(ex.Line, ex.Column, ex.Found?.Length ?? 1);
+                errors.Add(ex.Message); // Direkt ex.Message verwenden
+                return errors;
+            }
+
+            // --- Semantik-Check ---
+            var tokens2 = new DaedalusLexer()
+                .Tokenize(avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None));
+            var decls = new DaedalusParser(tokens2).ParseScript();
+
+            _interpreter = new DaedalusInterpreter();
+            _interpreter.LoadDeclarations(decls);
+            var semErr = _interpreter.SemanticCheck();
+
+            if (semErr != null && semErr.Any())
+            {
+                errors.AddRange(semErr);
+                foreach (var msg in semErr)
+                {
+                    var m = ErrorPositionRegex().Match(msg);
+                    if (m.Success)
+                    {
+                        int line = int.Parse(m.Groups[1].Value);
+                        int column = int.Parse(m.Groups[2].Value);
+                        HighlightError(line, column, 1);
+                    }
+                }
+            }
+
+            return errors;
+        }
     }
 
-    // Marker-Datenstruktur
     public class TextMarker : TextSegment
     {
         public TextMarker(IDocument document, int startOffset, int length)
@@ -197,7 +262,6 @@ namespace Skriptorium.UI
         public Color ForegroundColor { get; set; } = Colors.Black;
     }
 
-    // Zeichnet Marker im Editor
     public class TextMarkerRenderer : IBackgroundRenderer
     {
         private readonly TextView _textView;
@@ -209,11 +273,11 @@ namespace Skriptorium.UI
             _markers = markers;
         }
 
+        public KnownLayer Layer => KnownLayer.Selection;
+
         public void Draw(TextView textView, DrawingContext drawingContext)
         {
-            if (!_textView.VisualLinesValid)
-                return;
-
+            if (!_textView.VisualLinesValid) return;
             foreach (var marker in _markers)
             {
                 foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, marker))
@@ -223,7 +287,5 @@ namespace Skriptorium.UI
                 }
             }
         }
-
-        public KnownLayer Layer => KnownLayer.Selection;
     }
 }

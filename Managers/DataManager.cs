@@ -36,14 +36,15 @@ namespace Skriptorium.Managers
 
         // Neue Überladung: Öffnet eine Datei direkt über Pfad ohne TabManager
         public static void OpenFile(
-                    string filePath,
-                    Action<string, string> onFileLoaded,
-                    Action<string>? onError = null)
+            string filePath,
+            Action<string, string> onFileLoaded,
+            Action<string>? onError = null)
         {
             try
             {
                 var content = File.ReadAllText(filePath);
                 onFileLoaded(content, filePath);
+                AddRecentFile(filePath); // ✅ Jetzt wird es gespeichert
             }
             catch (Exception ex)
             {

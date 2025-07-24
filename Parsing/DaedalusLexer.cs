@@ -213,38 +213,51 @@ namespace Skriptorium.Parsing
                     }
 
                     // Symbole
-                    if (brackets.Contains(current))
+                    if (current == '{')
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Bracket,
-                            current.ToString(), line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.OpenBracket, "{", line + 1, column + 1));
                         column++;
                         continue;
                     }
-                    if (parentheses.Contains(current))
+                    else if (current == '}')
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Parenthesis,
-                            current.ToString(), line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.CloseBracket, "}", line + 1, column + 1));
                         column++;
                         continue;
                     }
-                    if (commas.Contains(current))
+                    else if (current == '(')
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Comma,
-                            current.ToString(), line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.OpenParenthesis, "(", line + 1, column + 1));
                         column++;
                         continue;
                     }
-                    if (semicolons.Contains(current))
+                    else if (current == ')')
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Semicolon,
-                            current.ToString(), line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.CloseParenthesis, ")", line + 1, column + 1));
                         column++;
                         continue;
                     }
-                    if (squareBrackets.Contains(current))
+                    else if (current == '[')
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Bracket,
-                            current.ToString(), line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.OpenSquareBracket, "[", line + 1, column + 1));
+                        column++;
+                        continue;
+                    }
+                    else if (current == ']')
+                    {
+                        tokens.Add(new DaedalusToken(TokenType.CloseSquareBracket, "]", line + 1, column + 1));
+                        column++;
+                        continue;
+                    }
+                    else if (commas.Contains(current))
+                    {
+                        tokens.Add(new DaedalusToken(TokenType.Comma, current.ToString(), line + 1, column + 1));
+                        column++;
+                        continue;
+                    }
+                    else if (semicolons.Contains(current))
+                    {
+                        tokens.Add(new DaedalusToken(TokenType.Semicolon, current.ToString(), line + 1, column + 1));
                         column++;
                         continue;
                     }

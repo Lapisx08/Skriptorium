@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Skriptorium.Interpreter;
+using Skriptorium.Managers;
+using Skriptorium.Parsing;
+using Skriptorium.UI.Views;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Skriptorium.Managers;
-using Skriptorium.UI.Views;
 
 namespace Skriptorium.UI
 {
@@ -296,6 +298,30 @@ namespace Skriptorium.UI
                               UriKind.Absolute);
 
             dicts.Add(new ResourceDictionary { Source = uri });
+        }
+        private void SemanticCheckButton_Click(object sender, RoutedEventArgs e)
+        {
+            var editor = _tabManager.GetActiveScriptEditor();
+            if (editor == null)
+            {
+                MessageBox.Show("Kein aktives Skript geöffnet.", "Hinweis",
+                                MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var errors = editor.CheckAll();
+
+            if (errors.Count > 0)
+            {
+                MessageBox.Show(string.Join(Environment.NewLine, errors),
+                                "Fehler gefunden",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                MessageBox.Show("Keine Fehler gefunden.", "Prüfung erfolgreich",
+                                MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
     }
 }
