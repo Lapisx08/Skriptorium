@@ -11,9 +11,9 @@ public enum SyntaxColor
     Number,
     Comment,
     Operator,
-    Assignment,  // NEU
+    Assignment,
     Bracket,
-    Enum,        // NEU
+    Enum,
     Unknown,
 }
 
@@ -50,8 +50,12 @@ public class SyntaxHighlighting
         { TokenType.Assignment, SyntaxColor.Assignment },
 
         // Symbole
-        { TokenType.Bracket, SyntaxColor.Bracket },
-        { TokenType.Parenthesis, SyntaxColor.Bracket },
+        { TokenType.OpenBracket, SyntaxColor.Bracket },
+        { TokenType.CloseBracket, SyntaxColor.Bracket },
+        { TokenType.OpenParenthesis, SyntaxColor.Bracket },
+        { TokenType.CloseParenthesis, SyntaxColor.Bracket },
+        { TokenType.OpenSquareBracket, SyntaxColor.Bracket },
+        { TokenType.CloseSquareBracket, SyntaxColor.Bracket },
         { TokenType.Comma, SyntaxColor.Bracket },
         { TokenType.Semicolon, SyntaxColor.Bracket },
 

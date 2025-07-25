@@ -1,11 +1,9 @@
-﻿using Skriptorium.Parsing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Skriptorium.Parsing
 {
-    // AST Node Definitionen
     public abstract class Declaration
     {
         public int Line { get; set; }
@@ -44,7 +42,6 @@ namespace Skriptorium.Parsing
         public string Signature { get; set; }
     }
 
-    // Statements
     public abstract class Statement
     {
         public int Line { get; set; }
@@ -74,7 +71,6 @@ namespace Skriptorium.Parsing
         public Expression ReturnValue { get; set; }
     }
 
-    // Expressionen
     public abstract class Expression
     {
         public int Line { get; set; }
@@ -158,7 +154,7 @@ namespace Skriptorium.Parsing
             if (Match(TokenType.InstanceKeyword)) return ParseInstance();
             if (Match(TokenType.FuncKeyword)) return ParseFunction();
             if (Match(TokenType.VarKeyword)) return ParseVarDeclaration();
-            if (Match(TokenType.TypeKeyword) && Peek(1).Type == TokenType.Identifier) return ParseClass();
+            if (Match(TokenType.ClassKeyword) && Peek(1).Type == TokenType.Identifier) return ParseClass();
             if (Match(TokenType.PrototypeKeyword)) return ParsePrototype();
             return null;
         }
@@ -176,13 +172,13 @@ namespace Skriptorium.Parsing
                 Column = startToken.Column
             };
 
-            Consume(TokenType.Parenthesis, "'(' erwartet");
+            Consume(TokenType.OpenParenthesis, "'(' erwartet");
             var baseToken = Consume(TokenType.Identifier, "Basisklasse erwartet");
             instance.BaseClass = baseToken.Value;
-            Consume(TokenType.Parenthesis, "')' erwartet");
-            Consume(TokenType.Bracket, "'{' erwartet");
+            Consume(TokenType.CloseParenthesis, "')' erwartet");
+            Consume(TokenType.OpenBracket, "'{' erwartet");
 
-            while (!Check(TokenType.Bracket) && !IsAtEnd())
+            while (!Check(TokenType.CloseBracket) && !IsAtEnd())
             {
                 try
                 {
@@ -209,7 +205,7 @@ namespace Skriptorium.Parsing
                 }
             }
 
-            Consume(TokenType.Bracket, "'}' erwartet");
+            Consume(TokenType.CloseBracket, "'}' erwartet");
             if (Match(TokenType.Semicolon)) Advance();
 
             return instance;
@@ -218,7 +214,7 @@ namespace Skriptorium.Parsing
         private ClassDeclaration ParseClass()
         {
             var startToken = Current();
-            Consume(TokenType.TypeKeyword, "Typenschlüsselwort 'type' erwartet");
+            Consume(TokenType.ClassKeyword, "Typenschlüsselwort 'class' erwartet");
             var nameToken = Consume(TokenType.Identifier, "Klassenname erwartet");
             var cls = new ClassDeclaration
             {
@@ -226,16 +222,16 @@ namespace Skriptorium.Parsing
                 Line = startToken.Line,
                 Column = startToken.Column
             };
-            Consume(TokenType.Bracket, "'{' nach Klassendefinition erwartet");
+            Consume(TokenType.OpenBracket, "'{' nach Klassendefinition erwartet");
 
-            while (!Check(TokenType.Bracket) && !IsAtEnd())
+            while (!Check(TokenType.CloseBracket) && !IsAtEnd())
             {
                 var stmt = ParseStatement();
                 if (stmt != null) cls.Body.Add(stmt);
                 else Advance();
             }
 
-            Consume(TokenType.Bracket, "'}' nach Klassenrumpf erwartet");
+            Consume(TokenType.CloseBracket, "'}' nach Klassenrumpf erwartet");
             if (Match(TokenType.Semicolon)) Advance();
             return cls;
         }
@@ -272,9 +268,9 @@ namespace Skriptorium.Parsing
             var nameToken = Consume(TokenType.Identifier, "Funktionsname erwartet");
             func.Name = nameToken.Value;
 
-            Consume(TokenType.Parenthesis, "'(' erwartet");
+            Consume(TokenType.OpenParenthesis, "'(' erwartet");
 
-            if (!Check(TokenType.Parenthesis))
+            if (!Check(TokenType.CloseParenthesis))
             {
                 while (true)
                 {
@@ -299,15 +295,15 @@ namespace Skriptorium.Parsing
                 }
             }
 
-            Consume(TokenType.Parenthesis, "')' nach Parametern erwartet");
-            Consume(TokenType.Bracket, "'{' vor Funktionsrumpf erwartet");
-            while (!Check(TokenType.Bracket) && !IsAtEnd())
+            Consume(TokenType.CloseParenthesis, "')' nach Parametern erwartet");
+            Consume(TokenType.OpenBracket, "'{' vor Funktionsrumpf erwartet");
+            while (!Check(TokenType.CloseBracket) && !IsAtEnd())
             {
                 var stmt = ParseStatement();
                 if (stmt != null) func.Body.Add(stmt);
                 else Advance();
             }
-            Consume(TokenType.Bracket, "'}' nach Funktionsrumpf erwartet");
+            Consume(TokenType.CloseBracket, "'}' nach Funktionsrumpf erwartet");
             if (Match(TokenType.Semicolon)) Advance();
 
             return func;
@@ -403,31 +399,31 @@ namespace Skriptorium.Parsing
         {
             var startToken = Current();
             Advance(); // 'if'
-            Consume(TokenType.Parenthesis, "'(' nach if erwartet");
+            Consume(TokenType.OpenParenthesis, "'(' nach if erwartet");
             var condition = ParseExpression();
-            Consume(TokenType.Parenthesis, "')' nach Bedingung erwartet");
+            Consume(TokenType.CloseParenthesis, "')' nach Bedingung erwartet");
 
-            Consume(TokenType.Bracket, "'{' vor if-Block erwartet");
+            Consume(TokenType.OpenBracket, "'{' vor if-Block erwartet");
             var thenBranch = new List<Statement>();
-            while (!Check(TokenType.Bracket) && !IsAtEnd())
+            while (!Check(TokenType.CloseBracket) && !IsAtEnd())
             {
                 var stmt = ParseStatement();
                 if (stmt != null) thenBranch.Add(stmt); else Advance();
             }
-            Consume(TokenType.Bracket, "'}' nach if-Block erwartet");
+            Consume(TokenType.CloseBracket, "'}' nach if-Block erwartet");
             if (Match(TokenType.Semicolon)) Advance();
 
             var elseBranch = new List<Statement>();
             if (Match(TokenType.ElseKeyword))
             {
                 Advance();
-                Consume(TokenType.Bracket, "'{' nach else erwartet");
-                while (!Check(TokenType.Bracket) && !IsAtEnd())
+                Consume(TokenType.OpenBracket, "'{' nach else erwartet");
+                while (!Check(TokenType.CloseBracket) && !IsAtEnd())
                 {
                     var stmt = ParseStatement();
                     if (stmt != null) elseBranch.Add(stmt); else Advance();
                 }
-                Consume(TokenType.Bracket, "'}' nach else-Block erwartet");
+                Consume(TokenType.CloseBracket, "'}' nach else-Block erwartet");
                 if (Match(TokenType.Semicolon)) Advance();
             }
 
@@ -469,7 +465,7 @@ namespace Skriptorium.Parsing
 
         private Expression ParsePrimary()
         {
-            var tok = Current();
+            DaedalusToken tok = Current();
 
             if (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral) ||
                 Match(TokenType.StringLiteral) || Match(TokenType.BoolLiteral) || Match(TokenType.EnumLiteral))
@@ -493,17 +489,16 @@ namespace Skriptorium.Parsing
                     Column = tok.Column
                 };
 
-                if (Match(TokenType.Parenthesis) && Current().Value == "(")
+                if (Match(TokenType.OpenParenthesis))
                 {
                     Advance(); // consume '('
                     var args = new List<Expression>();
 
-                    if (!Check(TokenType.Parenthesis)) // not ')'
+                    if (!Check(TokenType.CloseParenthesis))
                     {
                         while (true)
                         {
                             args.Add(ParseExpression());
-
                             if (Match(TokenType.Comma))
                                 Advance();
                             else
@@ -511,8 +506,7 @@ namespace Skriptorium.Parsing
                         }
                     }
 
-                    Consume(TokenType.Parenthesis, "')' nach Argumenten erwartet");
-
+                    Consume(TokenType.CloseParenthesis, "')' nach Argumenten erwartet");
                     expr = new FunctionCallExpression
                     {
                         FunctionName = tok.Value,
@@ -522,12 +516,11 @@ namespace Skriptorium.Parsing
                     };
                 }
 
-
-                while (Match(TokenType.Bracket) && Current().Value == "[")
+                while (Match(TokenType.OpenSquareBracket))
                 {
                     Advance();
                     var idx = ParseExpression();
-                    Consume(TokenType.Bracket, "']' nach Index erwartet");
+                    Consume(TokenType.CloseSquareBracket, "']' nach Index erwartet");
                     expr = new IndexExpression
                     {
                         Target = expr,
@@ -591,8 +584,12 @@ namespace Skriptorium.Parsing
                 string expectedSymbol = type switch
                 {
                     TokenType.Semicolon => "';'",
-                    TokenType.Bracket => Current().Value == "{" ? "'{'" : "'}'",
-                    TokenType.Parenthesis => Current().Value == "(" ? "'('" : "')'",
+                    TokenType.OpenBracket => "'{'",
+                    TokenType.CloseBracket => "'}'",
+                    TokenType.OpenParenthesis => "'('",
+                    TokenType.CloseParenthesis => "')'",
+                    TokenType.OpenSquareBracket => "'['",
+                    TokenType.CloseSquareBracket => "']'",
                     TokenType.Comma => "','",
                     TokenType.Assignment => "'='",
                     TokenType.TypeKeyword => "type",
@@ -603,7 +600,6 @@ namespace Skriptorium.Parsing
                     TokenType.ReturnKeyword => "return",
                     TokenType.PrototypeKeyword => "prototype",
                     TokenType.Identifier => "identifier",
-                    // Weitere TokenTypes nach Bedarf
                     _ => type.ToString()
                 };
                 throw new ParseException(message, tok, expectedSymbol);

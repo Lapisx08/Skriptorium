@@ -4,7 +4,6 @@ using ICSharpCode.AvalonEdit.Rendering;
 using Skriptorium.Interpreter;
 using Skriptorium.Managers;
 using Skriptorium.Parsing;
-using Skriptorium.UI.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -169,10 +168,6 @@ namespace Skriptorium.UI
             _bookmarkManager?.ToggleBookmark(lineNumber);
         }
 
-
-
-
-
         public void ClearHighlighting()
         {
             if (_markers == null) return;
@@ -213,27 +208,32 @@ namespace Skriptorium.UI
             {
                 var lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
                 var tokens = new DaedalusLexer().Tokenize(lines);
+
                 new DaedalusParser(tokens).ParseScript();
             }
             catch (ParseException ex)
             {
                 HighlightError(ex.Line, ex.Column, ex.Found?.Length ?? 1);
-                errors.Add(ex.Message); // Direkt ex.Message verwenden
+                errors.Add(ex.Message);
                 return errors;
             }
 
             // --- Semantik-Check ---
-            var tokens2 = new DaedalusLexer()
-                .Tokenize(avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None));
-            var decls = new DaedalusParser(tokens2).ParseScript();
-
-            _interpreter = new DaedalusInterpreter();
-            _interpreter.LoadDeclarations(decls);
-            var semErr = _interpreter.SemanticCheck();
-
-            if (semErr != null && semErr.Any())
+            try
             {
+                var tokens2 = new DaedalusLexer()
+                    .Tokenize(avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None));
+                var parsingDecls = new DaedalusParser(tokens2).ParseScript();
+
+                // Konvertiere Parsing.Declaration in Interpreter.Declaration
+                var interpreterDecls = ConvertDeclarations(parsingDecls);
+
+                _interpreter = new DaedalusInterpreter();
+                _interpreter.LoadDeclarations(interpreterDecls);
+                var semErr = _interpreter.SemanticCheck();
+
                 errors.AddRange(semErr);
+
                 foreach (var msg in semErr)
                 {
                     var m = ErrorPositionRegex().Match(msg);
@@ -245,8 +245,163 @@ namespace Skriptorium.UI
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ausnahme abgefangen: {ex.Message}"); // Debug-Ausgabe
+                errors.Add(ex.Message);
+                var lines = ex.Message.Split(new[] { "\n" }, StringSplitOptions.None);
+                foreach (var msg in lines)
+                {
+                    Console.WriteLine($"Verarbeite Zeile: {msg}"); // Debug-Ausgabe
+                    var m = ErrorPositionRegex().Match(msg);
+                    if (m.Success)
+                    {
+                        int line = int.Parse(m.Groups[1].Value);
+                        int column = int.Parse(m.Groups[2].Value);
+                        Console.WriteLine($"Markiere Fehler bei Zeile {line}, Spalte {column}"); // Debug-Ausgabe
+                        HighlightError(line, column, 1);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Kein Regex-Match gefunden"); // Debug-Ausgabe
+                    }
+                }
+            }
 
             return errors;
+        }
+
+        // Hilfsfunktion zum Konvertieren von Declarations
+        private List<Skriptorium.Interpreter.Declaration> ConvertDeclarations(List<Skriptorium.Parsing.Declaration> parsingDecls)
+        {
+            var interpreterDecls = new List<Skriptorium.Interpreter.Declaration>();
+
+            foreach (var decl in parsingDecls)
+            {
+                switch (decl)
+                {
+                    case Skriptorium.Parsing.FunctionDeclaration func:
+                        interpreterDecls.Add(new Skriptorium.Interpreter.FunctionDeclaration(
+                            name: func.Name,
+                            parameters: func.Parameters,
+                            body: func.Body?.Select(s => ConvertStatement(s)).ToList() ?? new List<Skriptorium.Interpreter.Statement>(),
+                            line: func.Line,
+                            column: func.Column
+                        ));
+                        break;
+                    case Skriptorium.Parsing.VarDeclaration varDecl:
+                        interpreterDecls.Add(new Skriptorium.Interpreter.VarDeclaration(
+                            name: varDecl.Name,
+                            typeName: varDecl.TypeName,
+                            line: varDecl.Line,
+                            column: varDecl.Column
+                        ));
+                        break;
+                    case Skriptorium.Parsing.InstanceDeclaration instance:
+                        // Konvertiere Body (Statements) in Assignments
+                        var assignments = instance.Body
+                            .OfType<Skriptorium.Parsing.Assignment>()
+                            .Select(a => ConvertAssignment(a))
+                            .ToList();
+                        interpreterDecls.Add(new Skriptorium.Interpreter.InstanceDeclaration(
+                            name: instance.Name,
+                            baseType: instance.BaseClass, // BaseClass -> BaseType
+                            assignments: assignments,
+                            line: instance.Line,
+                            column: instance.Column
+                        ));
+                        break;
+                    case Skriptorium.Parsing.ClassDeclaration:
+                    case Skriptorium.Parsing.PrototypeDeclaration:
+                        // Ignoriere ClassDeclaration und PrototypeDeclaration, da Interpreter sie nicht unterstützt
+                        Console.WriteLine($"Warnung: Ignoriere Deklarationstyp {decl.GetType().Name} bei Zeile {decl.Line}, Spalte {decl.Column}");
+                        break;
+                    default:
+                        throw new Exception($"Unbekannter Deklarationstyp: {decl.GetType().Name} bei Zeile {decl.Line}, Spalte {decl.Column}");
+                }
+            }
+
+            return interpreterDecls;
+        }
+
+        // Hilfsfunktion zum Konvertieren von Statements
+        private Skriptorium.Interpreter.Statement ConvertStatement(Skriptorium.Parsing.Statement stmt)
+        {
+            switch (stmt)
+            {
+                case Skriptorium.Parsing.Assignment assign:
+                    return new Skriptorium.Interpreter.Assignment(
+                        left: ConvertExpression(assign.Left),
+                        right: ConvertExpression(assign.Right),
+                        line: assign.Line,
+                        column: assign.Column
+                    );
+                case Skriptorium.Parsing.ExpressionStatement exprStmt:
+                    return new Skriptorium.Interpreter.ExpressionStatement(
+                        expr: ConvertExpression(exprStmt.Expr)
+                    );
+                case Skriptorium.Parsing.IfStatement ifStmt:
+                    return new Skriptorium.Interpreter.IfStatement(
+                        condition: ConvertExpression(ifStmt.Condition),
+                        thenBranch: ifStmt.ThenBranch?.Select(s => ConvertStatement(s)).ToList() ?? new List<Skriptorium.Interpreter.Statement>(),
+                        elseBranch: ifStmt.ElseBranch?.Select(s => ConvertStatement(s)).ToList() ?? new List<Skriptorium.Interpreter.Statement>()
+                    );
+                case Skriptorium.Parsing.ReturnStatement retStmt:
+                    return new Skriptorium.Interpreter.ReturnStatement(
+                        returnValue: ConvertExpression(retStmt.ReturnValue)
+                    );
+                default:
+                    throw new Exception($"Unbekannter Statement-Typ: {stmt.GetType().Name} bei Zeile {stmt.Line}, Spalte {stmt.Column}");
+            }
+        }
+
+        // Hilfsfunktion zum Konvertieren von Expressions
+        private Skriptorium.Interpreter.Expression ConvertExpression(Skriptorium.Parsing.Expression expr)
+        {
+            if (expr == null)
+                return null;
+
+            switch (expr)
+            {
+                case Skriptorium.Parsing.LiteralExpression lit:
+                    return new Skriptorium.Interpreter.LiteralExpression(
+                        value: lit.Value
+                    );
+                case Skriptorium.Parsing.VariableExpression varExpr:
+                    return new Skriptorium.Interpreter.VariableExpression(
+                        name: varExpr.Name,
+                        typeName: "unknown" // Kein TypeName in Parsing.VariableExpression, Standardwert
+                    );
+                case Skriptorium.Parsing.IndexExpression idx:
+                    return new Skriptorium.Interpreter.IndexExpression
+                    {
+                        // Anpassung erforderlich, wenn IndexExpression im Interpreter erweitert wird
+                    };
+                case Skriptorium.Parsing.BinaryExpression bin:
+                    return new Skriptorium.Interpreter.BinaryExpression(
+                        left: ConvertExpression(bin.Left),
+                        op: bin.Operator,
+                        right: ConvertExpression(bin.Right)
+                    );
+                case Skriptorium.Parsing.FunctionCallExpression call:
+                    return new Skriptorium.Interpreter.FunctionCallExpression(
+                        functionName: call.FunctionName,
+                        arguments: call.Arguments?.Select(a => ConvertExpression(a)).ToList() ?? new List<Skriptorium.Interpreter.Expression>()
+                    );
+                default:
+                    throw new Exception($"Unbekannter Expression-Typ: {expr.GetType().Name} bei Zeile {expr.Line}, Spalte {expr.Column}");
+            }
+        }
+
+        // Hilfsfunktion zum Konvertieren von Assignments
+        private Skriptorium.Interpreter.Assignment ConvertAssignment(Skriptorium.Parsing.Assignment assign)
+        {
+            return new Skriptorium.Interpreter.Assignment(
+                left: ConvertExpression(assign.Left),
+                right: ConvertExpression(assign.Right),
+                line: assign.Line,
+                column: assign.Column
+            );
         }
     }
 

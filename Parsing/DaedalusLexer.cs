@@ -15,7 +15,9 @@ namespace Skriptorium.Parsing
             // Datentypen als Keywords
             "int", "float", "void", "string",
             // Boolean Literale
-            "true", "false"
+            "true", "false",
+            // Spezifische Daedalus-Schlüsselwörter
+            "TA_Stand_ArmsCrossed", "daily_routine", "B_GiveNpcTalents", "TA_Stand_Guarding"
         };
 
         // Regex für verschiedene Token‑Klassen

@@ -10,24 +10,66 @@ namespace Skriptorium.Interpreter
         private readonly Dictionary<string, FunctionDeclaration> _functions = new();
         private readonly Dictionary<string, object> _globals = new();
         private readonly Stack<Dictionary<string, object>> _callStack = new();
+        private readonly Dictionary<string, InstanceDeclaration> _instances = new();
 
+        /// <summary>
+        /// Lädt NUR alle Deklarationen in interne Tabellen (Funktionen, Variablen, Instanzen).
+        /// KEINE semantischen Prüfungen (wie unbekannte Funktionen bei daily_routine) mehr hier!
+        /// </summary>
         public void LoadDeclarations(List<Declaration> decls)
         {
+            var errors = new List<string>();
+
             foreach (var decl in decls)
             {
                 switch (decl)
                 {
                     case FunctionDeclaration func:
-                        _functions[func.Name] = func;
+                        if (_functions.ContainsKey(func.Name))
+                        {
+                            var errorMsg = $"Semantischer Fehler: Zeile {func.Line}, Spalte {func.Column}. Doppelte Funktionsdefinition: '{func.Name}'";
+                            errors.Add(errorMsg);
+                        }
+                        else
+                        {
+                            _functions[func.Name] = func;
+                        }
                         break;
+
                     case VarDeclaration varDecl:
-                        _globals[varDecl.Name] = GetDefaultValue(varDecl.TypeName);
+                        if (_globals.ContainsKey(varDecl.Name))
+                        {
+                            var errorMsg = $"Semantischer Fehler: Zeile {varDecl.Line}, Spalte {varDecl.Column}. Doppelte globale Variable: '{varDecl.Name}'";
+                            errors.Add(errorMsg);
+                        }
+                        else
+                        {
+                            _globals[varDecl.Name] = GetDefaultValue(varDecl.TypeName);
+                        }
+                        break;
+
+                    case InstanceDeclaration instance:
+                        if (_instances.ContainsKey(instance.Name))
+                        {
+                            var errorMsg = $"Semantischer Fehler: Zeile {instance.Line}, Spalte {instance.Column}. Doppelte Instanzdefinition: '{instance.Name}'";
+                            errors.Add(errorMsg);
+                        }
+                        else
+                        {
+                            // KEINE Prüfungen hier – nur registrieren!
+                            _instances[instance.Name] = instance;
+                        }
                         break;
                 }
             }
+
+            if (errors.Any())
+            {
+                throw new Exception(string.Join("\n", errors));
+            }
         }
 
-        private object GetDefaultValue(string typeName) => typeName switch
+        private object GetDefaultValue(string typeName) => typeName.ToLowerInvariant() switch
         {
             "int" => 0,
             "float" => 0.0f,
@@ -37,39 +79,128 @@ namespace Skriptorium.Interpreter
         };
 
         /// <summary>
-        /// Semantikprüfung der geladenen Funktionen und Variablen.
+        /// Alle semantischen Checks passieren hier – nachdem ALLE Deklarationen vollständig geladen sind.
         /// </summary>
-        /// <returns>Liste der gefundenen Fehler, leer wenn keine Fehler</returns>
         public List<string> SemanticCheck()
         {
             var errors = new List<string>();
 
-            // Prüfe auf doppelte Funktionsnamen
-            var duplicateFuncs = _functions
-                .GroupBy(f => f.Key)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key);
-            foreach (var d in duplicateFuncs)
-                errors.Add($"Doppelte Funktionsdefinition: '{d}'");
-
-            // Prüfe, ob jede Funktion einen Körper hat
+            // Prüfe Funktionen
             foreach (var func in _functions.Values)
             {
                 if (func.Body == null || func.Body.Count == 0)
-                    errors.Add($"Funktion '{func.Name}' hat keinen Körper.");
+                    errors.Add($"Semantischer Fehler: Zeile {func.Line}, Spalte {func.Column}. Funktion '{func.Name}' hat keinen Körper.");
+
+                foreach (var stmt in func.Body)
+                    errors.AddRange(CheckStatement(stmt));
             }
 
-            // Prüfe auf doppelte globale Variablen
+            // Prüfe doppelte globale Variablen (sollte durch LoadDeclarations verhindert sein, aber sicher ist sicher)
             var globalVarNames = _globals.Keys.ToList();
             var duplicateGlobals = globalVarNames
                 .GroupBy(n => n)
                 .Where(g => g.Count() > 1)
                 .Select(g => g.Key);
             foreach (var d in duplicateGlobals)
-                errors.Add($"Doppelte globale Variable: '{d}'");
+                errors.Add($"Semantischer Fehler: Doppelte globale Variable: '{d}'");
 
-            // Hier kannst du noch mehr Checks einbauen,
-            // z.B. ob in Funktionen Variablen verwendet werden, die nicht deklariert sind.
+            // Prüfe Instanzen (inkl. daily_routine & Ausdrücke)
+            foreach (var instance in _instances.Values)
+            {
+                var assignments = new Dictionary<string, (int Line, int Column)>();
+                foreach (var assign in instance.Assignments)
+                {
+                    if (assign.Left is VariableExpression varExpr)
+                    {
+                        if (assignments.ContainsKey(varExpr.Name))
+                        {
+                            errors.Add($"Semantischer Fehler: Zeile {assign.Line}, Spalte {assign.Column}. Doppelte Zuweisung für Attribut '{varExpr.Name}' in Instanz '{instance.Name}'.");
+                        }
+                        else
+                        {
+                            assignments[varExpr.Name] = (assign.Line, assign.Column);
+                        }
+
+                        // Prüfe daily_routine
+                        if (varExpr.Name.Equals("daily_routine", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (assign.Right is not VariableExpression)
+                            {
+                                errors.Add($"Semantischer Fehler: Zeile {assign.Line}, Spalte {assign.Column}. 'daily_routine' erwartet einen Funktionsnamen in Instanz '{instance.Name}'.");
+                            }
+                            // Keine Prüfung, ob die Funktion existiert, da sie extern definiert sein kann
+                        }
+                    }
+
+                    // Prüfe Ausdrücke in Zuweisungen
+                    errors.AddRange(CheckExpression(assign.Right));
+                }
+            }
+
+            return errors;
+        }
+
+        private List<string> CheckStatement(Statement stmt)
+        {
+            var errors = new List<string>();
+            switch (stmt)
+            {
+                case ExpressionStatement exprStmt:
+                    errors.AddRange(CheckExpression(exprStmt.Expr));
+                    break;
+
+                case IfStatement ifStmt:
+                    errors.AddRange(CheckExpression(ifStmt.Condition));
+                    foreach (var thenStmt in ifStmt.ThenBranch)
+                        errors.AddRange(CheckStatement(thenStmt));
+                    foreach (var elseStmt in ifStmt.ElseBranch)
+                        errors.AddRange(CheckStatement(elseStmt));
+                    break;
+
+                case ReturnStatement retStmt:
+                    if (retStmt.ReturnValue != null)
+                        errors.AddRange(CheckExpression(retStmt.ReturnValue));
+                    break;
+
+                case Assignment assign:
+                    errors.AddRange(CheckExpression(assign.Left));
+                    errors.AddRange(CheckExpression(assign.Right));
+                    break;
+            }
+            return errors;
+        }
+
+        private List<string> CheckExpression(Expression expr)
+        {
+            var errors = new List<string>();
+            if (expr == null) return errors;
+
+            switch (expr)
+            {
+                case FunctionCallExpression funcCall:
+                    // Keine Prüfung, ob die Funktion in _functions existiert, da sie extern definiert sein kann
+                    foreach (var arg in funcCall.Arguments)
+                        errors.AddRange(CheckExpression(arg));
+                    break;
+
+                case BinaryExpression bin:
+                    errors.AddRange(CheckExpression(bin.Left));
+                    errors.AddRange(CheckExpression(bin.Right));
+                    break;
+
+                case IndexExpression:
+                    errors.Add($"Semantischer Fehler: Indexausdrücke werden nicht unterstützt.");
+                    break;
+
+                case VariableExpression varExpr:
+                    if (!_globals.ContainsKey(varExpr.Name) && !_instances.ContainsKey(varExpr.Name) &&
+                        !_callStack.Any(stack => stack.ContainsKey(varExpr.Name)) &&
+                        !_functions.ContainsKey(varExpr.Name))
+                    {
+                        errors.Add($"Semantischer Fehler: Zeile {varExpr.Line}, Spalte {varExpr.Column}. Unbekannte Variable oder Funktion '{varExpr.Name}'.");
+                    }
+                    break;
+            }
 
             return errors;
         }
@@ -125,9 +256,8 @@ namespace Skriptorium.Interpreter
                 else
                     throw new Exception($"Variable '{varExpr.Name}' not defined.");
             }
-            else if (assign.Left is IndexExpression idx)
+            else if (assign.Left is IndexExpression)
             {
-                // TODO: implement array/dictionary assignment
                 throw new NotImplementedException("Index assignment not implemented.");
             }
             else
@@ -148,7 +278,7 @@ namespace Skriptorium.Interpreter
         {
             LiteralExpression lit => ParseLiteral(lit.Value),
             VariableExpression varExpr => LookupVariable(varExpr.Name),
-            IndexExpression idx => throw new NotImplementedException("Index evaluation not implemented."),
+            IndexExpression => throw new NotImplementedException("Index evaluation not implemented."),
             BinaryExpression bin => EvaluateBinary(bin),
             FunctionCallExpression call => EvaluateCall(call),
             _ => throw new Exception("Unknown expression type.")
@@ -213,5 +343,156 @@ namespace Skriptorium.Interpreter
         };
 
         private class ReturnValue { public object Value { get; } public ReturnValue(object v) => Value = v; }
+    }
+
+    public abstract class Declaration
+    {
+        public int Line { get; }
+        public int Column { get; }
+        protected Declaration(int line, int column)
+        {
+            Line = line;
+            Column = column;
+        }
+    }
+
+    public class FunctionDeclaration : Declaration
+    {
+        public string Name { get; }
+        public List<string> Parameters { get; }
+        public List<Statement> Body { get; }
+        public FunctionDeclaration(string name, List<string> parameters, List<Statement> body, int line, int column)
+            : base(line, column)
+        {
+            Name = name;
+            Parameters = parameters;
+            Body = body;
+        }
+    }
+
+    public class VarDeclaration : Declaration
+    {
+        public string Name { get; }
+        public string TypeName { get; }
+        public VarDeclaration(string name, string typeName, int line, int column)
+            : base(line, column)
+        {
+            Name = name;
+            TypeName = typeName;
+        }
+    }
+
+    public class InstanceDeclaration : Declaration
+    {
+        public string Name { get; }
+        public string BaseType { get; }
+        public List<Assignment> Assignments { get; }
+        public InstanceDeclaration(string name, string baseType, List<Assignment> assignments, int line, int column)
+            : base(line, column)
+        {
+            Name = name;
+            BaseType = baseType;
+            Assignments = assignments;
+        }
+    }
+
+    public abstract class Statement { }
+
+    public class Assignment : Statement
+    {
+        public Expression Left { get; }
+        public Expression Right { get; }
+        public int Line { get; }
+        public int Column { get; }
+        public Assignment(Expression left, Expression right, int line, int column)
+        {
+            Left = left;
+            Right = right;
+            Line = line;
+            Column = column;
+        }
+    }
+
+    public class ExpressionStatement : Statement
+    {
+        public Expression Expr { get; }
+        public ExpressionStatement(Expression expr) => Expr = expr;
+    }
+
+    public class IfStatement : Statement
+    {
+        public Expression Condition { get; }
+        public List<Statement> ThenBranch { get; }
+        public List<Statement> ElseBranch { get; }
+        public IfStatement(Expression condition, List<Statement> thenBranch, List<Statement> elseBranch)
+        {
+            Condition = condition;
+            ThenBranch = thenBranch;
+            ElseBranch = elseBranch;
+        }
+    }
+
+    public class ReturnStatement : Statement
+    {
+        public Expression ReturnValue { get; }
+        public ReturnStatement(Expression returnValue) => ReturnValue = returnValue;
+    }
+
+    public abstract class Expression
+    {
+        public int Line { get; set; } = -1;
+        public int Column { get; set; } = -1;
+    }
+
+    public class LiteralExpression : Expression
+    {
+        public string Value { get; }
+        public LiteralExpression(string value) => Value = value;
+    }
+
+    public class VariableExpression : Expression
+    {
+        public string Name { get; }
+        public string TypeName { get; }
+        public VariableExpression(string name, string typeName, int line = -1, int column = -1)
+        {
+            Name = name;
+            TypeName = typeName;
+            Line = line;
+            Column = column;
+        }
+    }
+
+    public class IndexExpression : Expression
+    {
+        // Implementierung für Indexausdrücke
+    }
+
+    public class BinaryExpression : Expression
+    {
+        public Expression Left { get; }
+        public Expression Right { get; }
+        public string Operator { get; }
+        public BinaryExpression(Expression left, string op, Expression right, int line = -1, int column = -1)
+        {
+            Left = left;
+            Operator = op;
+            Right = right;
+            Line = line;
+            Column = column;
+        }
+    }
+
+    public class FunctionCallExpression : Expression
+    {
+        public string FunctionName { get; }
+        public List<Expression> Arguments { get; }
+        public FunctionCallExpression(string functionName, List<Expression> arguments, int line = -1, int column = -1)
+        {
+            FunctionName = functionName;
+            Arguments = arguments;
+            Line = line;
+            Column = column;
+        }
     }
 }
