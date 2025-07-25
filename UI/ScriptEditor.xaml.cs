@@ -14,14 +14,139 @@ using System.Windows.Media;
 
 namespace Skriptorium.UI
 {
+    public enum SyntaxColor
+    {
+        Keyword, Identifier, Type, String, Number, Comment, Operator, Assignment, Bracket, Enum, Unknown
+    }
+
+    public static class SyntaxHighlighting
+    {
+        private static readonly Dictionary<TokenType, (SyntaxColor Color, Color WpfColor, ConsoleColor ConsoleColor)> tokenTypeToColor = new()
+        {
+            // Schlüsselwörter
+            { TokenType.FuncKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
+            { TokenType.VarKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
+            { TokenType.ConstKeyword, (SyntaxColor.Keyword, Colors.Red, ConsoleColor.Blue) },
+            { TokenType.ReturnKeyword, (SyntaxColor.Keyword, Colors.DarkBlue, ConsoleColor.DarkBlue) },
+            { TokenType.IfKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
+            { TokenType.ElseKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
+            { TokenType.InstanceKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
+            { TokenType.ClassKeyword, (SyntaxColor.Keyword, Colors.Red, ConsoleColor.Blue) },
+            { TokenType.PrototypeKeyword, (SyntaxColor.Keyword, Colors.Red, ConsoleColor.Blue) },
+            { TokenType.BoolLiteral, (SyntaxColor.Keyword, Colors.Red, ConsoleColor.Red) },
+
+            // Typen und Literale
+            { TokenType.TypeKeyword, (SyntaxColor.Type, Colors.Red, ConsoleColor.Red) },
+            { TokenType.Identifier, (SyntaxColor.Identifier, Colors.Black, ConsoleColor.Black) },
+            { TokenType.StringLiteral, (SyntaxColor.String, Colors.Magenta, ConsoleColor.Magenta) },
+            { TokenType.FloatLiteral, (SyntaxColor.Number, Colors.DarkBlue, ConsoleColor.DarkBlue) },
+            { TokenType.IntegerLiteral, (SyntaxColor.Number, Colors.DarkBlue, ConsoleColor.DarkBlue) },
+            { TokenType.EnumLiteral, (SyntaxColor.Enum, Colors.Red, ConsoleColor.Red) },
+
+            // Kommentare
+            { TokenType.Comment, (SyntaxColor.Comment, Colors.Gray, ConsoleColor.Gray) },
+            { TokenType.CommentBlock, (SyntaxColor.Comment, Colors.Gray, ConsoleColor.Gray) },
+
+            // Operatoren und Symbole
+            { TokenType.Operator, (SyntaxColor.Operator, Colors.Green, ConsoleColor.Green) },
+            { TokenType.Assignment, (SyntaxColor.Assignment, Colors.Green, ConsoleColor.Green) },
+            { TokenType.OpenBracket, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+            { TokenType.CloseBracket, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+            { TokenType.OpenParenthesis, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+            { TokenType.CloseParenthesis, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+            { TokenType.OpenSquareBracket, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+            { TokenType.CloseSquareBracket, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+            { TokenType.Comma, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+            { TokenType.Semicolon, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+
+            // Sonstiges
+            { TokenType.Whitespace, (SyntaxColor.Unknown, Colors.Violet, ConsoleColor.White) },
+            { TokenType.EOF, (SyntaxColor.Unknown, Colors.Violet, ConsoleColor.White) },
+            { TokenType.Unknown, (SyntaxColor.Unknown, Colors.Violet, ConsoleColor.White) }
+        };
+
+        public static (SyntaxColor Color, Color WpfColor, ConsoleColor ConsoleColor) GetColorForToken(DaedalusToken token)
+        {
+            return tokenTypeToColor.TryGetValue(token.Type, out var colorInfo)
+                ? colorInfo
+                : (SyntaxColor.Unknown, Colors.Red, ConsoleColor.Red);
+        }
+    }
+
+    public class SyntaxColorizingTransformer : DocumentColorizingTransformer
+    {
+        private List<DaedalusToken> _tokens = new();
+
+        public void UpdateTokens(List<DaedalusToken> tokens)
+        {
+            _tokens = tokens ?? new List<DaedalusToken>();
+            Console.WriteLine($"Debug: Anzahl der Tokens (gesamt): {_tokens.Count}");
+            foreach (var token in _tokens)
+            {
+                Console.WriteLine($"Debug: Token: {token.Type}, Value: {token.Value}, Line: {token.Line}, Column: {token.Column}");
+            }
+        }
+
+        protected override void ColorizeLine(DocumentLine line)
+        {
+            var document = CurrentContext.Document;
+            if (document == null)
+            {
+                Console.WriteLine("Debug: Document ist null in ColorizeLine");
+                return;
+            }
+
+            var text = document.GetText(line);
+            Console.WriteLine($"Debug: Verarbeite Zeile {line.LineNumber}: {text}");
+
+            var tokens = _tokens.Where(t => t.Line == line.LineNumber);
+            Console.WriteLine($"Debug: Anzahl der Tokens in Zeile {line.LineNumber}: {tokens.Count()}");
+
+            foreach (var token in tokens)
+            {
+                Console.WriteLine($"Debug: Token: {token.Type}, Value: {token.Value}, Line: {token.Line}, Column: {token.Column}");
+                if (token.Type == TokenType.Whitespace || token.Type == TokenType.EOF) continue;
+
+                var (_, wpfColor, _) = SyntaxHighlighting.GetColorForToken(token);
+
+                try
+                {
+                    int startOffset = document.GetOffset(token.Line, token.Column);
+                    int endOffset = startOffset + token.Value.Length;
+
+                    Console.WriteLine($"Debug: Coloring Token '{token.Value}' at offset {startOffset} to {endOffset} with color {wpfColor}");
+
+                    if (startOffset >= line.Offset && endOffset <= line.EndOffset)
+                    {
+                        ChangeLinePart(startOffset, endOffset, element =>
+                        {
+                            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(wpfColor));
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Debug: Token außerhalb der Zeilengrenzen: startOffset={startOffset}, endOffset={endOffset}, line.Offset={line.Offset}, line.EndOffset={line.EndOffset}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Debug: Fehler beim Anwenden der Farbe für Token '{token.Value}': {ex.Message}");
+                }
+            }
+        }
+    }
+
     public partial class ScriptEditor : UserControl
     {
         private string _originalText = "";
+        private string _lastText = "";
         private bool _suppressChangeTracking = false;
         private string _filePath = "";
+        private List<DaedalusToken> _cachedTokens = new();
 
         private TextSegmentCollection<TextMarker>? _markers;
         private TextMarkerRenderer? _markerRenderer;
+        private SyntaxColorizingTransformer? _colorizer;
 
         private BookmarkManager? _bookmarkManager;
 
@@ -32,11 +157,24 @@ namespace Skriptorium.UI
             InitializeComponent();
             avalonEditor.TextChanged += AvalonEditor_TextChanged;
 
+            if (avalonEditor.Document == null)
+            {
+                Console.WriteLine("Fehler: avalonEditor.Document ist null");
+                return;
+            }
+
             _markers = new TextSegmentCollection<TextMarker>(avalonEditor.Document);
             _markerRenderer = new TextMarkerRenderer(avalonEditor.TextArea.TextView, _markers);
             avalonEditor.TextArea.TextView.BackgroundRenderers.Add(_markerRenderer);
 
+            _colorizer = new SyntaxColorizingTransformer();
+            avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
+
             _bookmarkManager = new BookmarkManager(avalonEditor);
+
+            // Testtext zum Debugging
+            avalonEditor.Text = "var x = 42;\n// Dies ist ein Kommentar\nfunc void test() {}";
+            ApplySyntaxHighlighting();
         }
 
         private void AvalonEditor_TextChanged(object? sender, EventArgs e)
@@ -46,9 +184,7 @@ namespace Skriptorium.UI
 
             IsModified = avalonEditor.Text != _originalText;
             TextChanged?.Invoke(this, null);
-
-            // Optional: Automatisches Parsen nach jeder Änderung
-            // ParseAndHighlightErrors(); // Vorsicht: Kann performance-intensiv sein!
+            ApplySyntaxHighlighting();
         }
 
         public bool IsModified { get; private set; } = false;
@@ -74,6 +210,7 @@ namespace Skriptorium.UI
             _suppressChangeTracking = false;
             IsModified = false;
             ClearHighlighting();
+            ApplySyntaxHighlighting();
         }
 
         public void SetTextAndMarkAsModified(string text)
@@ -84,6 +221,7 @@ namespace Skriptorium.UI
             IsModified = true;
             TextChanged?.Invoke(this, null);
             ClearHighlighting();
+            ApplySyntaxHighlighting();
         }
 
         public void ResetModifiedFlag()
@@ -109,7 +247,8 @@ namespace Skriptorium.UI
                 return;
 
             foreach (var m in _markers.ToList())
-                _markers.Remove(m);
+                if (m.BackgroundColor == Colors.Yellow)
+                    _markers.Remove(m);
 
             string text = restrictToSelection && selectionLength > 0 ? avalonEditor.SelectedText : avalonEditor.Text;
             int offsetBase = restrictToSelection && selectionLength > 0 ? selectionStart : 0;
@@ -193,22 +332,39 @@ namespace Skriptorium.UI
             catch { }
         }
 
-        // GeneratedRegex für Semantik-Fehler
+        private void ApplySyntaxHighlighting()
+        {
+            if (_markers == null || _markerRenderer == null || _colorizer == null) return;
+
+            foreach (var m in _markers.ToList())
+                if (m.BackgroundColor != Colors.Red && m.BackgroundColor != Colors.Yellow)
+                    _markers.Remove(m);
+
+            if (avalonEditor.Text != _lastText)
+            {
+                var lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                _cachedTokens = new DaedalusLexer().Tokenize(lines);
+                _lastText = avalonEditor.Text;
+            }
+
+            _colorizer.UpdateTokens(_cachedTokens);
+
+            avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+            avalonEditor.TextArea.TextView.InvalidateVisual();
+        }
+
         [GeneratedRegex(@"Zeile\s+(\d+),\s*Spalte\s+(\d+)")]
         private static partial Regex ErrorPositionRegex();
 
-        // Führt Syntax-Check und Semantik-Check durch
         public List<string> CheckAll()
         {
             ClearHighlighting();
+            ApplySyntaxHighlighting();
             var errors = new List<string>();
 
-            // --- Syntax-Check ---
             try
             {
-                var lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-                var tokens = new DaedalusLexer().Tokenize(lines);
-
+                var tokens = _cachedTokens;
                 new DaedalusParser(tokens).ParseScript();
             }
             catch (ParseException ex)
@@ -218,14 +374,9 @@ namespace Skriptorium.UI
                 return errors;
             }
 
-            // --- Semantik-Check ---
             try
             {
-                var tokens2 = new DaedalusLexer()
-                    .Tokenize(avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None));
-                var parsingDecls = new DaedalusParser(tokens2).ParseScript();
-
-                // Konvertiere Parsing.Declaration in Interpreter.Declaration
+                var parsingDecls = new DaedalusParser(_cachedTokens).ParseScript();
                 var interpreterDecls = ConvertDeclarations(parsingDecls);
 
                 _interpreter = new DaedalusInterpreter();
@@ -247,23 +398,23 @@ namespace Skriptorium.UI
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ausnahme abgefangen: {ex.Message}"); // Debug-Ausgabe
+                Console.WriteLine($"Ausnahme abgefangen: {ex.Message}");
                 errors.Add(ex.Message);
                 var lines = ex.Message.Split(new[] { "\n" }, StringSplitOptions.None);
                 foreach (var msg in lines)
                 {
-                    Console.WriteLine($"Verarbeite Zeile: {msg}"); // Debug-Ausgabe
+                    Console.WriteLine($"Verarbeite Zeile: {msg}");
                     var m = ErrorPositionRegex().Match(msg);
                     if (m.Success)
                     {
                         int line = int.Parse(m.Groups[1].Value);
                         int column = int.Parse(m.Groups[2].Value);
-                        Console.WriteLine($"Markiere Fehler bei Zeile {line}, Spalte {column}"); // Debug-Ausgabe
+                        Console.WriteLine($"Markiere Fehler bei Zeile {line}, Spalte {column}");
                         HighlightError(line, column, 1);
                     }
                     else
                     {
-                        Console.WriteLine("Kein Regex-Match gefunden"); // Debug-Ausgabe
+                        Console.WriteLine("Kein Regex-Match gefunden");
                     }
                 }
             }
@@ -271,7 +422,6 @@ namespace Skriptorium.UI
             return errors;
         }
 
-        // Hilfsfunktion zum Konvertieren von Declarations
         private List<Skriptorium.Interpreter.Declaration> ConvertDeclarations(List<Skriptorium.Parsing.Declaration> parsingDecls)
         {
             var interpreterDecls = new List<Skriptorium.Interpreter.Declaration>();
@@ -298,14 +448,13 @@ namespace Skriptorium.UI
                         ));
                         break;
                     case Skriptorium.Parsing.InstanceDeclaration instance:
-                        // Konvertiere Body (Statements) in Assignments
                         var assignments = instance.Body
                             .OfType<Skriptorium.Parsing.Assignment>()
                             .Select(a => ConvertAssignment(a))
                             .ToList();
                         interpreterDecls.Add(new Skriptorium.Interpreter.InstanceDeclaration(
                             name: instance.Name,
-                            baseType: instance.BaseClass, // BaseClass -> BaseType
+                            baseType: instance.BaseClass,
                             assignments: assignments,
                             line: instance.Line,
                             column: instance.Column
@@ -313,7 +462,6 @@ namespace Skriptorium.UI
                         break;
                     case Skriptorium.Parsing.ClassDeclaration:
                     case Skriptorium.Parsing.PrototypeDeclaration:
-                        // Ignoriere ClassDeclaration und PrototypeDeclaration, da Interpreter sie nicht unterstützt
                         Console.WriteLine($"Warnung: Ignoriere Deklarationstyp {decl.GetType().Name} bei Zeile {decl.Line}, Spalte {decl.Column}");
                         break;
                     default:
@@ -324,7 +472,6 @@ namespace Skriptorium.UI
             return interpreterDecls;
         }
 
-        // Hilfsfunktion zum Konvertieren von Statements
         private Skriptorium.Interpreter.Statement ConvertStatement(Skriptorium.Parsing.Statement stmt)
         {
             switch (stmt)
@@ -355,7 +502,6 @@ namespace Skriptorium.UI
             }
         }
 
-        // Hilfsfunktion zum Konvertieren von Expressions
         private Skriptorium.Interpreter.Expression ConvertExpression(Skriptorium.Parsing.Expression expr)
         {
             if (expr == null)
@@ -370,13 +516,10 @@ namespace Skriptorium.UI
                 case Skriptorium.Parsing.VariableExpression varExpr:
                     return new Skriptorium.Interpreter.VariableExpression(
                         name: varExpr.Name,
-                        typeName: "unknown" // Kein TypeName in Parsing.VariableExpression, Standardwert
+                        typeName: "unknown"
                     );
-                case Skriptorium.Parsing.IndexExpression idx:
-                    return new Skriptorium.Interpreter.IndexExpression
-                    {
-                        // Anpassung erforderlich, wenn IndexExpression im Interpreter erweitert wird
-                    };
+                case Skriptorium.Parsing.IndexExpression:
+                    return new Skriptorium.Interpreter.IndexExpression();
                 case Skriptorium.Parsing.BinaryExpression bin:
                     return new Skriptorium.Interpreter.BinaryExpression(
                         left: ConvertExpression(bin.Left),
@@ -393,7 +536,6 @@ namespace Skriptorium.UI
             }
         }
 
-        // Hilfsfunktion zum Konvertieren von Assignments
         private Skriptorium.Interpreter.Assignment ConvertAssignment(Skriptorium.Parsing.Assignment assign)
         {
             return new Skriptorium.Interpreter.Assignment(
@@ -413,7 +555,7 @@ namespace Skriptorium.UI
             Length = length;
         }
 
-        public Color BackgroundColor { get; set; } = Colors.Yellow;
+        public Color BackgroundColor { get; set; } = Colors.Transparent;
         public Color ForegroundColor { get; set; } = Colors.Black;
     }
 
@@ -437,8 +579,29 @@ namespace Skriptorium.UI
             {
                 foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, marker))
                 {
-                    var brush = new SolidColorBrush(marker.BackgroundColor) { Opacity = 0.4 };
-                    drawingContext.DrawRectangle(brush, null, rect);
+                    if (marker.BackgroundColor != Colors.Transparent)
+                    {
+                        var brush = new SolidColorBrush(marker.BackgroundColor) { Opacity = 0.4 };
+                        drawingContext.DrawRectangle(brush, null, rect);
+                    }
+                    if (marker.ForegroundColor != Colors.Black)
+                    {
+                        var visualLine = textView.GetVisualLineFromVisualTop(rect.Top);
+                        if (visualLine != null)
+                        {
+                            foreach (var element in visualLine.Elements)
+                            {
+                                if (element.TextRunProperties != null)
+                                {
+                                    int elementStartOffset = visualLine.StartOffset + element.RelativeTextOffset;
+                                    if (elementStartOffset >= marker.StartOffset && elementStartOffset < marker.EndOffset)
+                                    {
+                                        element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(marker.ForegroundColor));
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
