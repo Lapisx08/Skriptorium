@@ -17,6 +17,7 @@ namespace Skriptorium.UI
         private readonly ShortcutManager _shortcutManager;
         private readonly EditMenuManager _editMenuManager;
         private readonly SearchManager _searchManager;
+        private ScriptEditor? _currentScriptEditor;
 
         public MainWindow()
         {
@@ -35,7 +36,7 @@ namespace Skriptorium.UI
 
             // 2. Shortcuts registrieren
             _shortcutManager.Register(Key.I, ModifierKeys.Control,
-                          () => MenuSkriptoriumUeber_Click(null, null));
+                                  () => MenuSkriptoriumUeber_Click(null, null));
             _shortcutManager.Register(Key.OemComma, ModifierKeys.Control,
                                       () => MenuSkriptoriumEinstellungen_Click(null, null));
             _shortcutManager.Register(Key.N, ModifierKeys.Control,
@@ -67,7 +68,10 @@ namespace Skriptorium.UI
             _shortcutManager.Register(Key.F2, ModifierKeys.Control | ModifierKeys.Alt,
                                       () => GetActiveScriptEditor()?.ClearAllBookmarks());
 
-            // 3. Letzte Dateien laden und erstes Tab öffnen
+            // 3. TabControl-Ereignis registrieren
+            tabControlScripts.SelectionChanged += TabControlScripts_SelectionChanged;
+
+            // 4. Letzte Dateien laden und erstes Tab öffnen
             DataManager.LoadRecentFiles();
             UpdateRecentFilesMenu();
             _tabManager.AddNewTab();
@@ -321,6 +325,56 @@ namespace Skriptorium.UI
             {
                 MessageBox.Show("Keine Fehler gefunden.", "Prüfung erfolgreich",
                                 MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        private void TabControlScripts_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Alte Ereignisbindungen entfernen
+            if (_currentScriptEditor != null)
+            {
+                _currentScriptEditor.TextChanged -= ScriptEditor_TextChanged;
+                _currentScriptEditor.CaretPositionChanged -= ScriptEditor_CaretPositionChanged;
+            }
+
+            // Neuen ScriptEditor abrufen
+            _currentScriptEditor = _tabManager.GetActiveScriptEditor();
+
+            // Neue Ereignisbindungen hinzufügen
+            if (_currentScriptEditor != null)
+            {
+                _currentScriptEditor.TextChanged += ScriptEditor_TextChanged;
+                _currentScriptEditor.CaretPositionChanged += ScriptEditor_CaretPositionChanged;
+                UpdateStatusBar();
+            }
+            else
+            {
+                StatusPositionText.Text = "Zeile 1, Spalte 1";
+                StatusCharCountText.Text = "0 Zeichen";
+            }
+        }
+
+        private void ScriptEditor_TextChanged(object sender, EventArgs e)
+        {
+            UpdateStatusBar();
+        }
+
+        private void ScriptEditor_CaretPositionChanged(object sender, EventArgs e)
+        {
+            UpdateStatusBar();
+        }
+
+        private void UpdateStatusBar()
+        {
+            if (_currentScriptEditor?.Avalon.Document != null)
+            {
+                var caret = _currentScriptEditor.Avalon.TextArea.Caret;
+                StatusPositionText.Text = $"Zeile {caret.Line}, Spalte {caret.Column}";
+                StatusCharCountText.Text = $"{_currentScriptEditor.Avalon.Document.TextLength} Zeichen";
+            }
+            else
+            {
+                StatusPositionText.Text = "Zeile 1, Spalte 1";
+                StatusCharCountText.Text = "0 Zeichen";
             }
         }
     }

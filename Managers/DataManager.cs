@@ -1,10 +1,11 @@
 ﻿using Microsoft.Win32;
-using System;
-using System.IO;
-using System.Windows;
 using Skriptorium.UI;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Windows;
 
 namespace Skriptorium.Managers
 {
@@ -44,7 +45,7 @@ namespace Skriptorium.Managers
             {
                 var content = File.ReadAllText(filePath);
                 onFileLoaded(content, filePath);
-                AddRecentFile(filePath); // ✅ Jetzt wird es gespeichert
+                AddRecentFile(filePath); // Jetzt wird es gespeichert
             }
             catch (Exception ex)
             {

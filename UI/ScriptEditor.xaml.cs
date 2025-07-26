@@ -97,6 +97,7 @@ namespace Skriptorium.UI
         {
             InitializeComponent();
             avalonEditor.TextChanged += AvalonEditor_TextChanged;
+            avalonEditor.TextArea.Caret.PositionChanged += AvalonEditor_CaretPositionChanged;
 
             if (avalonEditor.Document == null)
             {
@@ -362,6 +363,13 @@ namespace Skriptorium.UI
 
             return errors;
         }
+
+        private void AvalonEditor_CaretPositionChanged(object sender, EventArgs e)
+        {
+            CaretPositionChanged?.Invoke(this, e);
+        }
+
+        public event EventHandler? CaretPositionChanged;
 
         private List<Skriptorium.Interpreter.Declaration> ConvertDeclarations(List<Skriptorium.Parsing.Declaration> parsingDecls)
         {

@@ -6,14 +6,10 @@
         Icon="pack://application:,,,/Skriptorium.ico"
         Background="{DynamicResource WindowBackgroundBrush}"
         Foreground="{DynamicResource TextBrush}">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <!-- komplette Menüleiste inline mit Icons, ohne Unterstriche -->
-        <Menu Grid.Row="0" BorderBrush="Gray" BorderThickness="0,1,0,1">
+    <DockPanel>
+        <!-- Menüleiste -->
+        <Menu DockPanel.Dock="Top" BorderBrush="Gray" BorderThickness="0,1,0,1">
             <MenuItem Header="Skriptorium">
                 <MenuItem Header="Über Skriptorium" InputGestureText="Strg + I" Click="MenuSkriptoriumUeber_Click">
                     <MenuItem.Icon>
@@ -39,7 +35,6 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE710;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Öffnen" InputGestureText="Strg + O" Click="MenuDateiÖffnen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED25;" FontSize="17"/>
@@ -50,9 +45,7 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE81C;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <Separator/>
-
                 <MenuItem Header="Speichern" InputGestureText="Strg + S" Click="MenuDateiSpeichern_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE105;" FontSize="15"/>
@@ -63,13 +56,11 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE792;" FontSize="17"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Alles speichern" InputGestureText="Strg + Alt + S" Click="MenuDateiAllesSpeichern_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE105;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Schließen" InputGestureText="Strg + W" Click="MenuDateiSchließen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8BB;" FontSize="12"/>
@@ -88,37 +79,29 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <Separator/>
-
                 <MenuItem Header="Ausschneiden" InputGestureText="Strg + X" Click="MenuBearbeitenAusschneiden_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C6;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Kopieren" InputGestureText="Strg + C" Click="MenuBearbeitenKopieren_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C8;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Einfügen" InputGestureText="Strg + V" Click="MenuBearbeitenEinfuegen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77F;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <Separator/>
-
                 <MenuItem Header="Duplizieren" InputGestureText="Strg + D" Click="MenuBearbeitenDuplizieren_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C8;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
-                <MenuItem Header="Alles auswählen" InputGestureText="Strg + A" Click="MenuBearbeitenAllesAuswaehlen_Click">
-                </MenuItem>
+                <MenuItem Header="Alles auswählen" InputGestureText="Strg + A" Click="MenuBearbeitenAllesAuswaehlen_Click"/>
             </MenuItem>
 
             <MenuItem Header="Suchen">
@@ -135,21 +118,17 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE840;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Zum nächsten" InputGestureText="Strg + F2" Click="MenuLesezeichenNaechstes_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72B;" FontSize="13"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Zum vorherigen" InputGestureText="Strg + Shift + F2" Click="MenuLesezeichenVorheriges_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72A;" FontSize="13"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <Separator/>
-
                 <MenuItem Header="Alle Lesezeichen löschen" InputGestureText="Strg + Alt + F2" Click="MenuLesezeichenAlleLoeschen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74D;" FontSize="15"/>
@@ -166,7 +145,17 @@
             </MenuItem>
         </Menu>
 
+        <!-- Statusleiste unten -->
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem HorizontalAlignment="Right" Margin="0,0,20,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Name="StatusPositionText" Text="Zeile 1, Spalte 1" Margin="0,0,10,0"/>
+                    <TextBlock Name="StatusCharCountText" Text="0 Zeichen"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+
         <!-- TabControl für mehrere Skripte -->
-        <TabControl x:Name="tabControlScripts" Grid.Row="1"/>
-    </Grid>
+        <TabControl x:Name="tabControlScripts" SelectionChanged="TabControlScripts_SelectionChanged"/>
+    </DockPanel>
 </Window>
