@@ -303,6 +303,15 @@ namespace Skriptorium.UI
 
             dicts.Add(new ResourceDictionary { Source = uri });
         }
+
+        private void SyntaxHighlightingUmschalten_Click(object sender, RoutedEventArgs e)
+        {
+            if ((tabControlScripts.SelectedItem as TabItem)?.Content is ScriptEditor editor)
+            {
+                editor.ToggleSyntaxHighlighting();
+            }
+        }
+
         private void SemanticCheckButton_Click(object sender, RoutedEventArgs e)
         {
             var editor = _tabManager.GetActiveScriptEditor();

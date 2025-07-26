@@ -248,6 +248,10 @@ namespace Skriptorium.Parsing
                         {
                             type = TokenType.ARConstant;
                         }
+                        else if (val.StartsWith("PLAYER_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.PLAYERConstant;
+                        }
                         else if (val.StartsWith("B_", StringComparison.OrdinalIgnoreCase))
                         {
                             type = TokenType.BuiltInFunction;

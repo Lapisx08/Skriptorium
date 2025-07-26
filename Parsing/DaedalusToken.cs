@@ -44,6 +44,7 @@ namespace Skriptorium.Parsing
         ZS_TalkConstant,        // ZS_Talk
         ATRConstant,            // z. B. ATR_DEXTERITY
         ARConstant,             // z. B. AR_THEFT
+        PLAYERConstant,  // z. B. PLAYER_TALENT_ALCHEMY
         BuiltInFunction,        // z. B. B_SetNpcVisual
         MdlFunction,            // z.  B. Mdl_SetModelFatness
         AIFunction,             // z. B. AI_StopProcessInfos

@@ -93,6 +93,8 @@ namespace Skriptorium.UI
 
         private DaedalusInterpreter? _interpreter;
 
+        private bool _syntaxHighlightingEnabled = true;
+
         public ScriptEditor()
         {
             InitializeComponent();
@@ -276,6 +278,8 @@ namespace Skriptorium.UI
 
         private void ApplySyntaxHighlighting()
         {
+            if (!_syntaxHighlightingEnabled) return;
+
             if (_markers == null || _markerRenderer == null || _colorizer == null) return;
 
             foreach (var m in _markers.ToList())
@@ -370,6 +374,26 @@ namespace Skriptorium.UI
         }
 
         public event EventHandler? CaretPositionChanged;
+
+        public void ToggleSyntaxHighlighting()
+        {
+            _syntaxHighlightingEnabled = !_syntaxHighlightingEnabled;
+
+            if (_syntaxHighlightingEnabled)
+            {
+                if (!avalonEditor.TextArea.TextView.LineTransformers.Contains(_colorizer))
+                {
+                    avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
+                }
+
+                ApplySyntaxHighlighting();
+            }
+            else
+            {
+                avalonEditor.TextArea.TextView.LineTransformers.Remove(_colorizer);
+                avalonEditor.TextArea.TextView.InvalidateVisual();
+            }
+        }
 
         private List<Skriptorium.Interpreter.Declaration> ConvertDeclarations(List<Skriptorium.Parsing.Declaration> parsingDecls)
         {
