@@ -31,6 +31,10 @@ namespace Skriptorium.Managers
             {
                 lineNumberMargin.MouseLeftButtonDown += LineNumberMargin_MouseLeftButtonDown;
             }
+
+            // Beim Scrollen und bei VisualLines-Änderungen neu zeichnen
+            _editor.TextArea.TextView.VisualLinesChanged += (s, e) => RefreshRendering();
+            _editor.TextArea.TextView.ScrollOffsetChanged += (s, e) => RefreshRendering();
         }
 
         private void LineNumberMargin_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -134,7 +138,22 @@ namespace Skriptorium.Managers
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            return new Size(5, 0); // 5px Breite für die Markierungen
+            if (TextView != null)
+            {
+                // Höhe an sichtbaren Textbereich anpassen
+                return new Size(5, TextView.ActualHeight);
+            }
+            return new Size(5, 0);
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            if (TextView != null)
+            {
+                // Höhe an sichtbaren Textbereich anpassen
+                return new Size(5, TextView.ActualHeight);
+            }
+            return base.ArrangeOverride(finalSize);
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -142,20 +161,20 @@ namespace Skriptorium.Managers
             if (_bookmarks.Count == 0 || TextView == null || !TextView.VisualLinesValid)
                 return;
 
-            var foreground = Brushes.OrangeRed; // Farbe der Markierung
+            var foreground = Brushes.OrangeRed;
 
-            foreach (var visualLine in TextView.VisualLines)
+            foreach (var bookmark in _bookmarks)
             {
-                var lineNumber = visualLine.FirstDocumentLine.LineNumber;
-                if (_bookmarks.Any(b => b.LineNumber == lineNumber))
-                {
-                    var rect = BackgroundGeometryBuilder.GetRectsForSegment(TextView, visualLine.FirstDocumentLine).FirstOrDefault();
-                    if (rect != null)
-                    {
-                        var bookmarkRect = new Rect(0, rect.Top, 5, rect.Height); // 5px breit, Höhe der Zeile
-                        drawingContext.DrawRectangle(foreground, null, bookmarkRect);
-                    }
-                }
+                var visualLine = TextView.GetVisualLine(bookmark.LineNumber);
+                if (visualLine == null)
+                    continue; // Zeile nicht sichtbar
+
+                var rect = BackgroundGeometryBuilder.GetRectsForSegment(TextView, visualLine.FirstDocumentLine).FirstOrDefault();
+                if (rect == null)
+                    continue;
+
+                var bookmarkRect = new Rect(0, rect.Top, 5, rect.Height);
+                drawingContext.DrawRectangle(foreground, null, bookmarkRect);
             }
         }
     }

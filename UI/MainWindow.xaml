@@ -113,7 +113,7 @@
             </MenuItem>
 
             <MenuItem Header="Lesezeichen">
-                <MenuItem Header="Lesezeichen umschalten" InputGestureText="F2" Click="MenuLesezeichenUmschalten_Click">
+                <MenuItem Header="Lesezeichen setzen und entfernen" InputGestureText="F2" Click="MenuLesezeichenUmschalten_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE840;" FontSize="15"/>
                     </MenuItem.Icon>

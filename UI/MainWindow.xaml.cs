@@ -110,7 +110,13 @@ namespace Skriptorium.UI
 
         #region Menü "Skriptorium"
         private void MenuSkriptoriumUeber_Click(object? sender, RoutedEventArgs? e)
-            => SkriptoriumMenuManager.ShowAboutDialog();
+        {
+            var aboutDialog = new AboutDialog
+            {
+                Owner = this
+            };
+            aboutDialog.ShowDialog();
+        }
 
         private void MenuSkriptoriumEinstellungen_Click(object? sender, RoutedEventArgs? e)
         {
@@ -214,12 +220,6 @@ namespace Skriptorium.UI
                     break;
                 }
             }
-
-            if (allSaved)
-                MessageBox.Show("Alle Dateien wurden erfolgreich gespeichert.", "Speichern");
-            else
-                MessageBox.Show("Einige Dateien konnten nicht gespeichert werden.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
-
             UpdateRecentFilesMenu();
         }
 
@@ -257,8 +257,7 @@ namespace Skriptorium.UI
             if (ed != null)
             {
                 var dialog = new SearchReplaceScriptDialog(ed);
-                if (dialog.ShowDialog() == true)
-                    _searchManager.FindNext(dialog.SearchText);
+                dialog.Show();
             }
         }
 
@@ -268,8 +267,7 @@ namespace Skriptorium.UI
             if (ed != null)
             {
                 var dialog = new SearchReplaceScriptDialog(ed);
-                if (dialog.ShowDialog() == true)
-                    _searchManager.ReplaceAll(dialog.SearchText, dialog.ReplaceText);
+                dialog.Show();
             }
         }
         #endregion

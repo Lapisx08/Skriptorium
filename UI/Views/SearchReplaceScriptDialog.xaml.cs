@@ -21,6 +21,8 @@ namespace Skriptorium.UI.Views
         public string SearchText => ComboSearchText.Text;
         public string ReplaceText => ComboReplaceText.Text;
 
+        public event Action<string>? FindNextRequested;
+
         public SearchReplaceScriptDialog(ScriptEditor scriptEditor)
         {
             InitializeComponent();
@@ -168,6 +170,12 @@ namespace Skriptorium.UI.Views
 
         private void BtnFindNext_Click(object? sender, RoutedEventArgs? e)
         {
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                MessageBox.Show("Bitte einen Suchbegriff eingeben.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             if (_searchOffsets.Count == 0)
             {
                 FindAllOccurrences();
@@ -188,6 +196,9 @@ namespace Skriptorium.UI.Views
             _scriptEditor.Avalon.Select(offset, length);
             _scriptEditor.Avalon.ScrollToLine(_scriptEditor.Avalon.Document.GetLineByOffset(offset).LineNumber);
             _scriptEditor.Avalon.Focus();
+
+            // Event auslösen
+            FindNextRequested?.Invoke(SearchText);
         }
 
         private void BtnReplace_Click(object sender, RoutedEventArgs e)
@@ -229,14 +240,23 @@ namespace Skriptorium.UI.Views
             }
 
             var doc = _scriptEditor.Avalon.Document;
+
+            // Undo-freundliche Ersetzung mit Gruppierung
+            doc.BeginUpdate();
+            doc.UndoStack.StartUndoGroup();
+
             doc.Replace(offset, length, ReplaceText);
-            _scriptEditor.SetTextAndMarkAsModified(doc.Text);
+
+            doc.UndoStack.EndUndoGroup();
+            doc.EndUpdate();
+
+            // Optional: Wenn du "geändert"-Status setzen willst
+            // _scriptEditor.MarkAsModified();
 
             // Anpassen der Auswahl basierend auf der Längenänderung
             int lengthDifference = ReplaceText.Length - SearchText.Length;
             int newSelectionLength = restrictToSelection ? originalSelectionLength + lengthDifference : originalSelectionLength;
 
-            // Sicherstellen, dass die neue Auswahl gültig ist
             if (restrictToSelection && newSelectionLength >= 0)
             {
                 _scriptEditor.Avalon.Select(originalSelectionStart, newSelectionLength);
@@ -280,7 +300,6 @@ namespace Skriptorium.UI.Views
                 MessageBox.Show("Keine weiteren Treffer gefunden.", "Ersetzen", MessageBoxButton.OK, MessageBoxImage.Information);
                 _currentIndex = -1;
                 _scriptEditor.ClearHighlighting();
-                // Auswahl beibehalten, wenn noch innerhalb der markierten Suche
                 if (restrictToSelection && newSelectionLength >= 0)
                 {
                     _scriptEditor.Avalon.Select(originalSelectionStart, newSelectionLength);
@@ -292,7 +311,6 @@ namespace Skriptorium.UI.Views
 
             int nextOffset = _searchOffsets[_currentIndex];
 
-            // Auswahl des nächsten Treffers nur, wenn nicht eingeschränkt, sonst ursprüngliche Auswahl beibehalten
             if (!restrictToSelection)
             {
                 _scriptEditor.Avalon.Select(nextOffset, SearchText.Length);
@@ -305,7 +323,6 @@ namespace Skriptorium.UI.Views
             _scriptEditor.Avalon.ScrollToLine(_scriptEditor.Avalon.Document.GetLineByOffset(nextOffset).LineNumber);
             _scriptEditor.Avalon.Focus();
 
-            // Übergabe der Auswahlparameter an HighlightAllOccurrences
             _scriptEditor.HighlightAllOccurrences(
                 SearchText,
                 ChkCase.IsChecked == true,
@@ -342,6 +359,9 @@ namespace Skriptorium.UI.Views
 
             var comparison = ChkCase.IsChecked == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
+            doc.BeginUpdate();
+            doc.UndoStack.StartUndoGroup();
+
             int replacedCount = 0;
             int index = 0;
 
@@ -367,13 +387,15 @@ namespace Skriptorium.UI.Views
                 replacedCount++;
             }
 
+            doc.UndoStack.EndUndoGroup();
+            doc.EndUpdate();
+
             if (replacedCount == 0)
             {
                 MessageBox.Show("Keine Treffer gefunden zum Ersetzen.", "Ersetzen Alle", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                _scriptEditor.SetTextAndMarkAsModified(doc.Text);
                 MessageBox.Show($"{replacedCount} Treffer wurden ersetzt.", "Ersetzen Alle", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
