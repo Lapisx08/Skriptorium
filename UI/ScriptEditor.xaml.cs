@@ -21,55 +21,57 @@ namespace Skriptorium.UI
 
     public static class SyntaxHighlighting
     {
-        private static readonly Dictionary<TokenType, (SyntaxColor Color, Color WpfColor, ConsoleColor ConsoleColor)> tokenTypeToColor = new()
+        private static readonly Dictionary<TokenType, (SyntaxColor Color, Color WpfColor)> tokenTypeToColor = new()
         {
             // Schlüsselwörter
-            { TokenType.FuncKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
-            { TokenType.VarKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
-            { TokenType.ConstKeyword, (SyntaxColor.Keyword, Colors.Red, ConsoleColor.Blue) },
-            { TokenType.ReturnKeyword, (SyntaxColor.Keyword, Colors.DarkBlue, ConsoleColor.DarkBlue) },
-            { TokenType.IfKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
-            { TokenType.ElseKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
-            { TokenType.InstanceKeyword, (SyntaxColor.Keyword, Colors.Blue, ConsoleColor.Blue) },
-            { TokenType.ClassKeyword, (SyntaxColor.Keyword, Colors.Red, ConsoleColor.Blue) },
-            { TokenType.PrototypeKeyword, (SyntaxColor.Keyword, Colors.Red, ConsoleColor.Blue) },
-            { TokenType.BoolLiteral, (SyntaxColor.Keyword, Colors.Red, ConsoleColor.Red) },
+            { TokenType.FuncKeyword, (SyntaxColor.Keyword, Colors.Blue) },
+            { TokenType.VarKeyword, (SyntaxColor.Keyword, Colors.Blue) },
+            { TokenType.ConstKeyword, (SyntaxColor.Keyword, Colors.Red) },
+            { TokenType.ReturnKeyword, (SyntaxColor.Keyword, Colors.DarkBlue) },
+            { TokenType.IfKeyword, (SyntaxColor.Keyword, Colors.Blue) },
+            { TokenType.ElseKeyword, (SyntaxColor.Keyword, Colors.Blue) },
+            { TokenType.InstanceKeyword, (SyntaxColor.Keyword, Colors.Blue) },
+            { TokenType.ClassKeyword, (SyntaxColor.Keyword, Colors.Red) },
+            { TokenType.PrototypeKeyword, (SyntaxColor.Keyword, Colors.Red) },
+            { TokenType.BoolLiteral, (SyntaxColor.Keyword, Colors.Red) },
 
             // Typen und Literale
-            { TokenType.TypeKeyword, (SyntaxColor.Type, Colors.Red, ConsoleColor.Red) },
-            { TokenType.Identifier, (SyntaxColor.Identifier, Colors.Black, ConsoleColor.Black) },
-            { TokenType.StringLiteral, (SyntaxColor.String, Colors.Magenta, ConsoleColor.Magenta) },
-            { TokenType.FloatLiteral, (SyntaxColor.Number, Colors.DarkBlue, ConsoleColor.DarkBlue) },
-            { TokenType.IntegerLiteral, (SyntaxColor.Number, Colors.DarkBlue, ConsoleColor.DarkBlue) },
-            { TokenType.EnumLiteral, (SyntaxColor.Enum, Colors.Red, ConsoleColor.Red) },
+            { TokenType.TypeKeyword, (SyntaxColor.Type, Colors.Red) },
+            { TokenType.Identifier, (SyntaxColor.Identifier, Colors.Black) },
+            { TokenType.StringLiteral, (SyntaxColor.String, Colors.Magenta) },
+            { TokenType.FloatLiteral, (SyntaxColor.Number, Colors.DarkBlue) },
+            { TokenType.IntegerLiteral, (SyntaxColor.Number, Colors.DarkBlue) },
+            { TokenType.EnumLiteral, (SyntaxColor.Enum, Colors.Red) },
+            { TokenType.BuiltInFunction, (SyntaxColor.Identifier, Colors.Goldenrod) },
+
 
             // Kommentare
-            { TokenType.Comment, (SyntaxColor.Comment, Colors.Gray, ConsoleColor.Gray) },
-            { TokenType.CommentBlock, (SyntaxColor.Comment, Colors.Gray, ConsoleColor.Gray) },
+            { TokenType.Comment, (SyntaxColor.Comment, Colors.Gray) },
+            { TokenType.CommentBlock, (SyntaxColor.Comment, Colors.Gray) },
 
             // Operatoren und Symbole
-            { TokenType.Operator, (SyntaxColor.Operator, Colors.Green, ConsoleColor.Green) },
-            { TokenType.Assignment, (SyntaxColor.Assignment, Colors.Green, ConsoleColor.Green) },
-            { TokenType.OpenBracket, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
-            { TokenType.CloseBracket, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
-            { TokenType.OpenParenthesis, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
-            { TokenType.CloseParenthesis, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
-            { TokenType.OpenSquareBracket, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
-            { TokenType.CloseSquareBracket, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
-            { TokenType.Comma, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
-            { TokenType.Semicolon, (SyntaxColor.Bracket, Colors.Green, ConsoleColor.Green) },
+            { TokenType.Operator, (SyntaxColor.Operator, Colors.Green) },
+            { TokenType.Assignment, (SyntaxColor.Assignment, Colors.Green) },
+            { TokenType.OpenBracket, (SyntaxColor.Bracket, Colors.Green) },
+            { TokenType.CloseBracket, (SyntaxColor.Bracket, Colors.Green) },
+            { TokenType.OpenParenthesis, (SyntaxColor.Bracket, Colors.Green) },
+            { TokenType.CloseParenthesis, (SyntaxColor.Bracket, Colors.Green) },
+            { TokenType.OpenSquareBracket, (SyntaxColor.Bracket, Colors.Green) },
+            { TokenType.CloseSquareBracket, (SyntaxColor.Bracket, Colors.Green) },
+            { TokenType.Comma, (SyntaxColor.Bracket, Colors.Green) },
+            { TokenType.Semicolon, (SyntaxColor.Bracket, Colors.Green) },
 
             // Sonstiges
-            { TokenType.Whitespace, (SyntaxColor.Unknown, Colors.Violet, ConsoleColor.White) },
-            { TokenType.EOF, (SyntaxColor.Unknown, Colors.Violet, ConsoleColor.White) },
-            { TokenType.Unknown, (SyntaxColor.Unknown, Colors.Violet, ConsoleColor.White) }
+            { TokenType.Whitespace, (SyntaxColor.Unknown, Colors.Violet) },
+            { TokenType.EOF, (SyntaxColor.Unknown, Colors.Violet) },
+            { TokenType.Unknown, (SyntaxColor.Unknown, Colors.Black) }
         };
 
-        public static (SyntaxColor Color, Color WpfColor, ConsoleColor ConsoleColor) GetColorForToken(DaedalusToken token)
+        public static (SyntaxColor Color, Color WpfColor) GetColorForToken(DaedalusToken token)
         {
             return tokenTypeToColor.TryGetValue(token.Type, out var colorInfo)
                 ? colorInfo
-                : (SyntaxColor.Unknown, Colors.Red, ConsoleColor.Red);
+                : (SyntaxColor.Unknown, Colors.Red);
         }
     }
 
@@ -107,7 +109,7 @@ namespace Skriptorium.UI
                 Console.WriteLine($"Debug: Token: {token.Type}, Value: {token.Value}, Line: {token.Line}, Column: {token.Column}");
                 if (token.Type == TokenType.Whitespace || token.Type == TokenType.EOF) continue;
 
-                var (_, wpfColor, _) = SyntaxHighlighting.GetColorForToken(token);
+                var (_, wpfColor) = SyntaxHighlighting.GetColorForToken(token);
 
                 try
                 {

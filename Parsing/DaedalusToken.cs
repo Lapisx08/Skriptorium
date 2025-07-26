@@ -20,11 +20,14 @@ namespace Skriptorium.Parsing
 
         // Literale
         Identifier,
-        IntegerLiteral,
-        FloatLiteral,
+        IntegerLiteral,    // Ganzzahlen
+        FloatLiteral,      // z. B. 1.5
         StringLiteral,     // "…"
         BoolLiteral,       // TRUE, FALSE
         EnumLiteral,       // z.B. CRIME_MURDER, GIL_PAL, NPC_FLAG_IMMORTAL
+
+        // Engine API
+        BuiltInFunction,   // z. B. B_SetNpcVisual, EquipItem usw.
 
         // Operatoren
         Operator,          // +, -, *, /, %, <, >, !, &&, ||

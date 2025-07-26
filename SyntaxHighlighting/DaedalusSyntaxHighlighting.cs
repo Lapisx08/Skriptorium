@@ -14,6 +14,7 @@ public enum SyntaxColor
     Assignment,
     Bracket,
     Enum,
+    BuiltInFunction,
     Unknown,
 }
 
@@ -71,20 +72,4 @@ public class SyntaxHighlighting
             return color;
         return SyntaxColor.Unknown;
     }
-
-    public static ConsoleColor GetConsoleColor(SyntaxColor color) => color switch
-    {
-        SyntaxColor.Keyword => ConsoleColor.Blue,
-        SyntaxColor.Identifier => ConsoleColor.White,
-        SyntaxColor.Type => ConsoleColor.Cyan,
-        SyntaxColor.String => ConsoleColor.Yellow,
-        SyntaxColor.Number => ConsoleColor.Magenta,
-        SyntaxColor.Comment => ConsoleColor.Green,
-        SyntaxColor.Operator => ConsoleColor.DarkYellow,
-        SyntaxColor.Assignment => ConsoleColor.DarkGray,
-        SyntaxColor.Bracket => ConsoleColor.Gray,
-        SyntaxColor.Enum => ConsoleColor.DarkCyan,
-        SyntaxColor.Unknown => ConsoleColor.Red,
-        _ => ConsoleColor.White
-    };
 }

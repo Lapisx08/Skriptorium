@@ -16,9 +16,21 @@ namespace Skriptorium.Parsing
             "int", "float", "void", "string",
             // Boolean Literale
             "true", "false",
-            // Spezifische Daedalus-Schlüsselwörter
-            "TA_Stand_ArmsCrossed", "daily_routine", "B_GiveNpcTalents", "TA_Stand_Guarding"
         };
+
+        private static readonly HashSet<string> BuiltInFunctions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "B_SetAttributesToChapter",
+        "B_CreateAmbientInv",
+        "B_SetNpcVisual",
+        "B_GiveNpcTalents",
+        "B_SetFightSkills",
+        "EquipItem",
+        "Mdl_SetModelFatness",
+        "Mdl_ApplyOverlayMds",
+        "TA_Stand_ArmsCrossed",
+        "TA_Stand_Guarding"
+    };
 
         // Regex für verschiedene Token‑Klassen
         private static readonly Regex identifier = new(@"^[A-Za-z_][A-Za-z0-9_]*");
@@ -177,7 +189,12 @@ namespace Skriptorium.Parsing
                         var val = match.Value;
                         TokenType type;
 
-                        if (keywords.Contains(val))
+                        if (BuiltInFunctions.Contains(val))
+                        {
+                            type = TokenType.BuiltInFunction;
+                        }
+
+                        else if (keywords.Contains(val))
                         {
                             switch (val.ToLowerInvariant())
                             {
