@@ -255,7 +255,7 @@ namespace Skriptorium.Parsing
             var startToken = Current();
             Advance(); // 'func'
 
-            var returnToken = Current().Type == TokenType.TypeKeyword || Current().Type == TokenType.EnumLiteral || Current().Type == TokenType.Identifier
+            var returnToken = Current().Type == TokenType.TypeKeyword || Current().Type == TokenType.Identifier
                 ? AdvanceAndGet()
                 : throw new ParseException("Rückgabetyp erwartet", Current());
 
@@ -281,7 +281,7 @@ namespace Skriptorium.Parsing
                         Advance();
                     }
 
-                    if (!(Current().Type == TokenType.TypeKeyword || Current().Type == TokenType.EnumLiteral || Current().Type == TokenType.Identifier))
+                    if (!(Current().Type == TokenType.TypeKeyword || Current().Type == TokenType.Identifier))
                         throw new ParseException("Parametertyp erwartet", Current());
 
                     var typeToken = AdvanceAndGet();
@@ -468,7 +468,7 @@ namespace Skriptorium.Parsing
             DaedalusToken tok = Current();
 
             if (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral) ||
-                Match(TokenType.StringLiteral) || Match(TokenType.BoolLiteral) || Match(TokenType.EnumLiteral))
+                Match(TokenType.StringLiteral) || Match(TokenType.BoolLiteral))
             {
                 Advance();
                 return new LiteralExpression

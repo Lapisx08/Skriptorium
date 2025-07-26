@@ -24,10 +24,17 @@ namespace Skriptorium.Parsing
         FloatLiteral,      // z. B. 1.5
         StringLiteral,     // "…"
         BoolLiteral,       // TRUE, FALSE
-        EnumLiteral,       // z.B. CRIME_MURDER, GIL_PAL, NPC_FLAG_IMMORTAL
+        InstanceName,      // z. B. PAL_200_Hagen
 
         // Engine API
+        GuildConstant,     // z.B. GIL_"Gilde"
+        NPC_Constant,      //
+        AiVariable,        // z. B. aivar
+        AIV_Constant,      // z. B. AIV_TOUGHGUY usw.
+        FAI_Constant,      // z. B. FAI_HUMAN_MASTER
         BuiltInFunction,   // z. B. B_SetNpcVisual, EquipItem usw.
+        SelfKeyword,       // self
+        OtherKeyword,      // other
 
         // Operatoren
         Operator,          // +, -, *, /, %, <, >, !, &&, ||

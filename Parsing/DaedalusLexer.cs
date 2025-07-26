@@ -18,19 +18,20 @@ namespace Skriptorium.Parsing
             "true", "false",
         };
 
+        // Built-in Funktionen
         private static readonly HashSet<string> BuiltInFunctions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "B_SetAttributesToChapter",
-        "B_CreateAmbientInv",
-        "B_SetNpcVisual",
-        "B_GiveNpcTalents",
-        "B_SetFightSkills",
-        "EquipItem",
-        "Mdl_SetModelFatness",
-        "Mdl_ApplyOverlayMds",
-        "TA_Stand_ArmsCrossed",
-        "TA_Stand_Guarding"
-    };
+        {
+            "B_SetAttributesToChapter",
+            "B_CreateAmbientInv",
+            "B_SetNpcVisual",
+            "B_GiveNpcTalents",
+            "B_SetFightSkills",
+            "EquipItem",
+            "Mdl_SetModelFatness",
+            "Mdl_ApplyOverlayMds",
+            "TA_Stand_ArmsCrossed",
+            "TA_Stand_Guarding"
+        };
 
         // Regex für verschiedene Token‑Klassen
         private static readonly Regex identifier = new(@"^[A-Za-z_][A-Za-z0-9_]*");
@@ -52,6 +53,8 @@ namespace Skriptorium.Parsing
         private static readonly char[] commas = { ',' };
         private static readonly char[] semicolons = { ';' };
         private static readonly char[] squareBrackets = { '[', ']' };
+
+        private bool _expectInstanceName = false;
 
         public List<DaedalusToken> Tokenize(string[] lines)
         {
@@ -182,18 +185,46 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Identifiers, Keywords, Bool- und Enum‑Literals
+                    // Identifiers, Keywords, Bool- und AIV-Literals usw.
                     if (identifier.IsMatch(remaining))
                     {
                         var match = identifier.Match(remaining);
                         var val = match.Value;
-                        TokenType type;
+                        TokenType type = TokenType.Unknown;
 
-                        if (BuiltInFunctions.Contains(val))
+                        // Spezielle Keywords und Konstanten
+                        if (val.StartsWith("GIL_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.GuildConstant;
+                        }
+                        else if (val.StartsWith("NPC"))
+                        {
+                            type = TokenType.NPC_Constant;
+                        }
+                        else if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.AiVariable;
+                        }
+                        else if (val.StartsWith("AIV_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.AIV_Constant;
+                        }
+                        else if (val.StartsWith("FAI_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.FAI_Constant;
+                        }
+                        else if (BuiltInFunctions.Contains(val))
                         {
                             type = TokenType.BuiltInFunction;
                         }
-
+                        else if (val.Equals("self", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.SelfKeyword;
+                        }
+                        else if (val.Equals("other", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.OtherKeyword;
+                        }
                         else if (keywords.Contains(val))
                         {
                             switch (val.ToLowerInvariant())
@@ -204,7 +235,10 @@ namespace Skriptorium.Parsing
                                 case "return": type = TokenType.ReturnKeyword; break;
                                 case "if": type = TokenType.IfKeyword; break;
                                 case "else": type = TokenType.ElseKeyword; break;
-                                case "instance": type = TokenType.InstanceKeyword; break;
+                                case "instance":
+                                    type = TokenType.InstanceKeyword;
+                                    _expectInstanceName = true; // nächstes Identifier ist Instanzname
+                                    break;
                                 case "class": type = TokenType.ClassKeyword; break;
                                 case "prototype": type = TokenType.PrototypeKeyword; break;
                                 case "int":
@@ -216,20 +250,28 @@ namespace Skriptorium.Parsing
                                 default: type = TokenType.Identifier; break;
                             }
                         }
-                        else if (Regex.IsMatch(val, "^[A-Z_][A-Z0-9_]*$"))
+                        else if (_expectInstanceName && type == TokenType.Unknown)
                         {
-                            type = TokenType.EnumLiteral;
+                            // Falls erwartet wird, dass dies ein Instanzname ist
+                            type = TokenType.InstanceName;
+                            _expectInstanceName = false;
                         }
                         else
                         {
                             type = TokenType.Identifier;
                         }
 
-                        tokens.Add(new DaedalusToken(type,
-                            val, line + 1, column + 1));
+                        // Sicherheitshalber _expectInstanceName zurücksetzen, falls es nicht gesetzt wurde
+                        if (type != TokenType.InstanceKeyword && !_expectInstanceName)
+                        {
+                            _expectInstanceName = false;
+                        }
+
+                        tokens.Add(new DaedalusToken(type, val, line + 1, column + 1));
                         column += match.Length;
                         continue;
                     }
+
 
                     // Symbole
                     if (current == '{')
