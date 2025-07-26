@@ -13,24 +13,15 @@ namespace Skriptorium.Parsing
             "instance", "func", "var", "const", "if", "else", "return",
             "class", "prototype",
             // Datentypen als Keywords
-            "int", "float", "void", "string",
+            "int", "float", "void", "string", "c_npc",
             // Boolean Literale
             "true", "false",
         };
 
-        // Built-in Funktionen
-        private static readonly HashSet<string> BuiltInFunctions = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> OtherFunctions = new(StringComparer.OrdinalIgnoreCase)
         {
-            "B_SetAttributesToChapter",
-            "B_CreateAmbientInv",
-            "B_SetNpcVisual",
-            "B_GiveNpcTalents",
-            "B_SetFightSkills",
             "EquipItem",
-            "Mdl_SetModelFatness",
-            "Mdl_ApplyOverlayMds",
-            "TA_Stand_ArmsCrossed",
-            "TA_Stand_Guarding"
+            "PrintScreen"
         };
 
         // Regex für verschiedene Token‑Klassen
@@ -197,7 +188,7 @@ namespace Skriptorium.Parsing
                         {
                             type = TokenType.GuildConstant;
                         }
-                        else if (val.StartsWith("NPC"))
+                        else if (val.StartsWith("NPC", StringComparison.Ordinal))
                         {
                             type = TokenType.NPC_Constant;
                         }
@@ -207,15 +198,103 @@ namespace Skriptorium.Parsing
                         }
                         else if (val.StartsWith("AIV_", StringComparison.OrdinalIgnoreCase))
                         {
-                            type = TokenType.AIV_Constant;
+                            type = TokenType.AIVConstant;
                         }
                         else if (val.StartsWith("FAI_", StringComparison.OrdinalIgnoreCase))
                         {
-                            type = TokenType.FAI_Constant;
+                            type = TokenType.FAIConstant;
                         }
-                        else if (BuiltInFunctions.Contains(val))
+                        else if (val.Equals("MALE", StringComparison.Ordinal) || val.Equals("FEMALE", StringComparison.Ordinal))
+                        {
+                            type = TokenType.SexConstant;
+                        }
+                        else if (val.StartsWith("CRIME_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.CRIMEConstant;
+                        }
+                        else if (val.StartsWith("LOC_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.LOCConstant;
+                        }
+                        else if (val.StartsWith("PETZCOUNTER_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.PETZCOUNTERConstant;
+                        }
+                        else if (val.StartsWith("LOG_", StringComparison.Ordinal))
+                        {
+                            type = TokenType.LOGConstant;
+                        }
+                        else if (val.StartsWith("FONT_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.FONTConstant;
+                        }
+                        else if (val.EndsWith("_ZEN", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.ZENConstant;
+                        }
+                        else if (val.StartsWith("REAL_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.REALConstant;
+                        }
+                        else if (val.Equals("ZS_Talk", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.REALConstant;
+                        }
+                        else if (val.StartsWith("ATR_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.ATRConstant;
+                        }
+                        else if (val.StartsWith("AR_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.ARConstant;
+                        }
+                        else if (val.StartsWith("B_", StringComparison.OrdinalIgnoreCase))
                         {
                             type = TokenType.BuiltInFunction;
+                        }
+                        else if (val.StartsWith("Mdl_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.MdlFunction;
+                        }
+                        else if (val.StartsWith("AI_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.AIFunction;
+                        }
+                        else if (val.StartsWith("Npc_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.NpcFunction;
+                        }
+                        else if (val.StartsWith("Info_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.InfoFunction;
+                        }
+                        else if (val.StartsWith("Create", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.CreateFunction;
+                        }
+                        else if (val.StartsWith("Wld_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.WldFunction;
+                        }
+                        else if (val.StartsWith("Log_", StringComparison.Ordinal))
+                        {
+                            type = TokenType.LogFunction;
+                        }
+                        else if (val.StartsWith("Hlp_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.HlpFunction;
+                        }
+                        else if (val.StartsWith("Snd_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.SndFunction;
+                        }
+                        else if (val.StartsWith("TA_", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.TAFunction;
+                        }
+                        else if (OtherFunctions.Contains(val))
+                        {
+                            type = TokenType.EquipFunction;
                         }
                         else if (val.Equals("self", StringComparison.OrdinalIgnoreCase))
                         {
@@ -224,6 +303,10 @@ namespace Skriptorium.Parsing
                         else if (val.Equals("other", StringComparison.OrdinalIgnoreCase))
                         {
                             type = TokenType.OtherKeyword;
+                        }
+                        else if (val.Equals("slf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = TokenType.SlfKeyword;
                         }
                         else if (keywords.Contains(val))
                         {
@@ -244,7 +327,8 @@ namespace Skriptorium.Parsing
                                 case "int":
                                 case "float":
                                 case "void":
-                                case "string": type = TokenType.TypeKeyword; break;
+                                case "string":
+                                case "c_npc": type = TokenType.TypeKeyword; break;
                                 case "true":
                                 case "false": type = TokenType.BoolLiteral; break;
                                 default: type = TokenType.Identifier; break;
@@ -271,7 +355,6 @@ namespace Skriptorium.Parsing
                         column += match.Length;
                         continue;
                     }
-
 
                     // Symbole
                     if (current == '{')
@@ -332,6 +415,20 @@ namespace Skriptorium.Parsing
 
             // EOF‑Markierung
             tokens.Add(new DaedalusToken(TokenType.EOF, "", lines.Length, 0));
+
+            for (int i = 0; i < tokens.Count - 1; i++)
+            {
+                if (tokens[i].Type == TokenType.TypeKeyword &&
+                    (string.Equals(tokens[i].Value, "void", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(tokens[i].Value, "int", StringComparison.OrdinalIgnoreCase))) // auch "int"
+                {
+                    var next = tokens[i + 1];
+                    if (next.Type == TokenType.Identifier)
+                    {
+                        next.Type = TokenType.FunctionName;
+                    }
+                }
+            }
             return tokens;
         }
     }
