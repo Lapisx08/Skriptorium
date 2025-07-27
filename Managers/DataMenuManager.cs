@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Skriptorium.UI;
+using System.IO;
 
 namespace Skriptorium.Managers
 {
@@ -38,6 +39,9 @@ namespace Skriptorium.Managers
 
             foreach (var path in recent)
             {
+                if (!File.Exists(path))
+                    continue; // <--- Hier wird ungültiger Pfad übersprungen
+
                 var item = new MenuItem
                 {
                     Header = System.IO.Path.GetFileName(path),
@@ -47,6 +51,7 @@ namespace Skriptorium.Managers
                 item.Click += OpenRecentFile_Click;
                 _menuZuletztGeoeffnet.Items.Add(item);
             }
+
         }
 
         private void OpenRecentFile_Click(object sender, RoutedEventArgs e)

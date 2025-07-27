@@ -17,6 +17,7 @@ namespace Skriptorium.UI
         private readonly ShortcutManager _shortcutManager;
         private readonly EditMenuManager _editMenuManager;
         private readonly SearchManager _searchManager;
+        private readonly DataMenuManager _dataMenuManager;
         private ScriptEditor? _currentScriptEditor;
 
         public MainWindow()
@@ -33,6 +34,7 @@ namespace Skriptorium.UI
             _editMenuManager = new EditMenuManager(_tabManager);
             _searchManager = new SearchManager(_tabManager);
             _shortcutManager = new ShortcutManager(this);
+            _dataMenuManager = new DataMenuManager(_tabManager, MenuDateiZuletztGeoeffnet);
 
             // 2. Shortcuts registrieren
             _shortcutManager.Register(Key.I, ModifierKeys.Control,
@@ -73,7 +75,7 @@ namespace Skriptorium.UI
 
             // 4. Letzte Dateien laden und erstes Tab öffnen
             DataManager.LoadRecentFiles();
-            UpdateRecentFilesMenu();
+            _dataMenuManager.UpdateRecentFilesMenu();
             _tabManager.AddNewTab();
         }
 
@@ -140,31 +142,8 @@ namespace Skriptorium.UI
             DataManager.OpenFile((content, path) =>
             {
                 _tabManager.AddNewTab(content, System.IO.Path.GetFileName(path), path);
-                UpdateRecentFilesMenu();
+                _dataMenuManager.UpdateRecentFilesMenu();
             });
-        }
-
-        private void UpdateRecentFilesMenu()
-        {
-            MenuDateiZuletztGeoeffnet.Items.Clear();
-            var recent = DataManager.GetRecentFiles();
-            if (recent.Count == 0)
-            {
-                MenuDateiZuletztGeoeffnet.Items.Add(new MenuItem { Header = "(Keine)", IsEnabled = false });
-                return;
-            }
-
-            foreach (var path in recent)
-            {
-                var item = new MenuItem
-                {
-                    Header = System.IO.Path.GetFileName(path),
-                    ToolTip = path,
-                    Tag = path
-                };
-                item.Click += OpenRecentFile_Click;
-                MenuDateiZuletztGeoeffnet.Items.Add(item);
-            }
         }
 
         private void OpenRecentFile_Click(object? sender, RoutedEventArgs? e)
@@ -174,7 +153,7 @@ namespace Skriptorium.UI
                 DataManager.OpenFile(path, (content, file) =>
                 {
                     _tabManager.AddNewTab(content, System.IO.Path.GetFileName(file), file);
-                    UpdateRecentFilesMenu();
+                    _dataMenuManager.UpdateRecentFilesMenu();
                 });
             }
         }
@@ -184,7 +163,7 @@ namespace Skriptorium.UI
             var ed = _tabManager.GetActiveScriptEditor();
             if (ed != null && DataManager.SaveFile(ed))
             {
-                UpdateRecentFilesMenu();
+                _dataMenuManager.UpdateRecentFilesMenu();
                 if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
                     ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
             }
@@ -195,7 +174,7 @@ namespace Skriptorium.UI
             var ed = _tabManager.GetActiveScriptEditor();
             if (ed != null && DataManager.SaveFileAs(ed))
             {
-                UpdateRecentFilesMenu();
+                _dataMenuManager.UpdateRecentFilesMenu();
                 if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
                     ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
             }
@@ -220,7 +199,7 @@ namespace Skriptorium.UI
                     break;
                 }
             }
-            UpdateRecentFilesMenu();
+            _dataMenuManager.UpdateRecentFilesMenu();
         }
 
         private void MenuDateiSchließen_Click(object? sender, RoutedEventArgs? e)
