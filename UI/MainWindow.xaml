@@ -4,7 +4,7 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:Skriptorium.UI"
         Title="Skriptorium" TitleCharacterCasing="Normal"
-        Height="450" Width="800" WindowStartupLocation="CenterScreen"
+        Height="750" Width="1000" WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Skriptorium.ico"
         Background="{DynamicResource WindowBackgroundBrush}"
         Foreground="{DynamicResource TextBrush}">
@@ -144,16 +144,20 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7E6;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Syntax und Semantik prüfen" Click="SemanticCheckButton_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE768;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
                 <MenuItem Header="Code formatieren" InputGestureText="Strg + E" Click="MenuCodeFormatieren_Click">
                     <MenuItem.Icon>
-                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A7;" FontSize="14"/>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Dialog Generator" InputGestureText="Strg + G" Click="MenuDialogGenerator_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
 

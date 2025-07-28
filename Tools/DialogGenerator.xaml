@@ -1,0 +1,56 @@
+﻿<mah:MetroWindow x:Class="Skriptorium.Tools.DialogGenerator"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:local="clr-namespace:Skriptorium.Tools"
+        Title="Dialog Generator" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
+        Height="450" Width="900">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="200"/>
+        </Grid.RowDefinitions>
+
+        <!-- Oberes Eingabefeld -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+            <TextBox x:Name="dialogInstanceEntry" Width="150" Margin="5" />
+            <TextBox x:Name="npcInstanceEntry" Width="150" Margin="5" />
+            <TextBox x:Name="descriptionEntry" Width="250" Margin="5" />
+            <ComboBox x:Name="dialogNumberDropdown" Width="80" Margin="5">
+                <ComboBoxItem Content="1"/>
+                <ComboBoxItem Content="2"/>
+                <ComboBoxItem Content="3"/>
+            </ComboBox>
+            <ComboBox x:Name="importantDropdown" Width="80" Margin="5">
+                <ComboBoxItem Content="Ja"/>
+                <ComboBoxItem Content="Nein"/>
+            </ComboBox>
+            <ComboBox x:Name="permanentDropdown" Width="80" Margin="5">
+                <ComboBoxItem Content="Ja"/>
+                <ComboBoxItem Content="Nein"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Dynamischer Bereich -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="dialogPanel" />
+        </ScrollViewer>
+
+        <!-- Button-Leiste -->
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,0">
+            <Button Content="Zeile hinzufügen" Click="AddDialogLine_Click" Margin="5"/>
+            <Button Content="Generieren" Click="GenerateCode_Click" Margin="5"/>
+            <Button Content="Kopieren" Click="CopyToClipboard_Click" Margin="5"/>
+            <Button Content="Zurücksetzen" Click="ResetFields_Click" Margin="5"/>
+        </StackPanel>
+
+        <!-- Output -->
+        <TextBox x:Name="outputText" Grid.Row="3" Margin="0,10,0,0"
+                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                 TextWrapping="Wrap" IsReadOnly="True"/>
+    </Grid>
+    
+</mah:MetroWindow>

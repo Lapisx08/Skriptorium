@@ -1,6 +1,8 @@
-﻿using Skriptorium.Interpreter;
+﻿using MahApps.Metro.Controls;
+using Skriptorium.Interpreter;
 using Skriptorium.Managers;
 using Skriptorium.Parsing;
+using Skriptorium.Tools;
 using Skriptorium.UI.Views;
 using System;
 using System.ComponentModel;
@@ -8,7 +10,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using MahApps.Metro.Controls;
 
 namespace Skriptorium.UI
 {
@@ -74,6 +75,8 @@ namespace Skriptorium.UI
             // Tool-Shortcuts
             _shortcutManager.Register(Key.E, ModifierKeys.Control,
                                       () => GetActiveScriptEditor()?.FormatCode());
+            _shortcutManager.Register(Key.G, ModifierKeys.Control,
+                                      () => MenuDialogGenerator_Click(null, null));
 
             // 3. TabControl-Ereignis registrieren
             tabControlScripts.SelectionChanged += TabControlScripts_SelectionChanged;
@@ -343,6 +346,14 @@ namespace Skriptorium.UI
             {
                 MessageBox.Show("Kein aktiver Editor gefunden.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private void MenuDialogGenerator_Click(object sender, RoutedEventArgs e)
+        {
+            // Erstelle und zeige das DialogGenerator-Fenster
+            var dialogGenerator = new DialogGenerator();
+            dialogGenerator.Owner = this;
+            dialogGenerator.Show();
         }
 
         private void TabControlScripts_SelectionChanged(object sender, SelectionChangedEventArgs e)
