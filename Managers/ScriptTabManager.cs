@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Input;
 
 namespace Skriptorium.Managers
 {
@@ -32,7 +34,8 @@ namespace Skriptorium.Managers
             var titleText = new TextBlock
             {
                 Text = baseTitle,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = (Brush)Application.Current.Resources["MahApps.Brushes.ThemeForeground"]
             };
 
             scriptEditor.TitleTextBlock = titleText;
@@ -57,8 +60,14 @@ namespace Skriptorium.Managers
                 Height = 20,
                 Padding = new Thickness(0),
                 Margin = new Thickness(5, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                Focusable = false,
+                Cursor = Cursors.Hand,
+                Foreground = (Brush)Application.Current.Resources["MahApps.Brushes.ThemeForeground"]
             };
+
             closeButton.Click += (s, e) =>
             {
                 if (!ConfirmClose(scriptEditor))
@@ -69,6 +78,7 @@ namespace Skriptorium.Managers
             };
 
             var headerPanel = new StackPanel { Orientation = Orientation.Horizontal };
+            headerPanel.Background = (Brush)Application.Current.Resources["MahApps.Brushes.TabItem.Background"];
             headerPanel.Children.Add(titleText);
             headerPanel.Children.Add(closeButton);
 

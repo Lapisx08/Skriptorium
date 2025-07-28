@@ -1,36 +1,34 @@
-﻿using System;
+﻿using ControlzEx.Theming;
+using MahApps.Metro;
+using Skriptorium.Properties;
+using System;
 using System.Windows;
-using Skriptorium.Properties;   // <<< notwendig, damit Settings gefunden wird
 
 namespace Skriptorium
 {
     public partial class App : Application
     {
-        // === NEU: Startup-Handler ===
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            // 1) Settings neu laden (holt Defaults aus Settings.settings)
             Settings.Default.Reload();
 
-            // 2) Gespeichertes Theme ermitteln, Fallback "Light"
-            string theme = Settings.Default.Theme;
-            if (string.IsNullOrWhiteSpace(theme))
+            string themeName = Settings.Default.Theme;
+            if (string.IsNullOrWhiteSpace(themeName))
             {
-                theme = "Light";
-                Settings.Default.Theme = theme;
+                themeName = "Light.Steel";  // Fallback: z.B. Light.Steel
+                Settings.Default.Theme = themeName;
                 Settings.Default.Save();
             }
 
-            // 3) Pack-URI auf das ResourceDictionary im gleichen Assembly
-            var uri = new Uri($"pack://application:,,,/UI/Themes/{theme}.xaml",
-                              UriKind.Absolute);
-            var dict = new ResourceDictionary { Source = uri };
+            // Theme aufteilen: Schema: Light.Steel → baseTheme: Light, accent: Steel
+            var parts = themeName.Split('.');
+            string baseTheme = parts[0];
+            string accent = parts.Length > 1 ? parts[1] : "Steel";
 
-            // 4) Globale Resources tauschen
-            Resources.MergedDictionaries.Clear();
-            Resources.MergedDictionaries.Add(dict);
+            // Setze Theme mit MahApps ThemeManager
+            ThemeManager.Current.ChangeTheme(this, $"{baseTheme}.{accent}");
 
-            // 5) Hauptfenster starten
+            // Hauptfenster starten
             var main = new UI.MainWindow();
             main.Show();
         }

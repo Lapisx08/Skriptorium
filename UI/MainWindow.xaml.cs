@@ -8,10 +8,11 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MahApps.Metro.Controls;
 
 namespace Skriptorium.UI
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : MetroWindow
     {
         private readonly ScriptTabManager _tabManager;
         private readonly ShortcutManager _shortcutManager;
@@ -236,6 +237,7 @@ namespace Skriptorium.UI
             if (ed != null)
             {
                 var dialog = new SearchReplaceScriptDialog(ed);
+                dialog.Owner = this;
                 dialog.Show();
             }
         }
@@ -246,6 +248,7 @@ namespace Skriptorium.UI
             if (ed != null)
             {
                 var dialog = new SearchReplaceScriptDialog(ed);
+                dialog.Owner = this;
                 dialog.Show();
             }
         }

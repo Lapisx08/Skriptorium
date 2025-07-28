@@ -5,10 +5,11 @@ using System.Windows;
 using System.Windows.Controls;
 using Skriptorium.Properties;
 using Skriptorium.UI;
+using MahApps.Metro.Controls;
 
 namespace Skriptorium.UI.Views
 {
-    public partial class SearchReplaceScriptDialog : Window
+    public partial class SearchReplaceScriptDialog : MetroWindow
     {
         private const int MaxHistory = 10;
         private readonly ScriptEditor _scriptEditor;

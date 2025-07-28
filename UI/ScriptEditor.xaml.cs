@@ -98,6 +98,7 @@ namespace Skriptorium.UI
         public ScriptEditor()
         {
             InitializeComponent();
+            ApplyCaretBrushFromTheme();
             avalonEditor.TextChanged += AvalonEditor_TextChanged;
             avalonEditor.TextArea.Caret.PositionChanged += AvalonEditor_CaretPositionChanged;
 
@@ -119,6 +120,20 @@ namespace Skriptorium.UI
             // Testtext zum Debugging
             avalonEditor.Text = "var x = 42;\n// Dies ist ein Kommentar\nfunc void test() {}";
             ApplySyntaxHighlighting();
+        }
+
+        private void ApplyCaretBrushFromTheme()
+        {
+            // Versuche EditorCaretColor-Ressource zu holen
+            if (Application.Current.Resources["EditorCaretColor"] is Color caretColor)
+            {
+                avalonEditor.TextArea.Caret.CaretBrush = new SolidColorBrush(caretColor);
+            }
+            else
+            {
+                // Fallback z. B. Schwarz
+                avalonEditor.TextArea.Caret.CaretBrush = Brushes.Black;
+            }
         }
 
         private void AvalonEditor_TextChanged(object? sender, EventArgs e)

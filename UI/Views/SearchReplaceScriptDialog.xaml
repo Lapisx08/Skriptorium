@@ -1,7 +1,9 @@
-﻿<Window x:Class="Skriptorium.UI.Views.SearchReplaceScriptDialog"
+﻿<mah:MetroWindow x:Class="Skriptorium.UI.Views.SearchReplaceScriptDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Suchen" Height="360" Width="600"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        Title="Suchen" TitleCharacterCasing="Normal"
+        Height="360" Width="600"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Loaded="Window_Loaded"
@@ -14,82 +16,67 @@
             <!-- Ersetzen -->
             <RowDefinition Height="Auto"/>
             <!-- Buttons -->
-            <RowDefinition Height="Auto"/>
-            <!-- Optionen -->
             <RowDefinition Height="*"/>
-            <!-- Filler -->
+            <!-- Optionen -->
             <RowDefinition Height="Auto"/>
-            <!-- Schließen Button -->
+            <!-- Schließen -->
         </Grid.RowDefinitions>
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <!-- Label-Spalte -->
             <ColumnDefinition Width="*"/>
-            <!-- Eingabefelder links -->
-            <ColumnDefinition Width="250"/>
-            <!-- Optionen rechts -->
         </Grid.ColumnDefinitions>
 
         <!-- Suchen -->
-        <TextBlock Text="Suchen:" 
-                   Grid.Row="0" Grid.Column="0" 
-                   Margin="0,0,5,5" 
-                   VerticalAlignment="Center"/>
-        <ComboBox x:Name="ComboSearchText"
-                  Grid.Row="0" Grid.Column="1" 
-                  Margin="0,0,0,5"
-                  Height="25"
-                  IsEditable="True"
-                  StaysOpenOnEdit="True"
-                  IsTextSearchEnabled="False"/>
+        <DockPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="Suchen:" Width="110" VerticalAlignment="Center"/>
+            <ComboBox x:Name="ComboSearchText"
+                      Height="25" Width="Auto"
+                      IsEditable="True"
+                      StaysOpenOnEdit="True"
+                      IsTextSearchEnabled="False"
+                      Margin="10,0,0,0"/>
+        </DockPanel>
 
-        <!-- Ersetzen durch -->
-        <TextBlock Text="Ersetzen durch:" 
-                   Grid.Row="1" Grid.Column="0" 
-                   Margin="0,0,5,5" 
-                   VerticalAlignment="Center"/>
-        <ComboBox x:Name="ComboReplaceText"
-                  Grid.Row="1" Grid.Column="1" 
-                  Margin="0,0,0,5"
-                  Height="25"
-                  IsEditable="True"
-                  StaysOpenOnEdit="True"
-                  IsTextSearchEnabled="False"/>
+        <!-- Ersetzen -->
+        <DockPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="Ersetzen durch:" Width="110" VerticalAlignment="Center"/>
+            <ComboBox x:Name="ComboReplaceText"
+                      Height="25" Width="Auto"
+                      IsEditable="True"
+                      StaysOpenOnEdit="True"
+                      IsTextSearchEnabled="False"
+                      Margin="10,0,0,0"/>
+        </DockPanel>
 
-        <!-- Buttons links bündig -->
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Left"
-                    Margin="0,15,0,10">
-            <!-- Spacing für Abstand zwischen Buttons -->
-            <Button x:Name="BtnFindNext" Content="Weitersuchen" Width="90" Margin="0,0,0,0" Click="BtnFindNext_Click"/>
-            <Button x:Name="BtnReplaceNext" Content="Weiterersetzen" Width="90" Margin="10,0,0,0" Click="BtnReplace_Click"/>
-            <Button x:Name="BtnReplaceAll" Content="Alle Ersetzen" Width="90" Margin="10,0,0,0" Click="BtnReplaceAll_Click"/>
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,10">
+            <Button x:Name="BtnFindNext" Width="100" Click="BtnFindNext_Click">
+                <TextBlock Text="Weitersuchen"/>
+            </Button>
+            <Button x:Name="BtnReplaceNext" Width="110" Margin="10,0,0,0" Click="BtnReplace_Click">
+                <TextBlock Text="Weiterersetzen"/>
+            </Button>
+            <Button x:Name="BtnReplaceAll" Width="100" Margin="10,0,0,0" Click="BtnReplaceAll_Click">
+                <TextBlock Text="Alle Ersetzen"/>
+            </Button>
         </StackPanel>
 
-        <!-- Optionen rechts in Spalte 2 -->
-        <GroupBox Header="Optionen" Grid.Column="2" 
-                  Margin="14,-11,-4,19" Grid.RowSpan="3">
-            <StackPanel Orientation="Vertical" Margin="10,5,0,5">
+        <!-- Optionen -->
+        <GroupBox Header="Optionen" Grid.Row="3" Margin="0,0,0,10">
+            <StackPanel Margin="10">
                 <CheckBox x:Name="ChkCase" Content="Groß-/Kleinschreibung"/>
                 <CheckBox x:Name="ChkWholeWord" Content="Nur ganzes Wort suchen"/>
-                <CheckBox x:Name="ChkSelectionOnly" Content="Nur markierter Text" 
-                          Checked="ChkSelectionOnly_Checked" Unchecked="ChkSelectionOnly_Unchecked"/>
+                <CheckBox x:Name="ChkSelectionOnly" Content="Nur markierter Text"
+                          Checked="ChkSelectionOnly_Checked"
+                          Unchecked="ChkSelectionOnly_Unchecked"/>
             </StackPanel>
         </GroupBox>
 
-        <!-- Filler (leeres Grid um Platz zu beanspruchen) -->
-        <Grid Grid.Row="4" Grid.ColumnSpan="3"/>
-
-        <!-- Schließen Button unten rechts -->
-        <StackPanel Grid.Row="5" Grid.Column="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,10,0,0">
-            <Button Content="Schließen"
-                    Width="75"
-                    IsCancel="True"
-                    Click="BtnClose_Click"/>
+        <!-- Schließen -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Width="80" IsCancel="True" Click="BtnClose_Click">
+                <TextBlock Text="Schließen"/>
+            </Button>
         </StackPanel>
     </Grid>
-</Window>
+</mah:MetroWindow>

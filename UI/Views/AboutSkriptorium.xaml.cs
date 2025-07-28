@@ -2,10 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using MahApps.Metro.Controls;
 
 namespace Skriptorium.UI.Views
 {
-    public partial class AboutDialog : Window
+    public partial class AboutDialog : MetroWindow
     {
         public AboutDialog()
         {

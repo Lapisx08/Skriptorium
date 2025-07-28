@@ -1,45 +1,44 @@
-﻿<Window x:Class="Skriptorium.UI.Views.SettingsView"
+﻿<mah:MetroWindow x:Class="Skriptorium.UI.Views.SettingsView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Einstellungen" Height="360" Width="480"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        Title="Einstellungen" TitleCharacterCasing="Normal"
+        Height="360" Width="480"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Loaded="Window_Loaded">
 
     <Grid Margin="10">
-        <!-- Spalten für das Grid -->
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="35*"/>
-            <!-- Erste Spalte -->
-            <ColumnDefinition Width="57*"/>
-            <!-- Zweite Spalte -->
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <!-- TabControl -->
+            <RowDefinition Height="Auto"/>
+            <!-- Schließen Button -->
+        </Grid.RowDefinitions>
 
-        <!-- TabControl für Allgemein und Pfade -->
-        <TabControl Grid.ColumnSpan="2">
+        <!-- TabControl über gesamte Fläche -->
+        <TabControl Grid.Row="0">
             <!-- Tab: Allgemein -->
             <TabItem Header="Allgemein">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <!-- Anzeigemodus -->
                         <RowDefinition Height="Auto"/>
-                        <!-- Weitere Einstellungen -->
                         <RowDefinition Height="Auto"/>
-                        <!-- Beispiel-Option -->
                         <RowDefinition Height="*"/>
-                        <!-- Filler -->
                     </Grid.RowDefinitions>
-
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Anzeigemodus -->
-                    <TextBlock Text="Anzeigemodus:" Grid.Row="0" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"/>
+                    <TextBlock Text="Anzeigemodus:" 
+                               Grid.Row="0" Grid.Column="0" 
+                               Margin="0,0,5,5" VerticalAlignment="Center"/>
                     <ComboBox x:Name="ComboTheme"
-                              Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"
+                              Grid.Row="0" Grid.Column="1" 
+                              Margin="0,0,0,5"
                               SelectedIndex="0"
                               SelectionChanged="ComboTheme_SelectionChanged">
                         <ComboBoxItem Content="Tagmodus" Tag="Light"/>
@@ -53,13 +52,8 @@
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <!-- Skript-Pfad Auswahl -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Weitere Pfad-Einstellungen -->
                         <RowDefinition Height="*"/>
-                        <!-- Filler -->
                     </Grid.RowDefinitions>
-
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -67,11 +61,13 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Skript-Pfad Auswahl -->
-                    <TextBlock Text="Pfad zu Gothic Skripts:" Grid.Row="0" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"/>
+                    <TextBlock Text="Pfad zu Gothic Skripts:" 
+                               Grid.Row="0" Grid.Column="0" 
+                               Margin="0,0,5,5" VerticalAlignment="Center"/>
                     <TextBox x:Name="TxtScriptPath"
-                             Grid.Row="0" Grid.Column="1" Margin="0,0,5,5"
+                             Grid.Row="0" Grid.Column="1" 
+                             Margin="0,0,5,5"
                              IsReadOnly="True"/>
-
                     <Button x:Name="BtnBrowse"
                             Grid.Row="0" Grid.Column="2"
                             Content="…"
@@ -81,11 +77,11 @@
             </TabItem>
         </TabControl>
 
-        <!-- Buttons: Schließen -->
-        <Button Content="Schließen"
-                Grid.Row="2" Grid.ColumnSpan="2"
-                HorizontalAlignment="Right"
-                Width="75" Height="19.94" Margin="0,260,15,0"
-                Click="Close_Click"/>
+        <!-- Schließen-Button unten rechts -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Width="80" Click="Close_Click">
+                <TextBlock Text="Schließen"/>
+            </Button>
+        </StackPanel>
     </Grid>
-</Window>
+</mah:MetroWindow>

@@ -16,11 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Remove="UI\Themes\Dark.xaml" />
-    <Page Remove="UI\Themes\Light.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="LICENSE.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -28,10 +23,6 @@
 
   <ItemGroup>
     <Resource Include="Skriptorium.ico" />
-    <Resource Include="UI\Themes\Dark.xaml">
-      <CopyToOutputDirectory></CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="UI\Themes\Light.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+    <PackageReference Include="MahApps.Metro" Version="2.4.10" />
     <PackageReference Include="Microsoft.WindowsAPICodePack.Core" Version="1.1.0" />
     <PackageReference Include="Microsoft.WindowsAPICodePack.Shell" Version="1.1.0" />
   </ItemGroup>

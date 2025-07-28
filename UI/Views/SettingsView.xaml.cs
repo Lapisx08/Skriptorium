@@ -1,12 +1,14 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
+﻿using ControlzEx.Theming;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
+using System.Windows;
+using System.Windows.Controls;
+using MahApps.Metro.Controls;
 
 namespace Skriptorium.UI.Views
 {
-    public partial class SettingsView : Window
+    public partial class SettingsView : MetroWindow
     {
         private bool _isInitializing = true;
 
@@ -14,18 +16,19 @@ namespace Skriptorium.UI.Views
         {
             InitializeComponent();
 
-            // Theme vorauswählen (z. B. Light oder Dark aus Settings)
-            var theme = Properties.Settings.Default.Theme;
+            var theme = Properties.Settings.Default.Theme; // z. B. "Dark.Blue"
+            string baseTheme = theme?.Split('.')[0] ?? "Light";
+
             foreach (ComboBoxItem item in ComboTheme.Items)
             {
-                if (item.Tag?.ToString() == theme)
+                if (item.Tag?.ToString() == baseTheme)
                 {
                     ComboTheme.SelectedItem = item;
                     break;
                 }
             }
 
-            _isInitializing = false; // <- jetzt ist Initialisierung fertig
+            _isInitializing = false;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -42,20 +45,24 @@ namespace Skriptorium.UI.Views
         {
             if (_isInitializing) return;
 
-            var idx = ComboTheme.SelectedIndex;
-            System.Diagnostics.Debug.WriteLine($"[SettingsView] SelectionChanged: Index={idx}");
-
-            if (ComboTheme.SelectedItem is ComboBoxItem item
-                && item.Tag is string themeKey)
+            if (ComboTheme.SelectedItem is ComboBoxItem item && item.Tag is string themeKey)
             {
-                Properties.Settings.Default.Theme = themeKey;
-                Properties.Settings.Default.Save();
-
-                if (Owner is MainWindow main)
-                {
-                    main.SetTheme(themeKey);
-                }
+                OnThemeSelected(themeKey);
             }
+        }
+
+        private void OnThemeSelected(string baseTheme)
+        {
+            // Accent festlegen – könnte später auch auswählbar gemacht werden
+            string accent = "Steel";
+            string fullTheme = $"{baseTheme}.{accent}";
+
+            // Theme global anwenden
+            ThemeManager.Current.ChangeTheme(Application.Current, fullTheme);
+
+            // Theme speichern
+            Properties.Settings.Default.Theme = fullTheme;
+            Properties.Settings.Default.Save();
         }
 
         private void BtnBrowse_Click(object sender, RoutedEventArgs e)
