@@ -7,7 +7,6 @@
         <avalonedit:TextEditor Name="avalonEditor"
                        ShowLineNumbers="True"
                        FontFamily="Consolas"
-                       FontSize="14"
-                       />
+                       FontSize="14"/>
     </Grid>
 </UserControl>

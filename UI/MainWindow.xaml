@@ -164,6 +164,7 @@
         </StatusBar>
 
         <!-- TabControl für mehrere Skripte -->
-        <TabControl x:Name="tabControlScripts" SelectionChanged="TabControlScripts_SelectionChanged"/>
+        <TabControl x:Name="tabControlScripts"
+                    SelectionChanged="TabControlScripts_SelectionChanged"/>
     </DockPanel>
 </mah:MetroWindow>
