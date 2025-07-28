@@ -1,6 +1,8 @@
 ﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Rendering;
+using Skriptorium.Formatting;
 using Skriptorium.Interpreter;
 using Skriptorium.Managers;
 using Skriptorium.Parsing;
@@ -10,6 +12,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Skriptorium.UI
@@ -88,12 +91,12 @@ namespace Skriptorium.UI
         private TextSegmentCollection<TextMarker>? _markers;
         private TextMarkerRenderer? _markerRenderer;
         private SyntaxColorizingTransformer? _colorizer;
-
         private BookmarkManager? _bookmarkManager;
-
         private DaedalusInterpreter? _interpreter;
-
         private bool _syntaxHighlightingEnabled = true;
+
+        private FoldingManager? _foldingManager;
+        private BraceFoldingStrategy _foldingStrategy;
 
         public ScriptEditor()
         {
@@ -101,6 +104,8 @@ namespace Skriptorium.UI
             ApplyCaretBrushFromTheme();
             avalonEditor.TextChanged += AvalonEditor_TextChanged;
             avalonEditor.TextArea.Caret.PositionChanged += AvalonEditor_CaretPositionChanged;
+            avalonEditor.TextArea.TextEntering += TextArea_TextEntering;
+
 
             if (avalonEditor.Document == null)
             {
@@ -117,9 +122,20 @@ namespace Skriptorium.UI
 
             _bookmarkManager = new BookmarkManager(avalonEditor);
 
-            // Testtext zum Debugging
-            avalonEditor.Text = "var x = 42;\n// Dies ist ein Kommentar\nfunc void test() {}";
-            ApplySyntaxHighlighting();
+            _foldingManager = FoldingManager.Install(avalonEditor.TextArea);
+            _foldingStrategy = new BraceFoldingStrategy();
+            UpdateFoldings();
+
+        }
+
+        protected override void OnVisualParentChanged(DependencyObject oldParent)
+        {
+            base.OnVisualParentChanged(oldParent);
+            if (oldParent != null && _foldingManager != null)
+            {
+                FoldingManager.Uninstall(_foldingManager);
+                _foldingManager = null;
+            }
         }
 
         private void ApplyCaretBrushFromTheme()
@@ -144,6 +160,17 @@ namespace Skriptorium.UI
             IsModified = avalonEditor.Text != _originalText;
             TextChanged?.Invoke(this, null);
             ApplySyntaxHighlighting();
+            UpdateFoldings();
+        }
+
+        // Methode zum Aktualisieren der Faltungen
+        private void UpdateFoldings()
+        {
+            if (_foldingManager == null || avalonEditor.Document == null)
+                return;
+
+            var foldings = _foldingStrategy.CreateNewFoldings(avalonEditor.Document);
+            _foldingManager.UpdateFoldings(foldings, -1); // -1 behält die aktuell geöffneten Faltungen bei
         }
 
         public bool IsModified { get; private set; } = false;
@@ -158,6 +185,7 @@ namespace Skriptorium.UI
                 _filePath = value;
                 _originalText = avalonEditor.Text;
                 ResetModifiedFlag();
+                UpdateFoldings();
             }
         }
 
@@ -170,6 +198,7 @@ namespace Skriptorium.UI
             IsModified = false;
             ClearHighlighting();
             ApplySyntaxHighlighting();
+            UpdateFoldings();
         }
 
         public void SetTextAndMarkAsModified(string text)
@@ -181,6 +210,7 @@ namespace Skriptorium.UI
             TextChanged?.Invoke(this, null);
             ClearHighlighting();
             ApplySyntaxHighlighting();
+            UpdateFoldings();
         }
 
         public void ResetModifiedFlag()
@@ -532,6 +562,77 @@ namespace Skriptorium.UI
                 line: assign.Line,
                 column: assign.Column
             );
+        }
+
+        public void FormatCode()
+        {
+            try
+            {
+                var tokens = _cachedTokens;
+                var parser = new DaedalusParser(tokens);
+                var declarations = parser.ParseScript(); // AST erzeugen
+
+                var formatter = new Skriptorium.Formatting.DaedalusFormatter();
+                string formattedCode = formatter.Format(declarations);
+
+                SetTextAndMarkAsModified(formattedCode);
+                ApplySyntaxHighlighting(); // Optional: neu einfärben
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Formatieren: {ex.Message}", "Formatierfehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void TextArea_TextEntering(object sender, TextCompositionEventArgs e)
+        {
+            var caretOffset = avalonEditor.CaretOffset;
+
+            if (e.Text == "{")
+            {
+                avalonEditor.Document.Insert(caretOffset, "{}");
+                avalonEditor.CaretOffset = caretOffset + 1;
+                e.Handled = true;
+            }
+            else if (e.Text == "(")
+            {
+                avalonEditor.Document.Insert(caretOffset, "()");
+                avalonEditor.CaretOffset = caretOffset + 1;
+                e.Handled = true;
+            }
+            else if (e.Text == "[")
+            {
+                avalonEditor.Document.Insert(caretOffset, "[]");
+                avalonEditor.CaretOffset = caretOffset + 1;
+                e.Handled = true;
+            }
+            else if (e.Text == "}")
+            {
+                if (caretOffset < avalonEditor.Document.TextLength &&
+                    avalonEditor.Document.GetCharAt(caretOffset) == '}')
+                {
+                    avalonEditor.CaretOffset = caretOffset + 1;
+                    e.Handled = true;
+                }
+            }
+            else if (e.Text == ")")
+            {
+                if (caretOffset < avalonEditor.Document.TextLength &&
+                    avalonEditor.Document.GetCharAt(caretOffset) == ')')
+                {
+                    avalonEditor.CaretOffset = caretOffset + 1;
+                    e.Handled = true;
+                }
+            }
+            else if (e.Text == "]")
+            {
+                if (caretOffset < avalonEditor.Document.TextLength &&
+                    avalonEditor.Document.GetCharAt(caretOffset) == ']')
+                {
+                    avalonEditor.CaretOffset = caretOffset + 1;
+                    e.Handled = true;
+                }
+            }
         }
     }
 

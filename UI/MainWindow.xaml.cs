@@ -71,6 +71,10 @@ namespace Skriptorium.UI
             _shortcutManager.Register(Key.F2, ModifierKeys.Control | ModifierKeys.Alt,
                                       () => GetActiveScriptEditor()?.ClearAllBookmarks());
 
+            // Tool-Shortcuts
+            _shortcutManager.Register(Key.E, ModifierKeys.Control,
+                                      () => GetActiveScriptEditor()?.FormatCode());
+
             // 3. TabControl-Ereignis registrieren
             tabControlScripts.SelectionChanged += TabControlScripts_SelectionChanged;
 
@@ -316,6 +320,31 @@ namespace Skriptorium.UI
                                 MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
+        private ScriptEditor? GetCurrentEditor()
+        {
+            if (tabControlScripts.SelectedItem is TabItem selectedTab &&
+                selectedTab.Content is ScriptEditor editor)
+            {
+                return editor;
+            }
+
+            return null;
+        }
+
+        private void MenuCodeFormatieren_Click(object sender, RoutedEventArgs e)
+        {
+            var editor = GetCurrentEditor();
+            if (editor != null)
+            {
+                editor.FormatCode(); // Diese Methode musst du im ScriptEditor bereitstellen
+            }
+            else
+            {
+                MessageBox.Show("Kein aktiver Editor gefunden.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
         private void TabControlScripts_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Alte Ereignisbindungen entfernen

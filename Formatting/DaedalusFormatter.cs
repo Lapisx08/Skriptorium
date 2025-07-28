@@ -5,13 +5,9 @@ namespace Skriptorium.Formatting
 {
     public class DaedalusFormatter
     {
-        private const int IndentSize = 4;  // Einstellbare Einrückungsgröße (Standard: 4 Leerzeichen)
-        private readonly string indentString;
+        private const int IndentSize = 4;
 
-        public DaedalusFormatter()
-        {
-            indentString = new string(' ', IndentSize);
-        }
+        private string Indent(int level) => new string(' ', IndentSize * level);
 
         public string Format(List<Declaration> declarations)
         {
@@ -28,11 +24,11 @@ namespace Skriptorium.Formatting
 
                         foreach (var stmt in func.Body ?? new List<Statement>())
                         {
-                            sb.AppendLine(indentString + FormatStatement(stmt));
+                            sb.AppendLine(FormatStatement(stmt, 1));
                         }
 
                         sb.AppendLine("}");
-                        sb.AppendLine();  // Leerzeile nach der Deklaration
+                        sb.AppendLine();
                         break;
 
                     case InstanceDeclaration inst:
@@ -41,61 +37,60 @@ namespace Skriptorium.Formatting
 
                         foreach (var stmt in inst.Body ?? new List<Statement>())
                         {
-                            sb.AppendLine(indentString + FormatStatement(stmt));
+                            sb.AppendLine(FormatStatement(stmt, 1));
                         }
 
                         sb.AppendLine("}");
-                        sb.AppendLine();  // Leerzeile nach der Deklaration
+                        sb.AppendLine();
                         break;
 
                     default:
                         sb.AppendLine("// Unbekannter Deklarationstyp");
                         break;
-
-                        // Weitere Deklarationstypen können hier hinzugefügt werden
                 }
             }
 
-            return sb.ToString().TrimEnd();  // Entfernt nachfolgende Leerzeichen
+            return sb.ToString().TrimEnd();
         }
 
-        private string FormatStatement(Statement stmt)
+        private string FormatStatement(Statement stmt, int indentLevel)
         {
+            string indent = Indent(indentLevel);
+
             return stmt switch
             {
-                Assignment a => $"{FormatExpr(a.Left)} = {FormatExpr(a.Right)};",  // Zuweisung formatieren
-                ReturnStatement r => r.ReturnValue != null ? $"return {FormatExpr(r.ReturnValue)};" : "return;",  // Rückgabe formatieren
-                ExpressionStatement e => $"{FormatExpr(e.Expr)};",  // Ausdrucks-Anweisung formatieren
-                IfStatement ifStmt => FormatIfStatement(ifStmt),  // If-Anweisung formatieren
-
-                // Weitere Anweisungstypen können hier hinzugefügt werden
-                _ => "// unbekannte Anweisung"
+                Assignment a => indent + $"{FormatExpr(a.Left)} = {FormatExpr(a.Right)};",
+                ReturnStatement r => indent + (r.ReturnValue != null ? $"return {FormatExpr(r.ReturnValue)};" : "return;"),
+                ExpressionStatement e => indent + $"{FormatExpr(e.Expr)};",
+                IfStatement ifStmt => FormatIfStatement(ifStmt, indentLevel),
+                _ => indent + "// unbekannte Anweisung"
             };
         }
 
-        private string FormatIfStatement(IfStatement ifStmt)
+        private string FormatIfStatement(IfStatement ifStmt, int indentLevel)
         {
             var sb = new StringBuilder();
-            sb.Append($"if ({FormatExpr(ifStmt.Condition)}) ");
-            sb.AppendLine("{");
+            string indent = Indent(indentLevel);
+
+            sb.AppendLine($"{indent}if ({FormatExpr(ifStmt.Condition)}) {{");
 
             foreach (var stmt in ifStmt.ThenBranch ?? new List<Statement>())
             {
-                sb.AppendLine(new string(' ', IndentSize * 2) + FormatStatement(stmt));  // Dann-Zweig mit doppelter Einrückung
+                sb.AppendLine(FormatStatement(stmt, indentLevel + 1));
             }
 
-            sb.AppendLine(new string(' ', IndentSize) + "}");
+            sb.AppendLine($"{indent}}}");
 
             if (ifStmt.ElseBranch != null)
             {
-                sb.AppendLine(new string(' ', IndentSize) + "else {");
+                sb.AppendLine($"{indent}else {{");
 
                 foreach (var stmt in ifStmt.ElseBranch)
                 {
-                    sb.AppendLine(new string(' ', IndentSize * 2) + FormatStatement(stmt));  // Sonst-Zweig mit doppelter Einrückung
+                    sb.AppendLine(FormatStatement(stmt, indentLevel + 1));
                 }
 
-                sb.AppendLine(new string(' ', IndentSize) + "}");
+                sb.AppendLine($"{indent}}}");
             }
 
             return sb.ToString();
@@ -105,11 +100,11 @@ namespace Skriptorium.Formatting
         {
             return expr switch
             {
-                LiteralExpression l => l.Value,  // Literale direkt ausgeben
-                VariableExpression v => v.Name,  // Variablennamen ausgeben
-                BinaryExpression b => $"{FormatExpr(b.Left)} {b.Operator} {FormatExpr(b.Right)}",  // Binäre Ausdrücke formatieren
-                FunctionCallExpression f => $"{f.FunctionName}({string.Join(", ", f.Arguments?.Select(FormatExpr) ?? new List<string>())})",  // Funktionsaufruf formatieren
-                _ => "<expr>"  // Unbekannter Ausdruck
+                LiteralExpression l => l.Value,
+                VariableExpression v => v.Name,
+                BinaryExpression b => $"{FormatExpr(b.Left)} {b.Operator} {FormatExpr(b.Right)}",
+                FunctionCallExpression f => $"{f.FunctionName}({string.Join(", ", f.Arguments?.Select(FormatExpr) ?? new List<string>())})",
+                _ => "<expr>"
             };
         }
     }
