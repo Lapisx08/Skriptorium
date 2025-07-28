@@ -2,11 +2,11 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Farben -->
-    <Color x:Key="WindowBackgroundColor">#FF1E1E1E</Color>
+    <Color x:Key="WindowBackgroundColor">#FF182123</Color>
     <!-- Sehr dunkles Grau -->
     <Color x:Key="TextColor">#FFFFFFFF</Color>
     <!-- Weiß -->
-    <Color x:Key="ControlBackgroundColor">#FF2A2A2A</Color>
+    <Color x:Key="ControlBackgroundColor">#FF182123</Color>
     <!-- Dunkler Bereich -->
     <Color x:Key="ControlBorderColor">#FF444444</Color>
     <!-- Mittelgrau -->
@@ -108,4 +108,11 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <Style TargetType="StatusBar">
+        <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+
 </ResourceDictionary>
+    
