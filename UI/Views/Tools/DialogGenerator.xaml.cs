@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
 
-namespace Skriptorium.Tools
+namespace Skriptorium.UI.Views.Tools
 {
     public partial class DialogGenerator : MetroWindow
     {
@@ -235,37 +235,37 @@ namespace Skriptorium.Tools
                 return;
             }
 
-            var lines = new List<string>();
+            var sb = new System.Text.StringBuilder();
 
             // Überschrift
-            lines.Add("// ************************************************************");
-            lines.Add("//                          Überschrift");
-            lines.Add("// ************************************************************");
-            lines.Add("");
+            sb.AppendLine("// ************************************************************");
+            sb.AppendLine("//                          Überschrift");
+            sb.AppendLine("// ************************************************************");
+            sb.AppendLine();
 
             // Instanzenkopf
-            lines.Add($"instance DIA_{dialogInstance} (C_INFO) ");
-            lines.Add("{");
-            lines.Add($"    npc           =    {npcInstance};");
-            lines.Add($"    nr            =    {dialogNumber};");
-            lines.Add($"    condition     =    DIA_{dialogInstance}_Condition;");
-            lines.Add($"    information   =    DIA_{dialogInstance}_Info;");
-            lines.Add($"    important     =    {important};");
-            lines.Add($"    permanent     =    {permanent};");
-            lines.Add($"    Description   =    \"{description}\";");
-            lines.Add("}");
-            lines.Add("");
+            sb.AppendLine($"instance DIA_{dialogInstance} (C_INFO) ");
+            sb.AppendLine("{");
+            sb.AppendLine($"    npc          =  {npcInstance};");
+            sb.AppendLine($"    nr           =  {dialogNumber};");
+            sb.AppendLine($"    condition    =  DIA_{dialogInstance}_Condition;");
+            sb.AppendLine($"    information  =  DIA_{dialogInstance}_Info;");
+            sb.AppendLine($"    important    =  {important};");
+            sb.AppendLine($"    permanent    =  {permanent};");
+            sb.AppendLine($"    Description  =  \"{description}\";");
+            sb.AppendLine("}");
+            sb.AppendLine();
 
             // Kondition
-            lines.Add($"func int DIA_{dialogInstance}_Condition ()");
-            lines.Add("{");
-            lines.Add("    return TRUE; //Bedingungen manuell eingeben");
-            lines.Add("};");
-            lines.Add("");
+            sb.AppendLine($"func int DIA_{dialogInstance}_Condition ()");
+            sb.AppendLine("{");
+            sb.AppendLine("    return TRUE; //Bedingungen manuell eingeben");
+            sb.AppendLine("};");
+            sb.AppendLine();
 
             // Information
-            lines.Add($"func void DIA_{dialogInstance}_Info ()");
-            lines.Add("{");
+            sb.AppendLine($"func void DIA_{dialogInstance}_Info ()");
+            sb.AppendLine("{");
 
             int dialogIndex = 0;
             foreach (var line in dialogLines)
@@ -292,7 +292,7 @@ namespace Skriptorium.Tools
                         secondParam = "self";
                     }
 
-                    lines.Add($"    AI_Output ({firstParam}, {secondParam}, \"{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
+                    sb.AppendLine($"    AI_Output ({firstParam}, {secondParam}, \"{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
                     dialogIndex++;
                 }
                 else if (type == "XP Geben")
@@ -301,7 +301,7 @@ namespace Skriptorium.Tools
 
                     if (int.TryParse(xpValue, out int xp) && xp >= 0)
                     {
-                        lines.Add($"    B_GivePlayerXP({xp});");
+                        sb.AppendLine($"    B_GivePlayerXP ({xp});");
                     }
                     else
                     {
@@ -340,17 +340,17 @@ namespace Skriptorium.Tools
                         secondParam = "self";
                     }
 
-                    lines.Add($"    B_GiveInvItems({firstParam}, {secondParam}, {itemName}, {itemQuantity});");
+                    sb.AppendLine($"    B_GiveInvItems ({firstParam}, {secondParam}, {itemName}, {itemQuantity});");
                 }
                 else if (type == "Ende-Dialog")
                 {
-                    lines.Add("    AI_StopProcessInfos (self);");
+                    sb.AppendLine("    AI_StopProcessInfos (self);");
                 }
             }
 
-            lines.Add("};");
+            sb.AppendLine("};");
 
-            outputText.Text = string.Join(Environment.NewLine, lines);
+            outputText.Text = sb.ToString();
         }
 
         private void CopyToClipboard_Click(object sender, RoutedEventArgs e)

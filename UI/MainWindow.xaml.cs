@@ -2,7 +2,7 @@
 using Skriptorium.Interpreter;
 using Skriptorium.Managers;
 using Skriptorium.Parsing;
-using Skriptorium.Tools;
+using Skriptorium.UI.Views.Tools;
 using Skriptorium.UI.Views;
 using System;
 using System.ComponentModel;
@@ -76,6 +76,8 @@ namespace Skriptorium.UI
             _shortcutManager.Register(Key.E, ModifierKeys.Control,
                                       () => GetActiveScriptEditor()?.FormatCode());
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
+                                      () => MenuNPCGenerator_Click(null, null));
+            _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift,
                                       () => MenuDialogGenerator_Click(null, null));
 
             // 3. TabControl-Ereignis registrieren
@@ -346,6 +348,14 @@ namespace Skriptorium.UI
             {
                 MessageBox.Show("Kein aktiver Editor gefunden.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private void MenuNPCGenerator_Click(object sender, RoutedEventArgs e)
+        {
+            // Erstelle und zeige das DialogGenerator-Fenster
+            var npcGenerator = new NPCGenerator();
+            npcGenerator.Owner = this;
+            npcGenerator.Show();
         }
 
         private void MenuDialogGenerator_Click(object sender, RoutedEventArgs e)

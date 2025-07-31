@@ -1,0 +1,88 @@
+﻿<mah:MetroWindow x:Class="Skriptorium.UI.Views.Tools.NPCGenerator"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:local="clr-namespace:Skriptorium.UI.Views.Tools"
+        Title="NPC Generator" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
+        Height="700" Width="700">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="350"/>
+        </Grid.RowDefinitions>
+
+        <!-- Obere Eingabefelder für NPC-Grunddaten -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <!-- Label-Spalte -->
+                <ColumnDefinition Width="400"/>
+                <!-- Eingabefeld-Spalte -->
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Name -->
+                <RowDefinition Height="Auto"/>
+                <!-- Guild -->
+                <RowDefinition Height="Auto"/>
+                <!-- ID -->
+                <RowDefinition Height="Auto"/>
+                <!-- Voice -->
+                <RowDefinition Height="Auto"/>
+                <!-- Flags -->
+                <RowDefinition Height="Auto"/>
+                <!-- NPCTYPE -->
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Name:" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBox x:Name="nameEntry" Grid.Row="0" Grid.Column="1" Margin="5"/>
+
+            <TextBlock Text="Gilde:" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBox x:Name="guildEntry" Grid.Row="1" Grid.Column="1" Margin="5"/>
+
+            <TextBlock Text="ID:" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBox x:Name="idEntry" Grid.Row="2" Grid.Column="1" Margin="5"/>
+
+            <TextBlock Text="Voice:" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBox x:Name="voiceEntry" Grid.Row="3" Grid.Column="1" Margin="5"/>
+
+            <TextBlock Text="Flags:" Grid.Row="4" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="flagsEntry" Grid.Row="4" Grid.Column="1" Margin="5">
+                <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
+                <ComboBoxItem Content="0"/>
+            </ComboBox>
+
+            <TextBlock Text="NPC Type:" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="npcTypeDropdown" Grid.Row="5" Grid.Column="1" Margin="5">
+                <ComboBoxItem Content="NPCTYPE_MAIN"/>
+                <ComboBoxItem Content="NPCTYPE_FRIEND"/>
+            </ComboBox>
+        </Grid>
+
+        <!-- Dynamischer Bereich für AIVars, Equipment, Talents etc. -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="detailsPanel"/>
+        </ScrollViewer>
+
+        <!-- Button-Leiste -->
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,0">
+            <Button Click="GenerateCode_Click" Margin="5">
+                <TextBlock Text="Generieren"/>
+            </Button>
+            <Button Click="CopyToClipboard_Click" Margin="5">
+                <TextBlock Text="Kopieren"/>
+            </Button>
+            <Button Click="ResetFields_Click" Margin="5">
+                <TextBlock Text="Zurücksetzen"/>
+            </Button>
+        </StackPanel>
+
+        <!-- Output -->
+        <TextBox x:Name="outputText" Grid.Row="3" Margin="0,10,0,0"
+                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                 TextWrapping="Wrap" IsReadOnly="False" FontFamily="Consolas" FontSize="14"/>
+    </Grid>
+</mah:MetroWindow>
