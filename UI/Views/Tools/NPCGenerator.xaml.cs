@@ -15,6 +15,22 @@ namespace Skriptorium.UI.Views.Tools
             // Nur Ganzzahlen in idEntry und voiceEntry erlauben
             RestrictToNumbers(idEntry);
             RestrictToNumbers(voiceEntry);
+
+            // Keine Ziffern in nameEntry und guildEntry erlauben
+            RestrictToNoDigits(nameEntry);
+            RestrictToNoDigits(guildEntry);
+
+            // Standardauswahl für Flags = "0"
+            flagsEntry.SelectedIndex = 0; // 0 = 0, 1 = NPC_FLAG_IMMORTAL
+
+            // Standardauswahl für NPC Type = NPCTYPE_MAIN
+            npcTypeDropdown.SelectedIndex = 0;
+
+            // Standard für AIVars und Attribute = "Nein"
+            aivarsDropdown.SelectedIndex = 1; // 0 = Ja, 1 = Nein
+            attributesDropdown.SelectedIndex = 1;
+            fightSkillsDropdown.SelectedIndex = 1;
+
         }
         
         private void RestrictToNumbers(TextBox textBox)
@@ -48,12 +64,49 @@ namespace Skriptorium.UI.Views.Tools
             }
         }
 
+        private void RestrictToNoDigits(TextBox textBox)
+        {
+            textBox.PreviewTextInput += DisallowDigits;
+            DataObject.AddPastingHandler(textBox, PreventDigitPaste);
+        }
+
+        // Keine Zahlen bei der Eingabe erlauben
+        private void DisallowDigits(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = e.Text.Any(char.IsDigit);
+        }
+
+        // Auch beim Einfügen keine Zahlen zulassen
+        private void PreventDigitPaste(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                var text = (string)e.DataObject.GetData(typeof(string));
+                if (text.Any(char.IsDigit))
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
         private void GenerateCode_Click(object sender, RoutedEventArgs e)
         {
-            // Überprüfung: Nur ganze Zahlen für id und voice erlaubt
-            if (!int.TryParse(idEntry.Text, out _) || !int.TryParse(voiceEntry.Text, out _))
+            // Pflichtfelder prüfen
+            if (string.IsNullOrWhiteSpace(nameEntry.Text) ||
+                string.IsNullOrWhiteSpace(guildEntry.Text) ||
+                string.IsNullOrWhiteSpace(idEntry.Text) ||
+                string.IsNullOrWhiteSpace(voiceEntry.Text) ||
+                flagsEntry.SelectedItem == null ||
+                npcTypeDropdown.SelectedItem == null ||
+                aivarsDropdown.SelectedItem == null ||
+                attributesDropdown.SelectedItem == null ||
+                fightSkillsDropdown.SelectedItem == null)
             {
-                MessageBox.Show("Bitte gib für ID und Voice nur ganze Zahlen ein.", "Ungültige Eingabe", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Bitte fülle alle Felder aus, bevor du den Code generierst.", "Fehlende Eingaben", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -68,17 +121,42 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine($"    guild    =  {guildEntry.Text};");
             sb.AppendLine($"    id       =  {idEntry.Text};");
             sb.AppendLine($"    voice    =  {voiceEntry.Text};");
-            sb.AppendLine($"    flags    =  {flagsEntry.Text}; //NPC_FLAG_IMMORTAL oder 0");
+            sb.AppendLine($"    flags    =  {flagsEntry.Text}; // NPC_FLAG_IMMORTAL oder 0");
             sb.AppendLine($"    npctype  =  {((ComboBoxItem)npcTypeDropdown.SelectedItem)?.Content};");
             sb.AppendLine();
 
-            // AIVARS
-            // Optional
+            if (((ComboBoxItem)aivarsDropdown.SelectedItem)?.Content.ToString() == "Ja")
+            {
+                // AIVARS
+                sb.AppendLine("    // ------ AIVARS ------");
+                sb.AppendLine("    aivar[AIV_ToughGuy]              =  TRUE;");
+                sb.AppendLine("    aivar[AIV_ToughGuyNewsOverride]  =  TRUE;");
+                sb.AppendLine("    aivar[AIV_IGNORE_Murder]         =  TRUE;");
+                sb.AppendLine("    aivar[AIV_IGNORE_Theft]          =  TRUE;");
+                sb.AppendLine("    aivar[AIV_IGNORE_Sheepkiller]    =  TRUE;");
+                sb.AppendLine("    aivar[AIV_IgnoresArmor]          =  TRUE;");
+                sb.AppendLine("    aivar[AIV_EnemyOverride]         =  TRUE;");
+                sb.AppendLine("    aivar[AIV_MagicUser]             =  MAGIC_ALWAYS; // Setzt immer Magie beim Kämpfen ein");
+                sb.AppendLine("    // Lösche die AIV, die nicht benötigt werden");
+                sb.AppendLine();
+            }
 
             // Attribute
             sb.AppendLine("    // ------ Attribute ------");
-            sb.AppendLine($"    B_SetAttributesToChapter (self, 1); //Setzt Attribute und Level entsprechend des angegebenen Kapitels (1-6)");
+            sb.AppendLine($"    B_SetAttributesToChapter (self, 1); // Setzt Attribute und Level entsprechend des angegebenen Kapitels (1-6)");
             sb.AppendLine();
+
+            if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == "Ja")
+            {
+                sb.AppendLine("    // Ersetzte bei Nutzung individueller Attribute B_SetAttributesToChapter (self, 1);");
+                sb.AppendLine("    attribute[ATR_STRENGTH        =  10;");
+                sb.AppendLine("    attribute[ATR_DEXTERITY]      =  10;");
+                sb.AppendLine("    attribute[ATR_HITPOINTS_MAX]  =  40;");
+                sb.AppendLine("    attribute[ATR_HITPOINTS]      =  40;");
+                sb.AppendLine("    attribute[ATR_MANA_MAX]       =  10;");
+                sb.AppendLine("    attribute[ATR_MANA]           =  10;");
+                sb.AppendLine();
+            }
 
             // Kampf-Taktik
             sb.AppendLine("    // ------ Kampf-Taktik ------");
@@ -96,8 +174,8 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             // Aussehen
-            sb.AppendLine("    // ------ Aussehen ------ // Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird");
-            sb.AppendLine("    B_SetNpcVisual      (self, Geschlecht, \"Hum_Head_Fat_Platzhalter\", Face_N_Platzhalter, BodyTex_Platzhalter, ITAR_Platzhalter); ");
+            sb.AppendLine("    // ------ Aussehen ------");
+            sb.AppendLine("    B_SetNpcVisual      (self, MALE, \"Hum_Head_Fat_Platzhalter\", Face_N_Platzhalter, BodyTex_Platzhalter, ITAR_Platzhalter); // Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird");
             sb.AppendLine("    Mdl_SetModelFatness (self, 0); // -1 / 0 / 1 / 2");
             sb.AppendLine("    Mdl_ApplyOverlayMds (self, \"Humans_Platzhalter.mds\"); // Tired / Militia / Mage / Arrogance / Relaxed");
             sb.AppendLine();
@@ -108,9 +186,19 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             // Kampf-Talente
-            sb.AppendLine("    // ------ Kampf-Talente ------ // Der enthaltene B_AddFightSkill setzt Talent-Ani abhängig von TrefferChance% - alle Kampftalente werden gleichhoch gesetzt");
-            sb.AppendLine("    B_SetFightSkills (self, Z); // Grenzen für Talent-Level liegen bei 30 und 60");
+            sb.AppendLine("    // ------ Kampf-Talente ------");
+            sb.AppendLine("    B_SetFightSkills (self, 10); // Grenzen für Talent-Level liegen bei 30 und 60 / Der enthaltene B_AddFightSkill setzt alle Kampftalente gleichhoch");
             sb.AppendLine();
+
+            if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() == "Ja")
+            {
+                sb.AppendLine("    // Ersetzte bei Nutzung individueller Kampf-Talente B_SetFightSkills (self, 10);");
+                sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_1H, 10);");
+                sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_2H, 10);");
+                sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_BOW, 10);");
+                sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_CROSSBOW, 10);");
+                sb.AppendLine();
+            }
 
             // TA anmelden
             sb.AppendLine("    // ------ TA anmelden ------");
@@ -118,10 +206,10 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             // Tagesroutine-Funktion
-            sb.AppendLine($"func void Rtn_Start_{idEntry.Text} () // Tages-Routine muss gesamt immer 24 h ergeben");
+            sb.AppendLine($"func void Rtn_Start_{idEntry.Text} () // Tages-Routine muss insgesamt immer 24 h ergeben");
             sb.AppendLine("{");
-            sb.AppendLine("     TA_Platzhalter  (08,00,20,00,\"Waypoint-Platzhalter\");");
-            sb.AppendLine("     TA_Platzhalter  (20,00,08,00,\"Waypoint-Platzhalter\");");
+            sb.AppendLine("     TA_Platzhalter  (08,00,20,00,\"WP_Platzhalter\");");
+            sb.AppendLine("     TA_Platzhalter  (20,00,08,00,\"WP_Platzhalter\");");
             sb.AppendLine("};");
 
             outputText.Text = sb.ToString();
@@ -134,14 +222,22 @@ namespace Skriptorium.UI.Views.Tools
 
         private void ResetFields_Click(object sender, RoutedEventArgs e)
         {
+            // Textfelder zurücksetzen
             nameEntry.Text = string.Empty;
             guildEntry.Text = string.Empty;
             idEntry.Text = string.Empty;
             voiceEntry.Text = string.Empty;
-            flagsEntry.Text = string.Empty;
-            npcTypeDropdown.SelectedIndex = -1;
-            detailsPanel.Children.Clear();
             outputText.Clear();
+
+            // ComboBoxen auf Standard zurücksetzen
+            flagsEntry.SelectedIndex = 0;         // "0"
+            npcTypeDropdown.SelectedIndex = 0;    // "NPCTYPE_MAIN"
+            aivarsDropdown.SelectedIndex = 1;     // "Nein"
+            attributesDropdown.SelectedIndex = 1; // "Nein"
+            fightSkillsDropdown.SelectedIndex = 1; // "Nein"
+
+            // Dynamischen Inhalt leeren (optional)
+            detailsPanel.Children.Clear();
         }
     }
 }

@@ -11,16 +11,14 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="350"/>
+            <RowDefinition Height="300"/>
         </Grid.RowDefinitions>
 
         <!-- Obere Eingabefelder für NPC-Grunddaten -->
         <Grid Grid.Row="0" Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="90"/>
-                <!-- Label-Spalte -->
+                <ColumnDefinition Width="170"/>
                 <ColumnDefinition Width="400"/>
-                <!-- Eingabefeld-Spalte -->
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -34,7 +32,13 @@
                 <RowDefinition Height="Auto"/>
                 <!-- Flags -->
                 <RowDefinition Height="Auto"/>
-                <!-- NPCTYPE -->
+                <!-- NPC Type -->
+                <RowDefinition Height="Auto"/>
+                <!-- AIVars -->
+                <RowDefinition Height="Auto"/>
+                <!-- Attribute -->
+                <RowDefinition Height="Auto"/>
+                <!-- Kampf-Talente -->
             </Grid.RowDefinitions>
 
             <TextBlock Text="Name:" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
@@ -50,15 +54,33 @@
             <TextBox x:Name="voiceEntry" Grid.Row="3" Grid.Column="1" Margin="5"/>
 
             <TextBlock Text="Flags:" Grid.Row="4" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <ComboBox x:Name="flagsEntry" Grid.Row="4" Grid.Column="1" Margin="5">
-                <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
+            <ComboBox x:Name="flagsEntry" Grid.Row="4" Grid.Column="1" Margin="5" SelectedIndex="0">
                 <ComboBoxItem Content="0"/>
+                <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
             </ComboBox>
 
             <TextBlock Text="NPC Type:" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <ComboBox x:Name="npcTypeDropdown" Grid.Row="5" Grid.Column="1" Margin="5">
+            <ComboBox x:Name="npcTypeDropdown" Grid.Row="5" Grid.Column="1" Margin="5" SelectedIndex="0">
                 <ComboBoxItem Content="NPCTYPE_MAIN"/>
                 <ComboBoxItem Content="NPCTYPE_FRIEND"/>
+            </ComboBox>
+
+            <TextBlock Text="AIVARs:" Grid.Row="6" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="aivarsDropdown" Grid.Row="6" Grid.Column="1" Margin="5" SelectedIndex="1">
+                <ComboBoxItem Content="Ja"/>
+                <ComboBoxItem Content="Nein"/>
+            </ComboBox>
+
+            <TextBlock Text="Individuelle Attribute:" Grid.Row="7" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="attributesDropdown" Grid.Row="7" Grid.Column="1" Margin="5" SelectedIndex="1">
+                <ComboBoxItem Content="Ja"/>
+                <ComboBoxItem Content="Nein"/>
+            </ComboBox>
+
+            <TextBlock Text="Individuelle Kampf-Talente:" Grid.Row="8" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="fightSkillsDropdown" Grid.Row="8" Grid.Column="1" Margin="5" SelectedIndex="1">
+                <ComboBoxItem Content="Ja"/>
+                <ComboBoxItem Content="Nein"/>
             </ComboBox>
         </Grid>
 

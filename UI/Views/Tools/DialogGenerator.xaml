@@ -63,6 +63,16 @@
                 <ComboBoxItem Content="18"/>
                 <ComboBoxItem Content="19"/>
                 <ComboBoxItem Content="20"/>
+                <ComboBoxItem Content="21"/>
+                <ComboBoxItem Content="22"/>
+                <ComboBoxItem Content="23"/>
+                <ComboBoxItem Content="24"/>
+                <ComboBoxItem Content="25"/>
+                <ComboBoxItem Content="26"/>
+                <ComboBoxItem Content="27"/>
+                <ComboBoxItem Content="28"/>
+                <ComboBoxItem Content="29"/>
+                <ComboBoxItem Content="30"/>
                 <ComboBoxItem Content="999"/>
             </ComboBox>
 
