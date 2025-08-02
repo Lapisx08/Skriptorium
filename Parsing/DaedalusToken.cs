@@ -44,11 +44,11 @@ namespace Skriptorium.Parsing
         ZS_TalkConstant,        // ZS_Talk
         ATRConstant,            // z. B. ATR_DEXTERITY
         ARConstant,             // z. B. AR_THEFT
-        PLAYERConstant,  // z. B. PLAYER_TALENT_ALCHEMY
+        PLAYERConstant,         // z. B. PLAYER_TALENT_ALCHEMY
         BuiltInFunction,        // z. B. B_SetNpcVisual
         MdlFunction,            // z.  B. Mdl_SetModelFatness
         AIFunction,             // z. B. AI_StopProcessInfos
-        NpcFunction,            // z. B. NPC_IsInState
+        NpcFunction,            // z. B. Npc_IsInState
         InfoFunction,           // z. B. Info_AddChoice
         CreateFunction,         // z. B. CreateInvItems
         WldFunction,            // z. B. Wld_InsertNpc
@@ -73,6 +73,7 @@ namespace Skriptorium.Parsing
         CloseParenthesis,   // )
         OpenSquareBracket,  // [
         CloseSquareBracket, // ]
+        Dot,                // .
         Comma,              // ,
         Semicolon,          // ;
 

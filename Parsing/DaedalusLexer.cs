@@ -7,43 +7,102 @@ namespace Skriptorium.Parsing
 {
     public class DaedalusLexer
     {
-        // Fall‑insensitive Keywords und Enums
-        private static readonly HashSet<string> keywords = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, TokenType> keywordsMap = new(StringComparer.OrdinalIgnoreCase)
         {
-            "instance", "func", "var", "const", "if", "else", "return",
-            "class", "prototype",
-            // Datentypen als Keywords
-            "int", "float", "void", "string", "c_npc",
-            // Boolean Literale
-            "true", "false",
+            ["func"] = TokenType.FuncKeyword,
+            ["var"] = TokenType.VarKeyword,
+            ["const"] = TokenType.ConstKeyword,
+            ["return"] = TokenType.ReturnKeyword,
+            ["if"] = TokenType.IfKeyword,
+            ["else"] = TokenType.ElseKeyword,
+            ["instance"] = TokenType.InstanceKeyword,
+            ["class"] = TokenType.ClassKeyword,
+            ["prototype"] = TokenType.PrototypeKeyword,
+            ["int"] = TokenType.TypeKeyword,
+            ["float"] = TokenType.TypeKeyword,
+            ["void"] = TokenType.TypeKeyword,
+            ["string"] = TokenType.TypeKeyword,
+            ["c_npc"] = TokenType.TypeKeyword,
+            ["true"] = TokenType.BoolLiteral,
+            ["false"] = TokenType.BoolLiteral,
         };
+
+        // Präfixe für spezielle Konstanten und Funktionen
+        private static readonly Dictionary<string, TokenType> prefixTokenTypes = new()
+        {
+            ["GIL_"] = TokenType.GuildConstant,
+            ["NPC"] = TokenType.NPC_Constant,
+            ["AIV_"] = TokenType.AIVConstant,
+            ["FAI_"] = TokenType.FAIConstant,
+            ["CRIME_"] = TokenType.CRIMEConstant,
+            ["LOC_"] = TokenType.LOCConstant,
+            ["PETZCOUNTER_"] = TokenType.PETZCOUNTERConstant,
+            ["LOG_"] = TokenType.LOGConstant,
+            ["FONT_"] = TokenType.FONTConstant,
+            ["REAL_"] = TokenType.REALConstant,
+            ["ATR_"] = TokenType.ATRConstant,
+            ["AR_"] = TokenType.ARConstant,
+            ["PLAYER_"] = TokenType.PLAYERConstant,
+            ["B_"] = TokenType.BuiltInFunction,
+            ["Mdl_"] = TokenType.MdlFunction,
+            ["AI_"] = TokenType.AIFunction,
+            ["Npc_"] = TokenType.NpcFunction,
+            ["Info_"] = TokenType.InfoFunction,
+            ["Create"] = TokenType.CreateFunction,
+            ["Wld_"] = TokenType.WldFunction,
+            ["Log_"] = TokenType.LogFunction,
+            ["Hlp_"] = TokenType.HlpFunction,
+            ["Snd_"] = TokenType.SndFunction,
+            ["TA_"] = TokenType.TAFunction,
+        };
+
+        private static readonly Dictionary<string, TokenType> specialKeywords = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["self"] = TokenType.SelfKeyword,
+            ["other"] = TokenType.OtherKeyword,
+            ["hero"] = TokenType.OtherKeyword,
+            ["slf"] = TokenType.SlfKeyword,
+        };
+
+        // Trennzeichen
+        private static readonly Dictionary<char, TokenType> singleCharTokenMap = new()
+        {
+            { '{', TokenType.OpenBracket },
+            { '}', TokenType.CloseBracket },
+            { '(', TokenType.OpenParenthesis },
+            { ')', TokenType.CloseParenthesis },
+            { '[', TokenType.OpenSquareBracket },
+            { ']', TokenType.CloseSquareBracket },
+            { '.', TokenType.Dot },
+            { ',', TokenType.Comma },
+            { ';', TokenType.Semicolon },
+        };
+
+        // Single‑Char Operatoren (ohne '=')
+        private static readonly HashSet<char> singleCharOperators = new()
+        {
+            '+', '-', '*', '/', '%', '<', '>', '!'
+        };
+
+        // Multi‑Char Operatoren
+        private static readonly HashSet<string> multiCharOperators = new()
+        {
+            "==", "!=", "<=", ">=", "&&", "||"
+        };
+
+        // Regex für verschiedene Token‑Klassen
+        private static readonly Regex identifier = new(@"^[A-Za-z_][A-Za-z0-9_]*", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex floatLiteral = new(@"^\d+\.\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex intLiteral = new(@"^\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex strLiteral = new(@"^""(?:\\.|[^""])*""", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex lineComment = new(@"^//.*", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex blockCommentStart = new(@"^/\*", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private static readonly HashSet<string> OtherFunctions = new(StringComparer.OrdinalIgnoreCase)
         {
             "EquipItem",
             "PrintScreen"
         };
-
-        // Regex für verschiedene Token‑Klassen
-        private static readonly Regex identifier = new(@"^[A-Za-z_][A-Za-z0-9_]*");
-        private static readonly Regex floatLiteral = new(@"^\d+\.\d+");
-        private static readonly Regex intLiteral = new(@"^\d+");
-        private static readonly Regex strLiteral = new Regex(@"^""(?:\\.|[^""])*""");
-        private static readonly Regex lineComment = new(@"^//.*");
-        private static readonly Regex blockCommentStart = new(@"^/\*");
-
-        // Multi‑Char Operatoren
-        private static readonly string[] multiCharOperators = { "==", "!=", "<=", ">=", "&&", "||" };
-
-        // Single‑Char Operatoren (ohne '=')
-        private static readonly char[] singleCharOperators = { '+', '-', '*', '/', '%', '<', '>', '!' };
-
-        // Symbole
-        private static readonly char[] brackets = { '{', '}' };
-        private static readonly char[] parentheses = { '(', ')' };
-        private static readonly char[] commas = { ',' };
-        private static readonly char[] semicolons = { ';' };
-        private static readonly char[] squareBrackets = { '[', ']' };
 
         private bool _expectInstanceName = false;
 
@@ -77,13 +136,6 @@ namespace Skriptorium.Parsing
                                 line + 1, column + 1));
                             break;
                         }
-                        continue;
-                    }
-
-                    char current = text[column];
-                    if (char.IsWhiteSpace(current))
-                    {
-                        column++;
                         continue;
                     }
 
@@ -148,21 +200,29 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Multi‑Char Operator
-                    var multiOp = multiCharOperators.FirstOrDefault(op => remaining.StartsWith(op, StringComparison.Ordinal));
-                    if (multiOp != null)
+                    char current = text[column];
+                    if (char.IsWhiteSpace(current))
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Operator,
-                            multiOp, line + 1, column + 1));
-                        column += multiOp.Length;
+                        column++;
                         continue;
                     }
 
-                    // Assignment‑Operator '='
+                    // Multi-Char Operator (2 Zeichen)
+                    if (column + 1 < text.Length)
+                    {
+                        string twoChars = text.Substring(column, 2);
+                        if (multiCharOperators.Contains(twoChars))
+                        {
+                            tokens.Add(new DaedalusToken(TokenType.Operator, twoChars, line + 1, column + 1));
+                            column += 2;
+                            continue;
+                        }
+                    }
+
+                    // Einzelnes '=' als Assignment-Operator
                     if (current == '=')
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Assignment,
-                            "=", line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.Assignment, "=", line + 1, column + 1));
                         column++;
                         continue;
                     }
@@ -183,174 +243,53 @@ namespace Skriptorium.Parsing
                         var val = match.Value;
                         TokenType type = TokenType.Unknown;
 
-                        // Spezielle Keywords und Konstanten
-                        if (val.StartsWith("GIL_", StringComparison.OrdinalIgnoreCase))
+                        // Präfix-Check
+                        foreach (var prefix in prefixTokenTypes)
                         {
-                            type = TokenType.GuildConstant;
-                        }
-                        else if (val.StartsWith("NPC", StringComparison.Ordinal))
-                        {
-                            type = TokenType.NPC_Constant;
-                        }
-                        else if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.AiVariable;
-                        }
-                        else if (val.StartsWith("AIV_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.AIVConstant;
-                        }
-                        else if (val.StartsWith("FAI_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.FAIConstant;
-                        }
-                        else if (val.Equals("MALE", StringComparison.Ordinal) || val.Equals("FEMALE", StringComparison.Ordinal))
-                        {
-                            type = TokenType.SexConstant;
-                        }
-                        else if (val.StartsWith("CRIME_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.CRIMEConstant;
-                        }
-                        else if (val.StartsWith("LOC_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.LOCConstant;
-                        }
-                        else if (val.StartsWith("PETZCOUNTER_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.PETZCOUNTERConstant;
-                        }
-                        else if (val.StartsWith("LOG_", StringComparison.Ordinal))
-                        {
-                            type = TokenType.LOGConstant;
-                        }
-                        else if (val.StartsWith("FONT_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.FONTConstant;
-                        }
-                        else if (val.EndsWith("_ZEN", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.ZENConstant;
-                        }
-                        else if (val.StartsWith("REAL_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.REALConstant;
-                        }
-                        else if (val.Equals("ZS_Talk", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.REALConstant;
-                        }
-                        else if (val.StartsWith("ATR_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.ATRConstant;
-                        }
-                        else if (val.StartsWith("AR_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.ARConstant;
-                        }
-                        else if (val.StartsWith("PLAYER_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.PLAYERConstant;
-                        }
-                        else if (val.StartsWith("B_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.BuiltInFunction;
-                        }
-                        else if (val.StartsWith("Mdl_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.MdlFunction;
-                        }
-                        else if (val.StartsWith("AI_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.AIFunction;
-                        }
-                        else if (val.StartsWith("Npc_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.NpcFunction;
-                        }
-                        else if (val.StartsWith("Info_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.InfoFunction;
-                        }
-                        else if (val.StartsWith("Create", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.CreateFunction;
-                        }
-                        else if (val.StartsWith("Wld_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.WldFunction;
-                        }
-                        else if (val.StartsWith("Log_", StringComparison.Ordinal))
-                        {
-                            type = TokenType.LogFunction;
-                        }
-                        else if (val.StartsWith("Hlp_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.HlpFunction;
-                        }
-                        else if (val.StartsWith("Snd_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.SndFunction;
-                        }
-                        else if (val.StartsWith("TA_", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.TAFunction;
-                        }
-                        else if (OtherFunctions.Contains(val))
-                        {
-                            type = TokenType.EquipFunction;
-                        }
-                        else if (val.Equals("self", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.SelfKeyword;
-                        }
-                        else if (val.Equals("other", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.OtherKeyword;
-                        }
-                        else if (val.Equals("slf", StringComparison.OrdinalIgnoreCase))
-                        {
-                            type = TokenType.SlfKeyword;
-                        }
-                        else if (keywords.Contains(val))
-                        {
-                            switch (val.ToLowerInvariant())
+                            if (val.StartsWith(prefix.Key, StringComparison.Ordinal))
                             {
-                                case "func": type = TokenType.FuncKeyword; break;
-                                case "var": type = TokenType.VarKeyword; break;
-                                case "const": type = TokenType.ConstKeyword; break;
-                                case "return": type = TokenType.ReturnKeyword; break;
-                                case "if": type = TokenType.IfKeyword; break;
-                                case "else": type = TokenType.ElseKeyword; break;
-                                case "instance":
-                                    type = TokenType.InstanceKeyword;
-                                    _expectInstanceName = true; // nächstes Identifier ist Instanzname
-                                    break;
-                                case "class": type = TokenType.ClassKeyword; break;
-                                case "prototype": type = TokenType.PrototypeKeyword; break;
-                                case "int":
-                                case "float":
-                                case "void":
-                                case "string":
-                                case "c_npc": type = TokenType.TypeKeyword; break;
-                                case "true":
-                                case "false": type = TokenType.BoolLiteral; break;
-                                default: type = TokenType.Identifier; break;
+                                type = prefix.Value;
+                                break;
                             }
                         }
-                        else if (_expectInstanceName && type == TokenType.Unknown)
+
+                        if (specialKeywords.TryGetValue(val, out var keywordType))
                         {
-                            // Falls erwartet wird, dass dies ein Instanzname ist
-                            type = TokenType.InstanceName;
-                            _expectInstanceName = false;
-                        }
-                        else
-                        {
-                            type = TokenType.Identifier;
+                            type = keywordType;
                         }
 
-                        // Sicherheitshalber _expectInstanceName zurücksetzen, falls es nicht gesetzt wurde
-                        if (type != TokenType.InstanceKeyword && !_expectInstanceName)
+
+                        if (type == TokenType.Unknown)
+                        {
+                            // Weitere Checks nur, wenn nicht schon erkannt
+                            if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
+                                type = TokenType.AiVariable;
+                            else if (val.Equals("MALE", StringComparison.Ordinal) || val.Equals("FEMALE", StringComparison.Ordinal))
+                                type = TokenType.SexConstant;
+                            else if (val.EndsWith("_ZEN", StringComparison.OrdinalIgnoreCase))
+                                type = TokenType.ZENConstant;
+                            else if (val.Equals("ZS_Talk", StringComparison.OrdinalIgnoreCase))
+                                type = TokenType.REALConstant;
+                            else if (OtherFunctions.Contains(val))
+                                type = TokenType.EquipFunction;
+                            else if (keywordsMap.TryGetValue(val, out var kwType))
+                            {
+                                type = kwType;
+                                if (type == TokenType.InstanceKeyword)
+                                    _expectInstanceName = true;
+                            }
+                            else if (_expectInstanceName)
+                            {
+                                type = TokenType.InstanceName;
+                                _expectInstanceName = false;
+                            }
+                            else
+                            {
+                                type = TokenType.Identifier;
+                            }
+                        }
+
+                        if (type != TokenType.InstanceKeyword)
                         {
                             _expectInstanceName = false;
                         }
@@ -360,52 +299,10 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Symbole
-                    if (current == '{')
+                    // Trennzeichen
+                    if (singleCharTokenMap.TryGetValue(current, out var tokenType))
                     {
-                        tokens.Add(new DaedalusToken(TokenType.OpenBracket, "{", line + 1, column + 1));
-                        column++;
-                        continue;
-                    }
-                    else if (current == '}')
-                    {
-                        tokens.Add(new DaedalusToken(TokenType.CloseBracket, "}", line + 1, column + 1));
-                        column++;
-                        continue;
-                    }
-                    else if (current == '(')
-                    {
-                        tokens.Add(new DaedalusToken(TokenType.OpenParenthesis, "(", line + 1, column + 1));
-                        column++;
-                        continue;
-                    }
-                    else if (current == ')')
-                    {
-                        tokens.Add(new DaedalusToken(TokenType.CloseParenthesis, ")", line + 1, column + 1));
-                        column++;
-                        continue;
-                    }
-                    else if (current == '[')
-                    {
-                        tokens.Add(new DaedalusToken(TokenType.OpenSquareBracket, "[", line + 1, column + 1));
-                        column++;
-                        continue;
-                    }
-                    else if (current == ']')
-                    {
-                        tokens.Add(new DaedalusToken(TokenType.CloseSquareBracket, "]", line + 1, column + 1));
-                        column++;
-                        continue;
-                    }
-                    else if (commas.Contains(current))
-                    {
-                        tokens.Add(new DaedalusToken(TokenType.Comma, current.ToString(), line + 1, column + 1));
-                        column++;
-                        continue;
-                    }
-                    else if (semicolons.Contains(current))
-                    {
-                        tokens.Add(new DaedalusToken(TokenType.Semicolon, current.ToString(), line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(tokenType, current.ToString(), line + 1, column + 1));
                         column++;
                         continue;
                     }

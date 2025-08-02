@@ -6,9 +6,9 @@ using MahApps.Metro.Controls;
 
 namespace Skriptorium.UI.Views
 {
-    public partial class AboutDialog : MetroWindow
+    public partial class AboutSkriptoriumView : MetroWindow
     {
-        public AboutDialog()
+        public AboutSkriptoriumView()
         {
             InitializeComponent();
 

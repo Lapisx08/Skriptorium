@@ -9,7 +9,7 @@ using MahApps.Metro.Controls;
 
 namespace Skriptorium.UI.Views
 {
-    public partial class SearchReplaceScriptDialog : MetroWindow
+    public partial class SearchReplaceScriptView : MetroWindow
     {
         private const int MaxHistory = 10;
         private readonly ScriptEditor _scriptEditor;
@@ -24,7 +24,7 @@ namespace Skriptorium.UI.Views
 
         public event Action<string>? FindNextRequested;
 
-        public SearchReplaceScriptDialog(ScriptEditor scriptEditor)
+        public SearchReplaceScriptView(ScriptEditor scriptEditor)
         {
             InitializeComponent();
             _scriptEditor = scriptEditor;

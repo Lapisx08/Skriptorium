@@ -123,18 +123,18 @@ namespace Skriptorium.UI
         #region Menü "Skriptorium"
         private void MenuSkriptoriumUeber_Click(object? sender, RoutedEventArgs? e)
         {
-            var aboutDialog = new AboutDialog
+            var aboutSkriptorium = new AboutSkriptoriumView
             {
                 Owner = this
             };
-            aboutDialog.ShowDialog();
+            aboutSkriptorium.ShowDialog();
         }
 
         private void MenuSkriptoriumEinstellungen_Click(object? sender, RoutedEventArgs? e)
         {
             var settings = new SettingsView
             {
-                Owner = this    // Owner auf MainWindow setzen
+                Owner = this
             };
             settings.ShowDialog();
         }
@@ -245,7 +245,7 @@ namespace Skriptorium.UI
             var ed = _tabManager.GetActiveScriptEditor();
             if (ed != null)
             {
-                var dialog = new SearchReplaceScriptDialog(ed);
+                var dialog = new SearchReplaceScriptView(ed);
                 dialog.Owner = this;
                 dialog.Show();
             }
@@ -256,7 +256,7 @@ namespace Skriptorium.UI
             var ed = _tabManager.GetActiveScriptEditor();
             if (ed != null)
             {
-                var dialog = new SearchReplaceScriptDialog(ed);
+                var dialog = new SearchReplaceScriptView(ed);
                 dialog.Owner = this;
                 dialog.Show();
             }

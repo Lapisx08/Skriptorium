@@ -120,8 +120,10 @@ public class DaedalusSyntaxHighlightingLightmode
         { TokenType.CloseParenthesis,   (SyntaxColor.Bracket, Colors.LimeGreen) },
         { TokenType.OpenSquareBracket,  (SyntaxColor.Bracket, Colors.LimeGreen) },
         { TokenType.CloseSquareBracket, (SyntaxColor.Bracket, Colors.LimeGreen) },
+        { TokenType.Dot,                (SyntaxColor.Bracket, Colors.LimeGreen) },
         { TokenType.Comma,              (SyntaxColor.Bracket, Colors.LimeGreen) },
         { TokenType.Semicolon,          (SyntaxColor.Bracket, Colors.LimeGreen) },
+
 
         // Sonstiges
         { TokenType.Whitespace,         (SyntaxColor.Unknown, Colors.Violet) },

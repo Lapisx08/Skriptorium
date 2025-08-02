@@ -17,7 +17,7 @@ public class DaedalusSyntaxHighlightingDarkmode
         { TokenType.ElseKeyword,        (SyntaxColor.Keyword, Colors.LightSkyBlue) },
         { TokenType.InstanceKeyword,    (SyntaxColor.Keyword, Colors.LightSkyBlue) },
         { TokenType.ClassKeyword,       (SyntaxColor.Keyword, Colors.OrangeRed) },
-        { TokenType.PrototypeKeyword,   (SyntaxColor.Keyword, Colors.OrangeRed) },
+        { TokenType.PrototypeKeyword,   (SyntaxColor.Keyword, Colors.LightSkyBlue) },
         { TokenType.BoolLiteral,        (SyntaxColor.Keyword, Colors.OrangeRed) },
 
         // Typen & Literale
@@ -77,6 +77,7 @@ public class DaedalusSyntaxHighlightingDarkmode
         { TokenType.CloseParenthesis,   (SyntaxColor.Bracket, Colors.LightGreen) },
         { TokenType.OpenSquareBracket,  (SyntaxColor.Bracket, Colors.LightGreen) },
         { TokenType.CloseSquareBracket, (SyntaxColor.Bracket, Colors.LightGreen) },
+        { TokenType.Dot,                (SyntaxColor.Bracket, Colors.LightGreen) },
         { TokenType.Comma,              (SyntaxColor.Bracket, Colors.LightGreen) },
         { TokenType.Semicolon,          (SyntaxColor.Bracket, Colors.LightGreen) },
 

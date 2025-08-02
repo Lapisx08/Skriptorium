@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="Skriptorium.UI.Views.SearchReplaceScriptDialog"
+﻿<mah:MetroWindow x:Class="Skriptorium.UI.Views.SearchReplaceScriptView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
