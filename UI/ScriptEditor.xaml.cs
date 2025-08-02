@@ -1,7 +1,9 @@
-﻿using ICSharpCode.AvalonEdit;
+﻿using ControlzEx.Theming;
+using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Rendering;
+using MahApps.Metro;
 using Skriptorium.Formatting;
 using Skriptorium.Interpreter;
 using Skriptorium.Managers;
@@ -14,51 +16,42 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Skriptorium.UI
 {
     public class SyntaxColorizingTransformer : DocumentColorizingTransformer
     {
+        private readonly Dictionary<TokenType, Color> _tokenColors;
         private List<DaedalusToken> _tokens = new();
+
+        public SyntaxColorizingTransformer(Dictionary<TokenType, Color> tokenColors)
+        {
+            _tokenColors = tokenColors ?? throw new ArgumentNullException(nameof(tokenColors));
+        }
 
         public void UpdateTokens(List<DaedalusToken> tokens)
         {
             _tokens = tokens ?? new List<DaedalusToken>();
             Console.WriteLine($"Debug: Anzahl der Tokens (gesamt): {_tokens.Count}");
-            foreach (var token in _tokens)
-            {
-                Console.WriteLine($"Debug: Token: {token.Type}, Value: {token.Value}, Line: {token.Line}, Column: {token.Column}");
-            }
         }
 
         protected override void ColorizeLine(DocumentLine line)
         {
             var document = CurrentContext.Document;
             if (document == null)
-            {
-                Console.WriteLine("Debug: Document ist null in ColorizeLine");
                 return;
-            }
 
-            var text = document.GetText(line);
-            Console.WriteLine($"Debug: Verarbeite Zeile {line.LineNumber}: {text}");
-
-            var tokens = _tokens.Where(t => t.Line == line.LineNumber);
-            Console.WriteLine($"Debug: Anzahl der Tokens in Zeile {line.LineNumber}: {tokens.Count()}");
+            var tokens = _tokens.Where(t => t.Line == line.LineNumber).ToList();
 
             foreach (var token in tokens)
             {
-                Console.WriteLine($"Debug: Token: {token.Type}, Value: {token.Value}, Line: {token.Line}, Column: {token.Column}");
                 if (token.Type == TokenType.Whitespace || token.Type == TokenType.EOF) continue;
 
-                var (_, wpfColor) = SyntaxHighlighting.GetColorForToken(token);
-
-                try
+                if (_tokenColors.TryGetValue(token.Type, out var wpfColor))
                 {
                     int startOffset = document.GetOffset(token.Line, token.Column);
                     int endOffset = startOffset + token.Value.Length;
-
-                    Console.WriteLine($"Debug: Coloring Token '{token.Value}' at offset {startOffset} to {endOffset} with color {wpfColor}");
 
                     if (startOffset >= line.Offset && endOffset <= line.EndOffset)
                     {
@@ -67,14 +60,6 @@ namespace Skriptorium.UI
                             element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(wpfColor));
                         });
                     }
-                    else
-                    {
-                        Console.WriteLine($"Debug: Token außerhalb der Zeilengrenzen: startOffset={startOffset}, endOffset={endOffset}, line.Offset={line.Offset}, line.EndOffset={line.EndOffset}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Debug: Fehler beim Anwenden der Farbe für Token '{token.Value}': {ex.Message}");
                 }
             }
         }
@@ -90,7 +75,7 @@ namespace Skriptorium.UI
 
         private TextSegmentCollection<TextMarker>? _markers;
         private TextMarkerRenderer? _markerRenderer;
-        private SyntaxColorizingTransformer? _colorizer;
+        private SyntaxColorizingTransformer? _colorizer = null!;
         private BookmarkManager? _bookmarkManager;
         private DaedalusInterpreter? _interpreter;
         private bool _syntaxHighlightingEnabled = true;
@@ -106,7 +91,6 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.Caret.PositionChanged += AvalonEditor_CaretPositionChanged;
             avalonEditor.TextArea.TextEntering += TextArea_TextEntering;
 
-
             if (avalonEditor.Document == null)
             {
                 Console.WriteLine("Fehler: avalonEditor.Document ist null");
@@ -117,15 +101,51 @@ namespace Skriptorium.UI
             _markerRenderer = new TextMarkerRenderer(avalonEditor.TextArea.TextView, _markers);
             avalonEditor.TextArea.TextView.BackgroundRenderers.Add(_markerRenderer);
 
-            _colorizer = new SyntaxColorizingTransformer();
+            var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
+            var tokenColorMap = isDark
+                 ? DaedalusSyntaxHighlightingDarkmode.TokenColors
+                 : DaedalusSyntaxHighlightingLightmode.TokenColors;
+            var colorMap = tokenColorMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.WpfColor);
+            _colorizer = new SyntaxColorizingTransformer(colorMap);
             avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
+
+            ThemeManager.Current.ThemeChanged += OnThemeChanged;
+            DoInitialHighlighting();
 
             _bookmarkManager = new BookmarkManager(avalonEditor);
 
             _foldingManager = FoldingManager.Install(avalonEditor.TextArea);
             _foldingStrategy = new BraceFoldingStrategy();
             UpdateFoldings();
+        }
 
+        private void OnThemeChanged(object? sender, ThemeChangedEventArgs e)
+        {
+            var isDark = e.NewTheme?.BaseColorScheme == "Dark";
+            var tokenColorMap = isDark
+                ? DaedalusSyntaxHighlightingDarkmode.TokenColors
+                : DaedalusSyntaxHighlightingLightmode.TokenColors;
+            var colorMap = tokenColorMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.WpfColor);
+            _colorizer = new SyntaxColorizingTransformer(colorMap);
+            avalonEditor.TextArea.TextView.LineTransformers.Clear();
+            avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
+            _colorizer.UpdateTokens(_cachedTokens);
+            avalonEditor.TextArea.TextView.InvalidateVisual();
+        }
+
+        private void DoInitialHighlighting()
+        {
+            if (string.IsNullOrEmpty(avalonEditor.Text))
+            {
+                _cachedTokens = new List<DaedalusToken>();
+                _colorizer.UpdateTokens(_cachedTokens);
+                return;
+            }
+
+            var lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            _cachedTokens = new DaedalusLexer().Tokenize(lines);
+            _colorizer.UpdateTokens(_cachedTokens);
+            avalonEditor.TextArea.TextView.InvalidateVisual();
         }
 
         protected override void OnVisualParentChanged(DependencyObject oldParent)
@@ -194,6 +214,7 @@ namespace Skriptorium.UI
             _suppressChangeTracking = true;
             avalonEditor.Text = text;
             _originalText = text;
+            _lastText = ""; // Erzwinge Neuverarbeitung in ApplySyntaxHighlighting
             _suppressChangeTracking = false;
             IsModified = false;
             ClearHighlighting();
@@ -205,6 +226,7 @@ namespace Skriptorium.UI
         {
             _suppressChangeTracking = true;
             avalonEditor.Text = text;
+            _lastText = ""; // Erzwinge Neuverarbeitung in ApplySyntaxHighlighting
             _suppressChangeTracking = false;
             IsModified = true;
             TextChanged?.Invoke(this, null);
@@ -321,11 +343,16 @@ namespace Skriptorium.UI
             catch { }
         }
 
+        private List<string> Errors = new List<string>();
+        private List<Skriptorium.Parsing.Declaration> _ast = new List<Skriptorium.Parsing.Declaration>();
+
         private void ApplySyntaxHighlighting()
         {
-            if (!_syntaxHighlightingEnabled) return;
+            if (!_syntaxHighlightingEnabled)
+                return;
 
-            if (_markers == null || _markerRenderer == null || _colorizer == null) return;
+            if (_markers == null || _markerRenderer == null || _colorizer == null)
+                return;
 
             foreach (var m in _markers.ToList())
                 if (m.BackgroundColor != Colors.Red && m.BackgroundColor != Colors.Yellow)
@@ -334,13 +361,31 @@ namespace Skriptorium.UI
             if (avalonEditor.Text != _lastText)
             {
                 var lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-                _cachedTokens = new DaedalusLexer().Tokenize(lines);
+                var lexer = new DaedalusLexer();
+                var tokens = lexer.Tokenize(lines);
+                _cachedTokens = tokens;
+                _colorizer.UpdateTokens(_cachedTokens);
+
+                try
+                {
+                    var parser = new DaedalusParser(tokens);
+                    var parsedDeclarations = parser.ParseScript();
+                    Errors.Clear();
+                    _ast = parsedDeclarations;
+                }
+                catch (Exception ex)
+                {
+                    // Optional: Fehler für spätere Nutzung speichern oder ignorieren
+                }
+
                 _lastText = avalonEditor.Text;
             }
+            else
+            {
+                _colorizer.UpdateTokens(_cachedTokens);
+            }
 
-            _colorizer.UpdateTokens(_cachedTokens);
-
-            avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+            avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
 
@@ -523,7 +568,11 @@ namespace Skriptorium.UI
         private Skriptorium.Interpreter.Expression ConvertExpression(Skriptorium.Parsing.Expression expr)
         {
             if (expr == null)
-                return null;
+            {
+                return new Skriptorium.Interpreter.LiteralExpression(
+                    value: "" // Verwende leeren String statt null
+                );
+            }
 
             switch (expr)
             {

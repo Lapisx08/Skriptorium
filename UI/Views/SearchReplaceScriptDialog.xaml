@@ -51,10 +51,10 @@
         <!-- Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,10">
             <Button x:Name="BtnFindNext" Width="100" Click="BtnFindNext_Click">
-                <TextBlock Text="Weitersuchen"/>
+                <TextBlock Text="Suchen"/>
             </Button>
             <Button x:Name="BtnReplaceNext" Width="110" Margin="10,0,0,0" Click="BtnReplace_Click">
-                <TextBlock Text="Weiterersetzen"/>
+                <TextBlock Text="Ersetzen"/>
             </Button>
             <Button x:Name="BtnReplaceAll" Width="100" Margin="10,0,0,0" Click="BtnReplaceAll_Click">
                 <TextBlock Text="Alle Ersetzen"/>
