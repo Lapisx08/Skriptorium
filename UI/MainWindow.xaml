@@ -139,7 +139,7 @@
             </MenuItem>
 
             <MenuItem Header="Tools">
-                <MenuItem Header="Syntax-Highlighting umschalten" Click="SyntaxHighlightingUmschalten_Click">
+                <MenuItem Header="Syntax-Highlighting umschalten" InputGestureText="Strg + H" Click="SyntaxHighlightingUmschalten_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7E6;" FontSize="14"/>
                     </MenuItem.Icon>

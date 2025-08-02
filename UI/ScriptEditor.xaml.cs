@@ -475,13 +475,39 @@ namespace Skriptorium.UI
                 {
                     avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
                 }
-
                 ApplySyntaxHighlighting();
             }
             else
             {
+                // Entferne den Syntax-Colorizer
                 avalonEditor.TextArea.TextView.LineTransformers.Remove(_colorizer);
-                avalonEditor.TextArea.TextView.InvalidateVisual();
+
+                // Füge einen einfachen LineTransformer hinzu, der die Standard-Textfarbe setzt
+                var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
+                var defaultColor = isDark ? Colors.WhiteSmoke : Colors.Black;
+
+                avalonEditor.TextArea.TextView.LineTransformers.Add(new DefaultColorLineTransformer(defaultColor));
+            }
+
+            avalonEditor.TextArea.TextView.InvalidateVisual();
+        }
+
+        // Neue Klasse für den Default-Color-LineTransformer
+        public class DefaultColorLineTransformer : DocumentColorizingTransformer
+        {
+            private readonly Color _defaultColor;
+
+            public DefaultColorLineTransformer(Color defaultColor)
+            {
+                _defaultColor = defaultColor;
+            }
+
+            protected override void ColorizeLine(DocumentLine line)
+            {
+                ChangeLinePart(line.Offset, line.EndOffset, element =>
+                {
+                    element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(_defaultColor));
+                });
             }
         }
 
