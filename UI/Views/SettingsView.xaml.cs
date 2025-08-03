@@ -1,6 +1,6 @@
 ﻿using ControlzEx.Theming;
 using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Dialogs;
+using Ookii.Dialogs.Wpf;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -67,20 +67,22 @@ namespace Skriptorium.UI.Views
 
         private void BtnBrowse_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new CommonOpenFileDialog
+            var dialog = new VistaFolderBrowserDialog
             {
-                IsFolderPicker = true,
-                Title = "Wähle den Skript-Ordner"
+                Description = "Wähle den Skript-Ordner",
+                UseDescriptionForTitle = true, // damit Description als Fenstertitel angezeigt wird
+                ShowNewFolderButton = true
             };
 
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            bool? result = dialog.ShowDialog();
+
+            if (result == true)
             {
-                TxtScriptPath.Text = dialog.FileName;
-                Properties.Settings.Default.ScriptSearchPath = dialog.FileName;
+                TxtScriptPath.Text = dialog.SelectedPath;
+                Properties.Settings.Default.ScriptSearchPath = dialog.SelectedPath;
                 Properties.Settings.Default.Save();
             }
         }
-
 
         // Schließen-Button
         private void Close_Click(object sender, RoutedEventArgs e)
