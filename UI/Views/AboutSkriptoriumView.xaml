@@ -7,30 +7,28 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Für TextBlocks und Lizenz-Button -->
+            <!-- Infos -->
+            <RowDefinition Height="Auto"/>
+            <!-- Button -->
             <RowDefinition Height="*"/>
-            <!-- Für restlichen Platz und Schließen-Button -->
+            <!-- Rest / Auffüllung -->
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <!-- TextBlocks und Lizenz-Button -->
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+        <!-- TextBlöcke -->
+        <StackPanel Grid.Row="0">
             <TextBlock Text="Skriptorium ©" FontWeight="Bold" FontSize="16" Margin="0,0,0,5" />
             <TextBlock Text="Version: 1.0" Margin="0,0,0,5"/>
             <TextBlock Text="Entwickler: Lapis" Margin="0,0,0,5" />
             <TextBlock x:Name="TextBlockDatum" Margin="0,0,0,10"/>
             <TextBlock Text="Lizensiert unter GNU General Public License Version 3" TextWrapping="Wrap" Margin="0,0,0,10"/>
-            <Button Width="100" HorizontalAlignment="Left" Click="LicenseButton_Click">
-                <TextBlock Text="Lizenz anzeigen" />
-            </Button>
         </StackPanel>
 
-        <!-- Schließen-Button rechts unten -->
-        <Button Grid.Row="1" Grid.Column="1" Width="80" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="CloseButton_Click">
-            <TextBlock Text="Schließen" />
+        <!-- Lizenz-Button weiter unten -->
+        <Button Grid.Row="1" Width="100" HorizontalAlignment="Left" Click="LicenseButton_Click" Margin="0,10,0,0">
+            <TextBlock Text="Lizenz anzeigen" />
         </Button>
     </Grid>
 </mah:MetroWindow>

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 
 namespace Skriptorium.Managers
@@ -19,7 +18,6 @@ namespace Skriptorium.Managers
 
         private static readonly List<string> recentFiles = new();
 
-        // Öffnet eine Datei über Dialog
         public static void OpenFile(Action<string, string> onFileLoaded)
         {
             var dlg = new OpenFileDialog
@@ -31,21 +29,17 @@ namespace Skriptorium.Managers
 
             if (dlg.ShowDialog() == true)
             {
-                OpenFile(dlg.FileName, onFileLoaded); // Ruft die neue Überladung auf
+                OpenFile(dlg.FileName, onFileLoaded);
             }
         }
 
-        // Neue Überladung: Öffnet eine Datei direkt über Pfad ohne TabManager
-        public static void OpenFile(
-            string filePath,
-            Action<string, string> onFileLoaded,
-            Action<string>? onError = null)
+        public static void OpenFile(string filePath, Action<string, string> onFileLoaded, Action<string>? onError = null)
         {
             try
             {
                 var content = File.ReadAllText(filePath);
                 onFileLoaded(content, filePath);
-                AddRecentFile(filePath); // Jetzt wird es gespeichert
+                AddRecentFile(filePath);
             }
             catch (Exception ex)
             {
@@ -53,15 +47,13 @@ namespace Skriptorium.Managers
             }
         }
 
-        // Öffnet eine Datei direkt über Pfad (für "Zuletzt geöffnet") mit TabManager
         public static void OpenFile(string filePath, Action<string, string> onFileLoaded, ScriptTabManager tabManager)
         {
             try
             {
-                // Prüfen, ob die Datei bereits geöffnet ist (nur wenn TabManager vorhanden)
                 if (tabManager != null && tabManager.TryActivateTabByFilePath(filePath))
                 {
-                    return; // Bereits geöffnet – Tab wurde aktiviert
+                    return;
                 }
 
                 string content = File.ReadAllText(filePath);
@@ -74,12 +66,10 @@ namespace Skriptorium.Managers
             }
         }
 
-        // Speichert das Skript, mit automatischer Entscheidung für "Speichern unter"
         public static bool SaveFile(ScriptEditor activeEditor)
         {
             if (activeEditor == null)
             {
-                MessageBox.Show("Kein Skript zum Speichern ausgewählt.");
                 return false;
             }
 
@@ -95,19 +85,16 @@ namespace Skriptorium.Managers
                 AddRecentFile(activeEditor.FilePath);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("Fehler beim Speichern der Datei:\n" + ex.Message);
                 return false;
             }
         }
 
-        // Speichern unter – fragt Benutzer nach Speicherort
         public static bool SaveFileAs(ScriptEditor activeEditor)
         {
             if (activeEditor == null)
             {
-                MessageBox.Show("Kein Skript zum Speichern ausgewählt.");
                 return false;
             }
 
@@ -131,17 +118,15 @@ namespace Skriptorium.Managers
                     AddRecentFile(dlg.FileName);
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    MessageBox.Show("Fehler beim Speichern der Datei:\n" + ex.Message);
                     return false;
                 }
             }
 
-            return false; // Dialog abgebrochen
+            return false;
         }
 
-        // Alles Speichern - speichert alle geöffneten Dateien
         public static bool SaveAllFiles(ScriptTabManager tabManager)
         {
             bool allSaved = true;
@@ -154,8 +139,6 @@ namespace Skriptorium.Managers
                     if (!saved)
                     {
                         allSaved = false;
-                        // Optional: Abbrechen, wenn ein Speichern fehlschlägt
-                        // break;
                     }
                 }
             }
@@ -163,7 +146,6 @@ namespace Skriptorium.Managers
             return allSaved;
         }
 
-        // Fügt einen Pfad zu den "zuletzt geöffneten Dateien" hinzu
         private static void AddRecentFile(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
@@ -176,13 +158,11 @@ namespace Skriptorium.Managers
                 recentFiles.RemoveAt(recentFiles.Count - 1);
         }
 
-        // Gibt aktuelle Liste zurück
         public static List<string> GetRecentFiles()
         {
             return recentFiles.ToList();
         }
 
-        // Laden der Liste beim App-Start
         public static void LoadRecentFiles()
         {
             if (File.Exists(RecentFilesPath))
@@ -193,7 +173,6 @@ namespace Skriptorium.Managers
             }
         }
 
-        // Speichern der Liste beim App-Ende
         public static void SaveRecentFiles()
         {
             try

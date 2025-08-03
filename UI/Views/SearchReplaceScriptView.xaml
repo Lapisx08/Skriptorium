@@ -71,12 +71,5 @@
                           Unchecked="ChkSelectionOnly_Unchecked"/>
             </StackPanel>
         </GroupBox>
-
-        <!-- Schließen -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Width="80" IsCancel="True" Click="BtnClose_Click">
-                <TextBlock Text="Schließen"/>
-            </Button>
-        </StackPanel>
     </Grid>
 </mah:MetroWindow>

@@ -1,27 +1,31 @@
-﻿using Skriptorium.UI;
+﻿using AvalonDock;
+using AvalonDock.Layout;
+using Skriptorium.UI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Skriptorium.Managers
 {
     public class ScriptTabManager
     {
-        private readonly TabControl _tabControl;
+        private readonly DockingManager _dockingManager;
+        private readonly LayoutDocumentPane _documentPane;
         private int _newScriptCounter = 1;
 
-        public ScriptTabManager(TabControl tabControl)
+        public ScriptTabManager(DockingManager dockingManager, LayoutDocumentPane documentPane)
         {
-            _tabControl = tabControl;
+            _dockingManager = dockingManager;
+            _documentPane = documentPane;
         }
 
         public void AddNewTab(string content = "", string? tabTitle = null, string? filePath = null)
         {
-            // Wenn eine Datei bereits geöffnet ist, aktiviere den vorhandenen Tab und beende
-            if (!string.IsNullOrWhiteSpace(filePath) && TryActivateTabByFilePath(filePath!))
+            if (!string.IsNullOrWhiteSpace(filePath) && TryActivateTabByFilePath(filePath))
                 return;
 
             var scriptEditor = new ScriptEditor
@@ -31,94 +35,81 @@ namespace Skriptorium.Managers
             scriptEditor.SetTextAndResetModified(content);
 
             string baseTitle = tabTitle ?? $"Neu{_newScriptCounter++}";
-            var titleText = new TextBlock
-            {
-                Text = baseTitle,
-                VerticalAlignment = VerticalAlignment.Center,
-                Foreground = (Brush)Application.Current.Resources["MahApps.Brushes.ThemeForeground"]
-            };
 
-            scriptEditor.TitleTextBlock = titleText;
+            var document = new LayoutDocument
+            {
+                Title = baseTitle,
+                Content = scriptEditor,
+                IsActive = true
+            };
 
             scriptEditor.TextChanged += (s, e) =>
             {
-                if (scriptEditor.IsModified)
+                UpdateTabTitle(scriptEditor);
+            };
+
+            _documentPane.Children.Add(document);
+            _dockingManager.ActiveContent = document;
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                document.IsActive = true;
+                _dockingManager.ActiveContent = document;
+                if (document.Content is ScriptEditor editor)
                 {
-                    if (!titleText.Text.EndsWith("*"))
-                        titleText.Text += "*";
+                    editor.Focus();
                 }
-                else
-                {
-                    RemoveTrailingAsterisk(titleText);
-                }
-            };
-
-            var closeButton = new Button
-            {
-                Content = "x",
-                Width = 20,
-                Height = 20,
-                Padding = new Thickness(0),
-                Margin = new Thickness(5, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                Background = Brushes.Transparent,
-                BorderThickness = new Thickness(0),
-                Focusable = false,
-                Cursor = Cursors.Hand,
-                Foreground = (Brush)Application.Current.Resources["MahApps.Brushes.ThemeForeground"]
-            };
-
-            closeButton.Click += (s, e) =>
-            {
-                if (!ConfirmClose(scriptEditor))
-                    return;
-
-                if (closeButton.Parent is StackPanel sp && sp.Parent is TabItem tabItem)
-                    _tabControl.Items.Remove(tabItem);
-            };
-
-            var headerPanel = new StackPanel { Orientation = Orientation.Horizontal };
-            headerPanel.Background = (Brush)Application.Current.Resources["MahApps.Brushes.TabItem.Background"];
-            headerPanel.Children.Add(titleText);
-            headerPanel.Children.Add(closeButton);
-
-            var newTab = new TabItem
-            {
-                Header = headerPanel,
-                Content = scriptEditor,
-                IsSelected = true
-            };
-
-            _tabControl.Items.Add(newTab);
+                _dockingManager.Focus();
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
+
 
         public ScriptEditor? GetActiveScriptEditor()
         {
-            if (_tabControl.SelectedItem is TabItem tabItem &&
-                tabItem.Content is ScriptEditor editor)
+            if (_dockingManager.ActiveContent is ScriptEditor editor)
+            {
                 return editor;
+            }
+            if (_dockingManager.ActiveContent is LayoutDocument doc && doc.Content is ScriptEditor docEditor)
+            {
+                return docEditor;
+            }
+
+            var activeDocument = _documentPane.Children.OfType<LayoutDocument>().FirstOrDefault(d => d.IsActive);
+            if (activeDocument != null && activeDocument.Content is ScriptEditor activeEditor)
+            {
+                return activeEditor;
+            }
+
+            var firstDocument = _documentPane.Children.OfType<LayoutDocument>().FirstOrDefault();
+            if (firstDocument != null && firstDocument.Content is ScriptEditor firstEditor)
+            {
+                return firstEditor;
+            }
+
             return null;
         }
 
         public void CloseActiveTab()
         {
-            if (_tabControl.SelectedItem is TabItem tabItem &&
-                tabItem.Content is ScriptEditor editor)
+            var editor = GetActiveScriptEditor();
+            if (editor != null && _documentPane.Children.FirstOrDefault(d => d.Content == editor) is LayoutDocument document)
             {
                 if (!ConfirmClose(editor))
                     return;
-                _tabControl.Items.Remove(tabItem);
+                _documentPane.Children.Remove(document);
             }
         }
 
         public bool TryActivateTabByFilePath(string filePath)
         {
-            foreach (TabItem item in _tabControl.Items)
+            foreach (var document in _documentPane.Children.OfType<LayoutDocument>())
             {
-                if (item.Content is ScriptEditor editor &&
+                if (document.Content is ScriptEditor editor &&
                     string.Equals(editor.FilePath, filePath, StringComparison.OrdinalIgnoreCase))
                 {
-                    item.IsSelected = true;
+                    document.IsActive = true;
+                    _dockingManager.ActiveContent = document;
                     return true;
                 }
             }
@@ -153,26 +144,61 @@ namespace Skriptorium.Managers
                 bool saved = DataManager.SaveFile(editor);
                 if (!saved)
                     return false;
+
                 editor.ResetModifiedFlag();
-                if (editor.TitleTextBlock != null)
-                    RemoveTrailingAsterisk(editor.TitleTextBlock);
+                UpdateTabTitle(editor);
             }
             return true;
         }
 
-        private void RemoveTrailingAsterisk(TextBlock titleText)
+        private LayoutDocument? GetDocumentByEditor(ScriptEditor editor)
         {
-            if (titleText.Text.EndsWith("*"))
-                titleText.Text = titleText.Text[..^1];
+            return _documentPane.Children
+                .OfType<LayoutDocument>()
+                .FirstOrDefault(d => d.Content == editor);
+        }
+
+        private void UpdateTabTitle(ScriptEditor editor)
+        {
+            var document = GetDocumentByEditor(editor);
+            if (document == null) return;
+
+            string baseTitle = document.Title.TrimEnd('*');
+            if (editor.IsModified)
+                document.Title = baseTitle + "*";
+            else
+                document.Title = baseTitle;
         }
 
         public IEnumerable<ScriptEditor> GetAllOpenEditors()
         {
-            foreach (TabItem tabItem in _tabControl.Items)
+            foreach (var document in _documentPane.Children.OfType<LayoutDocument>())
             {
-                if (tabItem.Content is ScriptEditor editor)
+                if (document.Content is ScriptEditor editor)
                     yield return editor;
             }
         }
+    }
+
+    public class RelayCommand : ICommand
+    {
+        private readonly Action<object> _execute;
+        private readonly Func<object, bool> _canExecute;
+
+        public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+        {
+            _execute = execute;
+            _canExecute = canExecute;
+        }
+
+        public event EventHandler CanExecuteChanged
+        {
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
+        }
+
+        public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
+
+        public void Execute(object parameter) => _execute(parameter);
     }
 }

@@ -1,14 +1,17 @@
-﻿using MahApps.Metro.Controls;
+﻿using AvalonDock;
+using AvalonDock.Layout;
+using MahApps.Metro.Controls;
 using Skriptorium.Interpreter;
 using Skriptorium.Managers;
 using Skriptorium.Parsing;
-using Skriptorium.UI.Views.Tools;
 using Skriptorium.UI.Views;
+using Skriptorium.UI.Views.Tools;
 using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Skriptorium.UI
@@ -32,7 +35,7 @@ namespace Skriptorium.UI
                 handledEventsToo: true);
 
             // 1. Manager initialisieren
-            _tabManager = new ScriptTabManager(tabControlScripts);
+            _tabManager = new ScriptTabManager(dockingManager, documentPane);
             _editMenuManager = new EditMenuManager(_tabManager);
             _searchManager = new SearchManager(_tabManager);
             _shortcutManager = new ShortcutManager(this);
@@ -82,8 +85,8 @@ namespace Skriptorium.UI
             _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift,
                                       () => MenuDialogGenerator_Click(null, null));
 
-            // 3. TabControl-Ereignis registrieren
-            tabControlScripts.SelectionChanged += TabControlScripts_SelectionChanged;
+            // 3. AvalonDock-Ereignisse
+            dockingManager.ActiveContentChanged += DockingManager_ActiveContentChanged;
 
             // 4. Letzte Dateien laden und erstes Tab öffnen
             DataManager.LoadRecentFiles();
@@ -108,6 +111,13 @@ namespace Skriptorium.UI
                 MenuSkriptoriumUeber_Click(null, null);
                 e.Handled = true;
             }
+
+            // Strg+D → Duplizieren
+            if (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                _editMenuManager.Duplicate();
+                e.Handled = true; // verhindert Löschen!
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -120,6 +130,53 @@ namespace Skriptorium.UI
 
             DataManager.SaveRecentFiles();
             base.OnClosing(e);
+        }
+
+        private void DockingManager_DocumentClosing(object sender, DocumentClosingEventArgs e)
+        {
+            if (e.Document.Content is ScriptEditor editor)
+            {
+                if (!_tabManager.ConfirmClose(editor))
+                {
+                    e.Cancel = true;
+                }
+            }
+        }
+
+        private void DockingManager_DocumentClosed(object sender, DocumentClosedEventArgs e)
+        {
+            // Entferne Ereignisbindungen für geschlossene Dokumente
+            if (e.Document.Content is ScriptEditor editor)
+            {
+                editor.TextChanged -= ScriptEditor_TextChanged;
+                editor.CaretPositionChanged -= ScriptEditor_CaretPositionChanged;
+            }
+        }
+
+        private void DockingManager_ActiveContentChanged(object sender, EventArgs e)
+        {
+            // Alte Ereignisbindungen entfernen
+            if (_currentScriptEditor != null)
+            {
+                _currentScriptEditor.TextChanged -= ScriptEditor_TextChanged;
+                _currentScriptEditor.CaretPositionChanged -= ScriptEditor_CaretPositionChanged;
+            }
+
+            // Neuen ScriptEditor abrufen
+            _currentScriptEditor = _tabManager.GetActiveScriptEditor();
+
+            // Neue Ereignisbindungen hinzufügen
+            if (_currentScriptEditor != null)
+            {
+                _currentScriptEditor.TextChanged += ScriptEditor_TextChanged;
+                _currentScriptEditor.CaretPositionChanged += ScriptEditor_CaretPositionChanged;
+                UpdateStatusBar();
+            }
+            else
+            {
+                StatusPositionText.Text = "Zeile 1, Spalte 1";
+                StatusCharCountText.Text = "0 Zeichen";
+            }
         }
 
         #region Menü "Skriptorium"
@@ -177,7 +234,12 @@ namespace Skriptorium.UI
             {
                 _dataMenuManager.UpdateRecentFilesMenu();
                 if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
+                {
                     ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
+                    var document = documentPane.Children.FirstOrDefault(d => d.Content == ed);
+                    if (document != null)
+                        document.Title = System.IO.Path.GetFileName(ed.FilePath);
+                }
             }
         }
 
@@ -188,7 +250,12 @@ namespace Skriptorium.UI
             {
                 _dataMenuManager.UpdateRecentFilesMenu();
                 if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
+                {
                     ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
+                    var document = documentPane.Children.FirstOrDefault(d => d.Content == ed);
+                    if (document != null)
+                        document.Title = System.IO.Path.GetFileName(ed.FilePath);
+                }
             }
         }
 
@@ -203,7 +270,12 @@ namespace Skriptorium.UI
                 if (DataManager.SaveFile(editor))
                 {
                     if (editor.TitleTextBlock != null)
+                    {
                         editor.TitleTextBlock.Text = System.IO.Path.GetFileName(editor.FilePath);
+                        var document = documentPane.Children.FirstOrDefault(d => d.Content == editor);
+                        if (document != null)
+                            document.Title = System.IO.Path.GetFileName(editor.FilePath);
+                    }
                 }
                 else
                 {
@@ -287,7 +359,6 @@ namespace Skriptorium.UI
             var dicts = Application.Current.Resources.MergedDictionaries;
             dicts.Clear();
 
-            // ACHTUNG: Assembly-Name korrekt angeben!
             string assembly = "Skriptorium";
             var uri = new Uri($"pack://application:,,,/{assembly};component/UI/Themes/{themeName}.xaml",
                               UriKind.Absolute);
@@ -297,10 +368,19 @@ namespace Skriptorium.UI
 
         private void SyntaxHighlightingUmschalten_Click(object sender, RoutedEventArgs e)
         {
-            if ((tabControlScripts.SelectedItem as TabItem)?.Content is ScriptEditor editor)
+            var layoutDocument = dockingManager.ActiveContent as LayoutDocument;
+            if (layoutDocument == null)
             {
-                editor.ToggleSyntaxHighlighting();
+                return;
             }
+
+            var editor = layoutDocument.Content as ScriptEditor;
+            if (editor == null)
+            {
+                return;
+            }
+
+            editor.ToggleSyntaxHighlighting();
         }
 
         private void SemanticCheckButton_Click(object sender, RoutedEventArgs e)
@@ -328,23 +408,12 @@ namespace Skriptorium.UI
             }
         }
 
-        private ScriptEditor? GetCurrentEditor()
-        {
-            if (tabControlScripts.SelectedItem is TabItem selectedTab &&
-                selectedTab.Content is ScriptEditor editor)
-            {
-                return editor;
-            }
-
-            return null;
-        }
-
         private void MenuCodeFormatieren_Click(object sender, RoutedEventArgs e)
         {
-            var editor = GetCurrentEditor();
+            var editor = _tabManager.GetActiveScriptEditor();
             if (editor != null)
             {
-                editor.FormatCode(); // Diese Methode musst du im ScriptEditor bereitstellen
+                editor.FormatCode();
             }
             else
             {
@@ -354,7 +423,6 @@ namespace Skriptorium.UI
 
         private void MenuNPCGenerator_Click(object sender, RoutedEventArgs e)
         {
-            // Erstelle und zeige das DialogGenerator-Fenster
             var npcGenerator = new NPCGenerator();
             npcGenerator.Owner = this;
             npcGenerator.Show();
@@ -362,36 +430,9 @@ namespace Skriptorium.UI
 
         private void MenuDialogGenerator_Click(object sender, RoutedEventArgs e)
         {
-            // Erstelle und zeige das DialogGenerator-Fenster
             var dialogGenerator = new DialogGenerator();
             dialogGenerator.Owner = this;
             dialogGenerator.Show();
-        }
-
-        private void TabControlScripts_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Alte Ereignisbindungen entfernen
-            if (_currentScriptEditor != null)
-            {
-                _currentScriptEditor.TextChanged -= ScriptEditor_TextChanged;
-                _currentScriptEditor.CaretPositionChanged -= ScriptEditor_CaretPositionChanged;
-            }
-
-            // Neuen ScriptEditor abrufen
-            _currentScriptEditor = _tabManager.GetActiveScriptEditor();
-
-            // Neue Ereignisbindungen hinzufügen
-            if (_currentScriptEditor != null)
-            {
-                _currentScriptEditor.TextChanged += ScriptEditor_TextChanged;
-                _currentScriptEditor.CaretPositionChanged += ScriptEditor_CaretPositionChanged;
-                UpdateStatusBar();
-            }
-            else
-            {
-                StatusPositionText.Text = "Zeile 1, Spalte 1";
-                StatusCharCountText.Text = "0 Zeichen";
-            }
         }
 
         private void ScriptEditor_TextChanged(object sender, EventArgs e)

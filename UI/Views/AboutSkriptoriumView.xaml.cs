@@ -42,10 +42,5 @@ namespace Skriptorium.UI.Views
                                 MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
     }
 }

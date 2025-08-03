@@ -83,11 +83,5 @@ namespace Skriptorium.UI.Views
                 Properties.Settings.Default.Save();
             }
         }
-
-        // Schließen-Button
-        private void Close_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
     }
 }

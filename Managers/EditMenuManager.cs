@@ -97,9 +97,34 @@ namespace Skriptorium.Managers
 
             if (!string.IsNullOrEmpty(Avalon.SelectedText))
             {
-                int caretIndex = Avalon.SelectionStart + Avalon.SelectionLength;
-                Avalon.Text = Avalon.Text.Insert(caretIndex, Avalon.SelectedText);
-                Avalon.SelectionStart = caretIndex;
+                int selectionStart = Avalon.SelectionStart;
+                int selectionLength = Avalon.SelectionLength;
+                int caretIndex = selectionStart + selectionLength;
+
+                // Extrahiere Text direkt aus dem Document
+                var document = Avalon.Document;
+                if (selectionStart < 0 || selectionLength < 0 || caretIndex > document.TextLength)
+                {
+                    MessageBox.Show($"Ungültige Auswahl: SelectionStart={selectionStart}, SelectionLength={selectionLength}, caretIndex={caretIndex}, Textlänge={document.TextLength}");
+                    return;
+                }
+
+                string selectedText = document.GetText(selectionStart, selectionLength);
+
+                try
+                {
+                    document.Insert(caretIndex, selectedText);
+                    Avalon.SelectionStart = caretIndex;
+                    Avalon.SelectionLength = 0;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Fehler beim Duplizieren: {ex.Message}");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Kein Text ausgewählt.");
             }
         }
 

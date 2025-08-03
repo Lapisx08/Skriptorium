@@ -240,10 +240,7 @@ namespace Skriptorium.UI
             _originalText = avalonEditor.Text;
             IsModified = false;
 
-            if (TitleTextBlock != null && TitleTextBlock.Text.EndsWith("*"))
-            {
-                TitleTextBlock.Text = TitleTextBlock.Text[..^1];
-            }
+            TextChanged?.Invoke(this, null);
         }
 
         public event TextChangedEventHandler? TextChanged;
@@ -469,20 +466,15 @@ namespace Skriptorium.UI
         {
             _syntaxHighlightingEnabled = !_syntaxHighlightingEnabled;
 
+            avalonEditor.TextArea.TextView.LineTransformers.Clear();
+
             if (_syntaxHighlightingEnabled)
             {
-                if (!avalonEditor.TextArea.TextView.LineTransformers.Contains(_colorizer))
-                {
-                    avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
-                }
+                avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
                 ApplySyntaxHighlighting();
             }
             else
             {
-                // Entferne den Syntax-Colorizer
-                avalonEditor.TextArea.TextView.LineTransformers.Remove(_colorizer);
-
-                // Füge einen einfachen LineTransformer hinzu, der die Standard-Textfarbe setzt
                 var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
                 var defaultColor = isDark ? Colors.WhiteSmoke : Colors.Black;
 
@@ -490,6 +482,7 @@ namespace Skriptorium.UI
             }
 
             avalonEditor.TextArea.TextView.InvalidateVisual();
+            avalonEditor.TextArea.TextView.Redraw();  // explizites Neuzeichnen erzwingen
         }
 
         // Neue Klasse für den Default-Color-LineTransformer
