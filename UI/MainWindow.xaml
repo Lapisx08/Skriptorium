@@ -188,7 +188,6 @@
                 DocumentClosing="DockingManager_DocumentClosing"
                 DocumentClosed="DockingManager_DocumentClosed">
           
-            <!-- AB HIER: layout: statt avalonDock: -->
             <avalon:LayoutRoot>
                 <avalon:LayoutPanel Orientation="Horizontal">
                     <avalon:LayoutDocumentPaneGroup>

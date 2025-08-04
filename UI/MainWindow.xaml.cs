@@ -1,5 +1,6 @@
 ﻿using AvalonDock;
 using AvalonDock.Layout;
+using AvalonDock.Controls;
 using MahApps.Metro.Controls;
 using Skriptorium.Interpreter;
 using Skriptorium.Managers;
