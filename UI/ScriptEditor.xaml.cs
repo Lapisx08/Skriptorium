@@ -130,6 +130,7 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.LineTransformers.Clear();
             avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
             _colorizer.UpdateTokens(_cachedTokens);
+            ApplyCaretBrushFromTheme();
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
 
@@ -160,16 +161,10 @@ namespace Skriptorium.UI
 
         private void ApplyCaretBrushFromTheme()
         {
-            // Versuche EditorCaretColor-Ressource zu holen
-            if (Application.Current.Resources["EditorCaretColor"] is Color caretColor)
-            {
-                avalonEditor.TextArea.Caret.CaretBrush = new SolidColorBrush(caretColor);
-            }
-            else
-            {
-                // Fallback z. B. Schwarz
-                avalonEditor.TextArea.Caret.CaretBrush = Brushes.Black;
-            }
+            var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
+            avalonEditor.TextArea.Caret.CaretBrush = isDark
+                ? new SolidColorBrush(Colors.WhiteSmoke) // Helle Farbe für Darkmode
+                : new SolidColorBrush(Colors.Black);     // Dunkle Farbe für Lightmode
         }
 
         private void AvalonEditor_TextChanged(object? sender, EventArgs e)

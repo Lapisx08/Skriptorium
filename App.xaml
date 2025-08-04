@@ -6,12 +6,10 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Nur Basis-Stile laden, kein fixes Theme -->
+                <!-- MahApps.Metro Theme -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FF607182"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

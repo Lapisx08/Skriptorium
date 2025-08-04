@@ -7,8 +7,8 @@
         Title="Skriptorium" TitleCharacterCasing="Normal"
         Height="750" Width="1000" WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Skriptorium.ico"
-        Background="{DynamicResource WindowBackgroundBrush}"
-        Foreground="{DynamicResource TextBrush}">
+        Background="{DynamicResource MahApps.Brushes.Window.Background}"
+        Foreground="{DynamicResource MahApps.Brushes.Text}">
 
     <DockPanel>
         <!-- Menüleiste -->
