@@ -2,62 +2,85 @@
 using MahApps.Metro;
 using Skriptorium.Properties;
 using System;
+using System.Linq;
 using System.Windows;
-using AvalonDock;
-using AvalonDock.Controls;
 
 namespace Skriptorium
 {
     public partial class App : Application
     {
+        private const string ThemePathTemplate = "/AvalonDock.Themes.VS2013;component/{0}Theme.xaml";
+        private const string DefaultTheme = "Light.Steel";
+
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             Settings.Default.Reload();
 
-            string themeName = Settings.Default.Theme;
-            if (string.IsNullOrWhiteSpace(themeName))
-            {
-                themeName = "Light.Steel";  // Fallback: z.B. Light.Steel
-                Settings.Default.Theme = themeName;
-                Settings.Default.Save();
-            }
+            // Theme aus Einstellungen oder Fallback
+            string themeName = string.IsNullOrWhiteSpace(Settings.Default.Theme)
+                ? DefaultTheme
+                : Settings.Default.Theme;
 
-            // Theme aufteilen: Schema: Light.Steel → baseTheme: Light, accent: Steel
-            var parts = themeName.Split('.');
-            string baseTheme = parts[0];
-            string accent = parts.Length > 1 ? parts[1] : "Steel";
+            // Theme setzen
+            ThemeManager.Current.ChangeTheme(this, themeName);
 
-            // Setze Theme mit MahApps ThemeManager
-            ThemeManager.Current.ChangeTheme(this, $"{baseTheme}.{accent}");
+            // AvalonDock-Theme auf Basis des aktuell aktiven MahApps-Themes anwenden
+            ApplyAvalonDockThemeFromMahApps();
 
-            // AvalonDock Brush-Farben initial setzen
-            ApplyAvalonDockBrushes(baseTheme);
-
-            // Reagiere auf zukünftige Theme-Wechsel
-            ThemeManager.Current.ThemeChanged += (s, args) =>
-            {
-                string newBaseTheme = args.NewTheme.BaseColorScheme;
-                ApplyAvalonDockBrushes(newBaseTheme);
-            };
+            // Theme-Wechsel-Handler synchronisieren
+            ThemeManager.Current.ThemeChanged += (_, __) =>
+                ApplyAvalonDockThemeFromMahApps();
 
             // Hauptfenster starten
-            var main = new UI.MainWindow();
-            main.Show();
+            new UI.MainWindow().Show();
         }
 
-        private void ApplyAvalonDockBrushes(string baseTheme)
+        private void ApplyAvalonDockThemeFromMahApps()
         {
-            // Entferne alte AvalonDock-Brushes
-            var existing = Current.Resources.MergedDictionaries
+            // Aktuelles MahApps-Theme ermitteln
+            var currentTheme = ThemeManager.Current.DetectTheme(this);
+
+            if (currentTheme == null)
+            {
+                MessageBox.Show("Konnte aktuelles MahApps-Theme nicht ermitteln. Fallback auf Light.",
+                    "Theme-Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ApplyAvalonDockTheme("Light");
+                return;
+            }
+
+            // BaseColorScheme von MahApps ist "Light" oder "Dark"
+            ApplyAvalonDockTheme(currentTheme.BaseColorScheme);
+        }
+
+        private void ApplyAvalonDockTheme(string baseTheme)
+        {
+            // Vorhandenes AvalonDock-Theme entfernen
+            var themeDictionary = Current.Resources.MergedDictionaries
                 .FirstOrDefault(d => d.Source?.ToString().Contains("Theme.xaml") == true);
 
-            if (existing != null)
-                Current.Resources.MergedDictionaries.Remove(existing);
+            if (themeDictionary != null)
+                Current.Resources.MergedDictionaries.Remove(themeDictionary);
 
-            // Debugging: Prüfe das aktuelle Theme
-            var currentTheme = ThemeManager.Current.DetectTheme(this)?.BaseColorScheme;
-            MessageBox.Show($"Aktuelles Theme: {currentTheme}, Übergebenes baseTheme: {baseTheme}",
-                            "Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Validiere baseTheme
+            if (baseTheme != "Light" && baseTheme != "Dark")
+            {
+                MessageBox.Show($"Ungültiges Theme: {baseTheme}. Fallback auf Light.",
+                    "Theme-Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
+                baseTheme = "Light";
+            }
+
+            try
+            {
+                Current.Resources.MergedDictionaries.Add(new ResourceDictionary
+                {
+                    Source = new Uri(string.Format(ThemePathTemplate, baseTheme), UriKind.Relative)
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Laden des {baseTheme} Themes: {ex.Message}",
+                    "Theme-Ladefehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
