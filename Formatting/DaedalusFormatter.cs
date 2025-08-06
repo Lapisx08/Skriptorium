@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Skriptorium.Parsing;
+using System.Text.RegularExpressions;
 
 namespace Skriptorium.Formatting
 {
@@ -9,103 +9,95 @@ namespace Skriptorium.Formatting
 
         private string Indent(int level) => new string(' ', IndentSize * level);
 
-        public string Format(List<Declaration> declarations)
+        public string Format(string script)
         {
             var sb = new StringBuilder();
+            int indentLevel = 0; // Aktuelle Verschachtelungsebene
+            bool isInsideDeclaration = false; // Verfolgt, ob wir in einer Deklaration (func/instance) sind
 
-            foreach (var decl in declarations)
+            // Zeilenweise Verarbeitung
+            string[] lines = script.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            foreach (string line in lines)
             {
-                switch (decl)
+                string trimmedLine = line.TrimStart(); // Entferne führende Leerzeichen für die Analyse
+                if (string.IsNullOrWhiteSpace(trimmedLine))
                 {
-                    case FunctionDeclaration func:
-                        sb.Append($"func {func.ReturnType} {func.Name}(");
-                        sb.Append(string.Join(", ", func.Parameters ?? new List<string>()));
-                        sb.AppendLine(") {");
+                    // Leere Zeilen unverändert hinzufügen (optional mit Einrückung)
+                    sb.AppendLine();
+                    continue;
+                }
 
-                        foreach (var stmt in func.Body ?? new List<Statement>())
-                        {
-                            sb.AppendLine(FormatStatement(stmt, 1));
-                        }
+                // Prüfe, ob die Zeile eine öffnende Klammer enthält
+                bool hasOpeningBrace = trimmedLine.Contains("{");
+                // Prüfe, ob die Zeile eine schließende Klammer enthält
+                bool hasClosingBrace = trimmedLine.Contains("}");
+                // Ignoriere Klammern in Kommentaren oder Strings
+                if (IsInCommentOrString(trimmedLine))
+                {
+                    hasOpeningBrace = false;
+                    hasClosingBrace = false;
+                }
 
-                        sb.AppendLine("}");
-                        sb.AppendLine();
-                        break;
+                // Wenn die Zeile eine schließende Klammer enthält, reduziere die Einrückungsebene *vor* der Zeile
+                if (hasClosingBrace)
+                {
+                    indentLevel = Math.Max(0, indentLevel - 1);
+                }
 
-                    case InstanceDeclaration inst:
-                        sb.Append($"instance {inst.Name}({inst.BaseClass}) ");
-                        sb.AppendLine("{");
+                // Füge die Zeile mit der aktuellen Einrückung hinzu
+                sb.AppendLine(Indent(indentLevel) + trimmedLine);
 
-                        foreach (var stmt in inst.Body ?? new List<Statement>())
-                        {
-                            sb.AppendLine(FormatStatement(stmt, 1));
-                        }
+                // Wenn die Zeile eine öffnende Klammer enthält, erhöhe die Einrückungsebene *nach* der Zeile
+                if (hasOpeningBrace)
+                {
+                    indentLevel++;
+                }
 
-                        sb.AppendLine("}");
-                        sb.AppendLine();
-                        break;
-
-                    default:
-                        sb.AppendLine("// Unbekannter Deklarationstyp");
-                        break;
+                // Prüfe, ob die Zeile eine func- oder instance-Deklaration beginnt
+                if (Regex.IsMatch(trimmedLine, @"^(func|instance)\b"))
+                {
+                    isInsideDeclaration = true;
+                }
+                // Prüfe, ob die Deklaration endet (nach schließender Klammer)
+                if (hasClosingBrace && indentLevel == 0)
+                {
+                    isInsideDeclaration = false;
+                    sb.AppendLine(); // Füge eine leere Zeile nach der Deklaration hinzu
                 }
             }
 
             return sb.ToString().TrimEnd();
         }
 
-        private string FormatStatement(Statement stmt, int indentLevel)
+        // Hilfsmethode: Prüft, ob die Zeile ein Kommentar oder ein String ist (um Klammern zu ignorieren)
+        private bool IsInCommentOrString(string line)
         {
-            string indent = Indent(indentLevel);
+            // Einfache Prüfung: Ignoriere Zeilen, die mit // beginnen oder in Anführungszeichen sind
+            line = line.TrimStart();
+            if (line.StartsWith("//"))
+                return true;
 
-            return stmt switch
+            // Prüfe auf Strings (einfache Heuristik, kann erweitert werden)
+            if (line.Contains("\""))
             {
-                Assignment a => indent + $"{FormatExpr(a.Left)} = {FormatExpr(a.Right)};",
-                ReturnStatement r => indent + (r.ReturnValue != null ? $"return {FormatExpr(r.ReturnValue)};" : "return;"),
-                ExpressionStatement e => indent + $"{FormatExpr(e.Expr)};",
-                IfStatement ifStmt => FormatIfStatement(ifStmt, indentLevel),
-                _ => indent + "// unbekannte Anweisung"
-            };
-        }
-
-        private string FormatIfStatement(IfStatement ifStmt, int indentLevel)
-        {
-            var sb = new StringBuilder();
-            string indent = Indent(indentLevel);
-
-            sb.AppendLine($"{indent}if ({FormatExpr(ifStmt.Condition)}) {{");
-
-            foreach (var stmt in ifStmt.ThenBranch ?? new List<Statement>())
-            {
-                sb.AppendLine(FormatStatement(stmt, indentLevel + 1));
-            }
-
-            sb.AppendLine($"{indent}}}");
-
-            if (ifStmt.ElseBranch != null)
-            {
-                sb.AppendLine($"{indent}else {{");
-
-                foreach (var stmt in ifStmt.ElseBranch)
+                // Annahme: Wenn { oder } in einem String vorkommen, ignorieren wir sie
+                int quoteCount = line.Count(c => c == '"');
+                if (quoteCount % 2 == 0) // Nur geschlossene Strings
                 {
-                    sb.AppendLine(FormatStatement(stmt, indentLevel + 1));
+                    // Prüfe, ob { oder } innerhalb von Anführungszeichen liegt
+                    bool insideString = false;
+                    foreach (char c in line)
+                    {
+                        if (c == '"')
+                            insideString = !insideString;
+                        if ((c == '{' || c == '}') && insideString)
+                            return true;
+                    }
                 }
-
-                sb.AppendLine($"{indent}}}");
             }
 
-            return sb.ToString();
-        }
-
-        private string FormatExpr(Expression expr)
-        {
-            return expr switch
-            {
-                LiteralExpression l => l.Value,
-                VariableExpression v => v.Name,
-                BinaryExpression b => $"{FormatExpr(b.Left)} {b.Operator} {FormatExpr(b.Right)}",
-                FunctionCallExpression f => $"{f.FunctionName}({string.Join(", ", f.Arguments?.Select(FormatExpr) ?? new List<string>())})",
-                _ => "<expr>"
-            };
+            return false;
         }
     }
 }

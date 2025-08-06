@@ -81,6 +81,7 @@ namespace Skriptorium.Parsing
         Comment,           // //
         CommentBlock,      // /* … */
 
+        // Sonstige
         Whitespace,
         EOF,
         Unknown

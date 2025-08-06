@@ -631,15 +631,13 @@ namespace Skriptorium.UI
         {
             try
             {
-                var tokens = _cachedTokens;
-                var parser = new DaedalusParser(tokens);
-                var declarations = parser.ParseScript(); // AST erzeugen
-
                 var formatter = new Skriptorium.Formatting.DaedalusFormatter();
-                string formattedCode = formatter.Format(declarations);
+                string scriptText = avalonEditor.Text; // Skripttext aus dem AvalonEdit TextEditor
+                string formattedCode = formatter.Format(scriptText);
 
                 SetTextAndMarkAsModified(formattedCode);
                 ApplySyntaxHighlighting(); // Optional: neu einfärben
+                UpdateFoldings(); // Faltungen aktualisieren, da die Einrückung sich ändert
             }
             catch (Exception ex)
             {

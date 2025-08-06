@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Skriptorium.Parsing
 {
@@ -163,7 +164,7 @@ namespace Skriptorium.Parsing
         {
             var startToken = Current();
             Advance(); // 'instance'
-            var nameToken = Consume(TokenType.Identifier, "Instanzname erwartet");
+            var nameToken = Consume(TokenType.InstanceName, "Instanzname erwartet");
 
             var instance = new InstanceDeclaration
             {
@@ -265,7 +266,7 @@ namespace Skriptorium.Parsing
                 Line = startToken.Line,
                 Column = startToken.Column
             };
-            var nameToken = Consume(TokenType.Identifier, "Funktionsname erwartet");
+            var nameToken = Consume(TokenType.FunctionName, "Funktionsname erwartet");
             func.Name = nameToken.Value;
 
             Consume(TokenType.OpenParenthesis, "'(' erwartet");
@@ -321,7 +322,7 @@ namespace Skriptorium.Parsing
             var startToken = Current();
             Advance(); // 'var'
             var typeToken = Consume(TokenType.TypeKeyword, "Typname erwartet");
-            var nameToken = Consume(TokenType.Identifier, "Variablenname erwartet");
+            var nameToken = Consume(TokenType.FunctionName, "Variablenname erwartet");
             Consume(TokenType.Semicolon, "';' nach Variablendeklaration erwartet");
             return new VarDeclaration
             {
@@ -467,8 +468,17 @@ namespace Skriptorium.Parsing
         {
             DaedalusToken tok = Current();
 
+            // Behandlung von Literals und Konstanten
             if (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral) ||
-                Match(TokenType.StringLiteral) || Match(TokenType.BoolLiteral))
+                Match(TokenType.StringLiteral) || Match(TokenType.BoolLiteral) ||
+                Match(TokenType.GuildConstant) || Match(TokenType.NPC_Constant) ||
+                Match(TokenType.AIVConstant) || Match(TokenType.FAIConstant) ||
+                Match(TokenType.CRIMEConstant) || Match(TokenType.LOCConstant) ||
+                Match(TokenType.PETZCOUNTERConstant) || Match(TokenType.LOGConstant) ||
+                Match(TokenType.FONTConstant) || Match(TokenType.REALConstant) ||
+                Match(TokenType.ATRConstant) || Match(TokenType.ARConstant) ||
+                Match(TokenType.PLAYERConstant) || Match(TokenType.ZENConstant) ||
+                Match(TokenType.SexConstant))
             {
                 Advance();
                 return new LiteralExpression
@@ -479,7 +489,16 @@ namespace Skriptorium.Parsing
                 };
             }
 
-            if (Match(TokenType.Identifier))
+            // Behandlung von Variablen, aivar, speziellen Schlüsselwörtern und Funktionen
+            if (Match(TokenType.Identifier) || Match(TokenType.AiVariable) ||
+                Match(TokenType.SelfKeyword) || Match(TokenType.OtherKeyword) ||
+                Match(TokenType.SlfKeyword) || Match(TokenType.BuiltInFunction) ||
+                Match(TokenType.MdlFunction) || Match(TokenType.AIFunction) ||
+                Match(TokenType.NpcFunction) || Match(TokenType.InfoFunction) ||
+                Match(TokenType.CreateFunction) || Match(TokenType.WldFunction) ||
+                Match(TokenType.LogFunction) || Match(TokenType.HlpFunction) ||
+                Match(TokenType.SndFunction) || Match(TokenType.TAFunction) ||
+                Match(TokenType.EquipFunction))
             {
                 Advance();
                 Expression expr = new VariableExpression
@@ -489,6 +508,7 @@ namespace Skriptorium.Parsing
                     Column = tok.Column
                 };
 
+                // Funktionsaufruf
                 if (Match(TokenType.OpenParenthesis))
                 {
                     Advance(); // consume '('
@@ -516,6 +536,7 @@ namespace Skriptorium.Parsing
                     };
                 }
 
+                // Array-Zugriff
                 while (Match(TokenType.OpenSquareBracket))
                 {
                     Advance();

@@ -208,8 +208,8 @@ namespace Skriptorium.UI.Views.Tools
             // Tagesroutine-Funktion
             sb.AppendLine($"func void Rtn_Start_{idEntry.Text} () // Tages-Routine muss insgesamt immer 24 h ergeben");
             sb.AppendLine("{");
-            sb.AppendLine("     TA_Platzhalter  (08,00,20,00,\"WP_Platzhalter\");");
-            sb.AppendLine("     TA_Platzhalter  (20,00,08,00,\"WP_Platzhalter\");");
+            sb.AppendLine("    TA_Platzhalter  (08,00,20,00,\"WP_Platzhalter\");");
+            sb.AppendLine("    TA_Platzhalter  (20,00,08,00,\"WP_Platzhalter\");");
             sb.AppendLine("};");
 
             outputText.Text = sb.ToString();

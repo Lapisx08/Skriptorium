@@ -79,6 +79,9 @@ namespace Skriptorium.UI
             // Tool-Shortcuts
             _shortcutManager.Register(Key.H, ModifierKeys.Control,
                                       () => SyntaxHighlightingUmschalten_Click(null, null));
+
+            _shortcutManager.Register(Key.F5, ModifierKeys.None,
+                                      () => SemanticCheckButton_Click(null, null));
             _shortcutManager.Register(Key.E, ModifierKeys.Control,
                                       () => GetActiveScriptEditor()?.FormatCode());
             _shortcutManager.Register(Key.G, ModifierKeys.Control,

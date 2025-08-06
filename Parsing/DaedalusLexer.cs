@@ -244,12 +244,20 @@ namespace Skriptorium.Parsing
                         TokenType type = TokenType.Unknown;
 
                         // Präfix-Check
-                        foreach (var prefix in prefixTokenTypes)
+                        if (val.Equals("Npc_Default", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (val.StartsWith(prefix.Key, StringComparison.Ordinal))
+                            type = TokenType.Identifier;
+                        }
+                        else
+                        {
+                            // Präfix-Check
+                            foreach (var prefix in prefixTokenTypes)
                             {
-                                type = prefix.Value;
-                                break;
+                                if (val.StartsWith(prefix.Key, StringComparison.Ordinal))
+                                {
+                                    type = prefix.Value;
+                                    break;
+                                }
                             }
                         }
 

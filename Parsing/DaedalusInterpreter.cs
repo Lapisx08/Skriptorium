@@ -12,10 +12,6 @@ namespace Skriptorium.Interpreter
         private readonly Stack<Dictionary<string, object>> _callStack = new();
         private readonly Dictionary<string, InstanceDeclaration> _instances = new();
 
-        /// <summary>
-        /// Lädt NUR alle Deklarationen in interne Tabellen (Funktionen, Variablen, Instanzen).
-        /// KEINE semantischen Prüfungen (wie unbekannte Funktionen bei daily_routine) mehr hier!
-        /// </summary>
         public void LoadDeclarations(List<Declaration> decls)
         {
             var errors = new List<string>();
@@ -78,9 +74,6 @@ namespace Skriptorium.Interpreter
             _ => null,
         };
 
-        /// <summary>
-        /// Alle semantischen Checks passieren hier – nachdem ALLE Deklarationen vollständig geladen sind.
-        /// </summary>
         public List<string> SemanticCheck()
         {
             var errors = new List<string>();
