@@ -14,13 +14,61 @@ namespace Skriptorium.Managers
     public class ScriptTabManager
     {
         private readonly DockingManager _dockingManager;
-        private readonly LayoutDocumentPane _documentPane;
+        private readonly LayoutDocumentPane _defaultDocumentPane; // Ursprüngliche Pane als Fallback
         private int _newScriptCounter = 1;
 
         public ScriptTabManager(DockingManager dockingManager, LayoutDocumentPane documentPane)
         {
             _dockingManager = dockingManager;
-            _documentPane = documentPane;
+            _defaultDocumentPane = documentPane;
+        }
+
+        private LayoutDocumentPane GetActiveDocumentPane()
+        {
+            // 1. Versuche, die Pane des aktiven Dokuments zu finden
+            if (_dockingManager.ActiveContent is LayoutDocument activeDoc)
+            {
+                var parentPane = activeDoc.Parent as LayoutDocumentPane;
+                if (parentPane != null)
+                    return parentPane;
+            }
+
+            // 2. Suche nach der ersten verfügbaren LayoutDocumentPane im Layout
+            var layoutRoot = _dockingManager.Layout;
+            var documentPane = layoutRoot.Descendents()
+                .OfType<LayoutDocumentPane>()
+                .FirstOrDefault();
+
+            // 3. Falls keine Pane gefunden wurde, erstelle eine neue
+            if (documentPane == null)
+            {
+                documentPane = new LayoutDocumentPane();
+
+                // Versuche, eine bestehende PaneGroup zu finden
+                var paneGroup = layoutRoot.Descendents()
+                    .OfType<LayoutDocumentPaneGroup>()
+                    .FirstOrDefault();
+
+                if (paneGroup == null)
+                {
+                    paneGroup = new LayoutDocumentPaneGroup();
+
+                    var root = (LayoutRoot)layoutRoot;
+                    if (root.RootPanel == null)
+                        root.RootPanel = new LayoutPanel();
+
+                    root.RootPanel.Children.Add(paneGroup); // statt InsertChildAt
+
+                    paneGroup.InsertChildAt(paneGroup.ChildrenCount, documentPane); // kann so bleiben
+                }
+                else
+                {
+                    paneGroup.InsertChildAt(paneGroup.ChildrenCount, documentPane);
+                }
+            }
+
+            // Rückfall auf Default, falls doch noch null
+            return documentPane ?? _defaultDocumentPane;
         }
 
         public void AddNewTab(string content = "", string? tabTitle = null, string? filePath = null)
@@ -48,7 +96,8 @@ namespace Skriptorium.Managers
                 UpdateTabTitle(scriptEditor);
             };
 
-            _documentPane.Children.Add(document);
+            var targetPane = GetActiveDocumentPane();
+            targetPane.Children.Add(document);
             _dockingManager.ActiveContent = document;
 
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -63,7 +112,6 @@ namespace Skriptorium.Managers
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
-
         public ScriptEditor? GetActiveScriptEditor()
         {
             if (_dockingManager.ActiveContent is ScriptEditor editor)
@@ -75,13 +123,13 @@ namespace Skriptorium.Managers
                 return docEditor;
             }
 
-            var activeDocument = _documentPane.Children.OfType<LayoutDocument>().FirstOrDefault(d => d.IsActive);
+            var activeDocument = GetActiveDocumentPane().Children.OfType<LayoutDocument>().FirstOrDefault(d => d.IsActive);
             if (activeDocument != null && activeDocument.Content is ScriptEditor activeEditor)
             {
                 return activeEditor;
             }
 
-            var firstDocument = _documentPane.Children.OfType<LayoutDocument>().FirstOrDefault();
+            var firstDocument = GetActiveDocumentPane().Children.OfType<LayoutDocument>().FirstOrDefault();
             if (firstDocument != null && firstDocument.Content is ScriptEditor firstEditor)
             {
                 return firstEditor;
@@ -93,17 +141,17 @@ namespace Skriptorium.Managers
         public void CloseActiveTab()
         {
             var editor = GetActiveScriptEditor();
-            if (editor != null && _documentPane.Children.FirstOrDefault(d => d.Content == editor) is LayoutDocument document)
+            if (editor != null && GetDocumentByEditor(editor) is LayoutDocument document)
             {
-                if (!ConfirmClose(editor))
-                    return;
-                _documentPane.Children.Remove(document);
+                document.Close();
             }
         }
 
         public bool TryActivateTabByFilePath(string filePath)
         {
-            foreach (var document in _documentPane.Children.OfType<LayoutDocument>())
+            foreach (var document in _dockingManager.Layout.Descendents()
+                     .OfType<LayoutDocumentPane>()
+                     .SelectMany(p => p.Children.OfType<LayoutDocument>()))
             {
                 if (document.Content is ScriptEditor editor &&
                     string.Equals(editor.FilePath, filePath, StringComparison.OrdinalIgnoreCase))
@@ -153,7 +201,7 @@ namespace Skriptorium.Managers
 
         private LayoutDocument? GetDocumentByEditor(ScriptEditor editor)
         {
-            return _documentPane.Children
+            return GetActiveDocumentPane().Children
                 .OfType<LayoutDocument>()
                 .FirstOrDefault(d => d.Content == editor);
         }
@@ -172,10 +220,13 @@ namespace Skriptorium.Managers
 
         public IEnumerable<ScriptEditor> GetAllOpenEditors()
         {
-            foreach (var document in _documentPane.Children.OfType<LayoutDocument>())
+            foreach (var pane in _dockingManager.Layout.Descendents().OfType<LayoutDocumentPane>())
             {
-                if (document.Content is ScriptEditor editor)
-                    yield return editor;
+                foreach (var document in pane.Children.OfType<LayoutDocument>())
+                {
+                    if (document.Content is ScriptEditor editor)
+                        yield return editor;
+                }
             }
         }
     }
