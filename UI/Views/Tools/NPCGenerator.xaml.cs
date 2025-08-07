@@ -149,7 +149,7 @@ namespace Skriptorium.UI.Views.Tools
             if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == "Ja")
             {
                 sb.AppendLine("    // Ersetzte bei Nutzung individueller Attribute B_SetAttributesToChapter (self, 1);");
-                sb.AppendLine("    attribute[ATR_STRENGTH        =  10;");
+                sb.AppendLine("    attribute[ATR_STRENGTH]       =  10;");
                 sb.AppendLine("    attribute[ATR_DEXTERITY]      =  10;");
                 sb.AppendLine("    attribute[ATR_HITPOINTS_MAX]  =  40;");
                 sb.AppendLine("    attribute[ATR_HITPOINTS]      =  40;");
@@ -160,7 +160,7 @@ namespace Skriptorium.UI.Views.Tools
 
             // Kampf-Taktik
             sb.AppendLine("    // ------ Kampf-Taktik ------");
-            sb.AppendLine($"    fight_tactic  =  (FAI_HUMAN_Platzhalter); // COWARD / STRONG / MASTER");
+            sb.AppendLine($"    fight_tactic  =  FAI_HUMAN_Platzhalter; // COWARD / STRONG / MASTER");
             sb.AppendLine();
 
             // Ausgerüstete Waffen
@@ -203,6 +203,7 @@ namespace Skriptorium.UI.Views.Tools
             // TA anmelden
             sb.AppendLine("    // ------ TA anmelden ------");
             sb.AppendLine($"    daily_routine  =  Rtn_Start_{idEntry.Text};");
+            sb.AppendLine("}");
             sb.AppendLine();
 
             // Tagesroutine-Funktion
