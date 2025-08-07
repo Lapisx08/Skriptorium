@@ -8,7 +8,7 @@ public class DaedalusSyntaxHighlightingDarkmode
 {
     private static readonly Dictionary<TokenType, (SyntaxColor Color, Color WpfColor)> tokenTypeToColor = new()
     {
-            // Schlüsselwörter
+        // Schlüsselwörter
         { TokenType.FuncKeyword,        (SyntaxColor.Keyword, Colors.LightSkyBlue) },
         { TokenType.VarKeyword,         (SyntaxColor.Keyword, Colors.LightSkyBlue) },
         { TokenType.ConstKeyword,       (SyntaxColor.Keyword, Colors.OrangeRed) },

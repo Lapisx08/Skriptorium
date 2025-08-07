@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using ICSharpCode.AvalonEdit.Document;
+using Skriptorium.Formatting;
 using Skriptorium.UI;
+using System.Windows;
 
 namespace Skriptorium.Managers
 {
@@ -39,6 +41,34 @@ namespace Skriptorium.Managers
             if (editor.Avalon.CanRedo)
             {
                 editor.Avalon.Redo();
+            }
+        }
+
+        public void FormatCurrentScript()
+        {
+            var editor = _tabManager.GetActiveScriptEditor();
+            if (editor == null)
+            {
+                MessageBox.Show("Kein Skript geöffnet.");
+                return;
+            }
+
+            var document = editor.Avalon.Document;
+            var originalText = document.Text;
+
+            var formatter = new DaedalusFormatter();
+            var formattedText = formatter.Format(originalText);
+
+            if (formattedText != originalText)
+            {
+                // Änderungen als eine Undo-Operation ausführen
+                using (document.RunUpdate())
+                {
+                    document.Replace(0, document.TextLength, formattedText);
+                }
+
+                // Optional: Cursor wieder an alte Stelle setzen
+                editor.Avalon.CaretOffset = Math.Min(editor.Avalon.CaretOffset, formattedText.Length);
             }
         }
 

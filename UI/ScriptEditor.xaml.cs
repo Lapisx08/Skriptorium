@@ -628,19 +628,18 @@ namespace Skriptorium.UI
 
         public void FormatCode()
         {
-            try
-            {
-                var formatter = new Skriptorium.Formatting.DaedalusFormatter();
-                string scriptText = avalonEditor.Text; // Skripttext aus dem AvalonEdit TextEditor
-                string formattedCode = formatter.Format(scriptText);
+            var document = Avalon.Document;
+            var originalText = document.Text;
 
-                SetTextAndMarkAsModified(formattedCode);
-                ApplySyntaxHighlighting(); // Optional: neu einfärben
-                UpdateFoldings(); // Faltungen aktualisieren, da die Einrückung sich ändert
-            }
-            catch (Exception ex)
+            var formatter = new DaedalusFormatter();
+            var formattedText = formatter.Format(originalText);
+
+            if (formattedText != originalText)
             {
-                MessageBox.Show($"Fehler beim Formatieren: {ex.Message}", "Formatierfehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                using (document.RunUpdate())
+                {
+                    document.Replace(0, document.TextLength, formattedText);
+                }
             }
         }
 

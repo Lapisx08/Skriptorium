@@ -1,24 +1,32 @@
 # Skriptorium
 
-
-
-Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripten für das Modding von Gothic
+Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripten für das Modding von Gothic.
 
 
 
 
 
-### Inhaltsverzeichnis
+## Inhaltsverzeichnis
 
+\- \[Funktionen](#Funktionen)
 
+\- \[Systemanforderungen](#Systemanforderungen)
 
+\- \[Installation](#Installation)
 
+\- \[Abhängigkeiten](#Abhängigkeiten)
+
+\- \[Entwicklung](#Entwicklung)
+
+\- \[Entwickler](#Entwickler)
+
+\- \[Lizenz](#Lizenz)
+
+\- \[Kontaktinformationen](#Kontaktinformationen)
 
 
 
 ### Funktionen
-
-
 
 * Speziell für Daedalus-Skripte optimiert
 * Moderne WPF-Oberfläche mit hellem und dunklem Anzeigemodus
@@ -32,9 +40,8 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 
 ### Systemanforderungen
 
-
-
-* Windows 10 Build 26100 (WWindows 11 24H2)
+* Zielbetriebssystem 10.0.26100.0 (Windows 11)
+* Unterstützte Mindest-Betriebssystemversion 10.0.19041.0 (Windows 10)
 * .NET 8.0 Runtime (Windows-spezifische Variante)
 
 
@@ -43,27 +50,22 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 
 ### Installation
 
-
+1. SkriptoriumSetup.exe starten
+2. Folge dem Installationsassistenten
 
 
 
 ### Abhängigkeiten
 
-
-
-* MahApps.Metro Version= 2.4.10
-* AvalonEdit, Version = 6.3.1.120
-* Dirkster.AvalonDock, Version = 4.72.1
-* Dirkster.AvalonDock.Themes.VS2013, Version = 4.72.1
-* Ookii.Dialogs.Wpf" Version="5.0.1" />
-
-
+* MahApps.Metro (2.4.10)
+* AvalonEdit, Version (6.3.1.120)
+* Dirkster.AvalonDock (4.72.1)
+* Dirkster.AvalonDock.Themes.VS2013 (4.72.1)
+* Ookii.Dialogs.Wpf (5.0.1)
 
 
 
 ### Entwicklung
-
-
 
 Das Projekt ist in C# mit .NET 8.0 WPF entwickelt.
 
@@ -82,9 +84,7 @@ Das Projekt ist in C# mit .NET 8.0 WPF entwickelt.
 
 ### Lizenz
 
-
-
-Lizenzert unter der GNU General Public License Version 3. Genaue Informationen siehe LICENSE.txt
+Lizenziert unter der GNU General Public License Version 3. Genaue Informationen siehe LICENSE.txt
 
 
 
@@ -92,13 +92,5 @@ Lizenzert unter der GNU General Public License Version 3. Genaue Informationen s
 
 ### Kontaktinformationen
 
-
-
 Kontaktmöglichkeit bei Fragen, Kritik oder Interesse an einer Mitwirkung des Projekts: (lapisx08@protonmail.com)
-
-
-
-
-
-
 

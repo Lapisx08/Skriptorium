@@ -60,6 +60,11 @@ namespace Skriptorium.Parsing
         public Expression Expr { get; set; }
     }
 
+    public class VarDeclarationStatement : Statement
+    {
+        public VarDeclaration Declaration { get; set; }
+    }
+
     public class IfStatement : Statement
     {
         public Expression Condition { get; set; }
@@ -337,6 +342,7 @@ namespace Skriptorium.Parsing
         {
             if (Match(TokenType.IfKeyword)) return ParseIfStatement();
             if (Match(TokenType.ReturnKeyword)) return ParseReturnStatement();
+            if (Match(TokenType.VarKeyword)) return ParseVarStatement();
 
             int startPos = _position;
 
@@ -380,6 +386,51 @@ namespace Skriptorium.Parsing
             };
         }
 
+        private Statement ParseVarStatement()
+        {
+            var startToken = Current();
+            Advance(); // 'var'
+            var typeToken = Consume(TokenType.TypeKeyword, "Typname erwartet");
+            var nameToken = Consume(TokenType.FunctionName, "Variablenname erwartet");
+            Consume(TokenType.Semicolon, "';' nach Variablendeklaration erwartet");
+
+            var varDeclaration = new VarDeclaration
+            {
+                TypeName = typeToken.Value,
+                Name = nameToken.Value,
+                Line = startToken.Line,
+                Column = startToken.Column
+            };
+
+            // Prüfe, ob eine Zuweisung folgt
+            if (Match(TokenType.Identifier) || Match(TokenType.FunctionName))
+            {
+                var lhs = ParseExpression();
+                if (Match(TokenType.Assignment))
+                {
+                    var assignToken = Current();
+                    Advance(); // '='
+                    var rhs = ParseExpression();
+                    Consume(TokenType.Semicolon, "';' nach Zuweisung erwartet");
+
+                    return new Assignment
+                    {
+                        Left = lhs,
+                        Right = rhs,
+                        Line = assignToken.Line,
+                        Column = assignToken.Column
+                    };
+                }
+            }
+
+            return new VarDeclarationStatement
+            {
+                Declaration = varDeclaration,
+                Line = startToken.Line,
+                Column = startToken.Column
+            };
+        }
+
         private ReturnStatement ParseReturnStatement()
         {
             var startToken = Current();
@@ -403,6 +454,25 @@ namespace Skriptorium.Parsing
             Consume(TokenType.OpenParenthesis, "'(' nach if erwartet");
             var condition = ParseExpression();
             Consume(TokenType.CloseParenthesis, "')' nach Bedingung erwartet");
+
+            // Sammle zusätzliche Bedingungen mit && oder ||
+            while (Match(TokenType.Operator) && (Current().Value == "&&" || Current().Value == "||"))
+            {
+                var opToken = Current();
+                Advance(); // Operator konsumieren
+                Consume(TokenType.OpenParenthesis, "'(' nach Operator erwartet");
+                var rightCondition = ParseExpression();
+                Consume(TokenType.CloseParenthesis, "')' nach Bedingung erwartet");
+
+                condition = new BinaryExpression
+                {
+                    Left = condition,
+                    Operator = opToken.Value,
+                    Right = rightCondition,
+                    Line = opToken.Line,
+                    Column = opToken.Column
+                };
+            }
 
             Consume(TokenType.OpenBracket, "'{' vor if-Block erwartet");
             var thenBranch = new List<Statement>();

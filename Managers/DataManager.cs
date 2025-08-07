@@ -24,7 +24,8 @@ namespace Skriptorium.Managers
             {
                 Filter = "Textdateien (*.txt)|*.txt|Daedalus-Skripte (*.d)|*.d",
                 DefaultExt = ".d",
-                FilterIndex = 2
+                FilterIndex = 2,
+                InitialDirectory = GetInitialDirectory()
             };
 
             if (dlg.ShowDialog() == true)
@@ -103,6 +104,7 @@ namespace Skriptorium.Managers
                 Filter = "Textdateien (*.txt)|*.txt|Daedalus-Skripte (*.d)|*.d",
                 DefaultExt = ".d",
                 FilterIndex = 2,
+                InitialDirectory = GetInitialDirectory(),
                 FileName = string.IsNullOrWhiteSpace(activeEditor.FilePath)
                     ? ""
                     : Path.GetFileName(activeEditor.FilePath)
@@ -184,6 +186,16 @@ namespace Skriptorium.Managers
             {
                 // Ignorieren
             }
+        }
+
+        private static string GetInitialDirectory()
+        {
+            string path = Properties.Settings.Default.ScriptSearchPath;
+
+            if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path))
+                return path;
+
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
     }
 }
