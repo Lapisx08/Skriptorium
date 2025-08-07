@@ -6,26 +6,6 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 
 
 
-## Inhaltsverzeichnis
-
-\- \[Funktionen](#Funktionen)
-
-\- \[Systemanforderungen](#Systemanforderungen)
-
-\- \[Installation](#Installation)
-
-\- \[Abhängigkeiten](#Abhängigkeiten)
-
-\- \[Entwicklung](#Entwicklung)
-
-\- \[Entwickler](#Entwickler)
-
-\- \[Lizenz](#Lizenz)
-
-\- \[Kontaktinformationen](#Kontaktinformationen)
-
-
-
 ### Funktionen
 
 * Speziell für Daedalus-Skripte optimiert
@@ -55,6 +35,8 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 
 
 
+
+
 ### Abhängigkeiten
 
 * MahApps.Metro (2.4.10)
@@ -62,6 +44,8 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 * Dirkster.AvalonDock (4.72.1)
 * Dirkster.AvalonDock.Themes.VS2013 (4.72.1)
 * Ookii.Dialogs.Wpf (5.0.1)
+
+
 
 
 
