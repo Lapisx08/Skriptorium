@@ -112,6 +112,18 @@ namespace Skriptorium.Parsing
         public List<Expression> Arguments { get; set; } = new List<Expression>();
     }
 
+    public class MemberExpression : Expression
+    {
+        public Expression Object { get; set; }
+        public string MemberName { get; set; }
+    }
+
+    public class UnaryExpression : Expression
+    {
+        public string Operator { get; set; }
+        public Expression Operand { get; set; }
+    }
+
     public class ParseException : Exception
     {
         public int Line { get; }
@@ -451,27 +463,53 @@ namespace Skriptorium.Parsing
         {
             var startToken = Current();
             Advance(); // 'if'
-            Consume(TokenType.OpenParenthesis, "'(' nach if erwartet");
-            var condition = ParseExpression();
-            Consume(TokenType.CloseParenthesis, "')' nach Bedingung erwartet");
 
-            // Sammle zusätzliche Bedingungen mit && oder ||
-            while (Match(TokenType.Operator) && (Current().Value == "&&" || Current().Value == "||"))
+            Expression condition;
+            if (Match(TokenType.OpenParenthesis))
             {
-                var opToken = Current();
-                Advance(); // Operator konsumieren
-                Consume(TokenType.OpenParenthesis, "'(' nach Operator erwartet");
-                var rightCondition = ParseExpression();
+                Advance(); // '(' konsumieren
+                condition = ParseExpression();
                 Consume(TokenType.CloseParenthesis, "')' nach Bedingung erwartet");
 
-                condition = new BinaryExpression
+                // Prüfe auf logische Operatoren (&& oder ||) mit geklammerten Bedingungen
+                while (Match(TokenType.Operator) && (Current().Value == "&&" || Current().Value == "||"))
                 {
-                    Left = condition,
-                    Operator = opToken.Value,
-                    Right = rightCondition,
-                    Line = opToken.Line,
-                    Column = opToken.Column
-                };
+                    var opToken = Current();
+                    Advance(); // Operator konsumieren
+                    Consume(TokenType.OpenParenthesis, "'(' nach logischem Operator erwartet");
+                    var rightCondition = ParseExpression();
+                    Consume(TokenType.CloseParenthesis, "')' nach Bedingung erwartet");
+
+                    condition = new BinaryExpression
+                    {
+                        Left = condition,
+                        Operator = opToken.Value,
+                        Right = rightCondition,
+                        Line = opToken.Line,
+                        Column = opToken.Column
+                    };
+                }
+            }
+            else
+            {
+                // Bedingung ohne Klammern parsen
+                condition = ParseExpression();
+
+                // Prüfe auf logische Operatoren (&& oder ||) ohne Klammern
+                while (Match(TokenType.Operator) && (Current().Value == "&&" || Current().Value == "||"))
+                {
+                    var opToken = Current();
+                    Advance(); // Operator konsumieren
+                    var rightCondition = ParseExpression();
+                    condition = new BinaryExpression
+                    {
+                        Left = condition,
+                        Operator = opToken.Value,
+                        Right = rightCondition,
+                        Line = opToken.Line,
+                        Column = opToken.Column
+                    };
+                }
             }
 
             Consume(TokenType.OpenBracket, "'{' vor if-Block erwartet");
@@ -487,15 +525,23 @@ namespace Skriptorium.Parsing
             var elseBranch = new List<Statement>();
             if (Match(TokenType.ElseKeyword))
             {
-                Advance();
-                Consume(TokenType.OpenBracket, "'{' nach else erwartet");
-                while (!Check(TokenType.CloseBracket) && !IsAtEnd())
+                Advance(); // 'else' konsumieren
+                if (Match(TokenType.IfKeyword))
                 {
-                    var stmt = ParseStatement();
-                    if (stmt != null) elseBranch.Add(stmt); else Advance();
+                    var elseIfStatement = ParseIfStatement();
+                    elseBranch.Add(elseIfStatement);
                 }
-                Consume(TokenType.CloseBracket, "'}' nach else-Block erwartet");
-                if (Match(TokenType.Semicolon)) Advance();
+                else
+                {
+                    Consume(TokenType.OpenBracket, "'{' nach else erwartet");
+                    while (!Check(TokenType.CloseBracket) && !IsAtEnd())
+                    {
+                        var stmt = ParseStatement();
+                        if (stmt != null) elseBranch.Add(stmt); else Advance();
+                    }
+                    Consume(TokenType.CloseBracket, "'}' nach else-Block erwartet");
+                    if (Match(TokenType.Semicolon)) Advance();
+                }
             }
 
             return new IfStatement
@@ -538,6 +584,46 @@ namespace Skriptorium.Parsing
         {
             DaedalusToken tok = Current();
 
+            // Behandlung von unären Operatoren (z. B. ! oder - vor numerischen Literalen)
+            if (Match(TokenType.Operator) && (Current().Value == "!" || Current().Value == "-"))
+            {
+                Advance(); // '!' oder '-' konsumieren
+                if (tok.Value == "-" && (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral)))
+                {
+                    // Behandlung von negativen numerischen Literalen (z. B. -1)
+                    var literalToken = Current();
+                    Advance(); // Literal konsumieren
+                    return new LiteralExpression
+                    {
+                        Value = "-" + literalToken.Value, // Kombiniere - mit dem Literal
+                        Line = tok.Line,
+                        Column = tok.Column
+                    };
+                }
+                else if (tok.Value == "!")
+                {
+                    // Behandlung von logischer Negation
+                    var operand = ParsePrimary(); // Rekursiv den Operanden parsen
+                    return new UnaryExpression
+                    {
+                        Operator = tok.Value,
+                        Operand = operand,
+                        Line = tok.Line,
+                        Column = tok.Column
+                    };
+                }
+                throw new ParseException($"Unerwarteter Operanden nach unärem Operator '{tok.Value}'", Current());
+            }
+
+            // Behandlung von geklammerten Ausdrücken
+            if (Match(TokenType.OpenParenthesis))
+            {
+                Advance(); // '(' konsumieren
+                var expr = ParseExpression();
+                Consume(TokenType.CloseParenthesis, "')' nach geklammertem Ausdruck erwartet");
+                return expr;
+            }
+
             // Behandlung von Literals und Konstanten
             if (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral) ||
                 Match(TokenType.StringLiteral) || Match(TokenType.BoolLiteral) ||
@@ -578,10 +664,28 @@ namespace Skriptorium.Parsing
                     Column = tok.Column
                 };
 
+                // Member-Zugriff (z. B. self.aivar)
+                while (Match(TokenType.Dot))
+                {
+                    Advance(); // '.' konsumieren
+                    if (!(Match(TokenType.Identifier) || Match(TokenType.AiVariable)))
+                    {
+                        throw new ParseException("Membername (Identifier oder AiVariable) nach '.' erwartet", Current());
+                    }
+                    var memberToken = AdvanceAndGet();
+                    expr = new MemberExpression
+                    {
+                        Object = expr,
+                        MemberName = memberToken.Value,
+                        Line = memberToken.Line,
+                        Column = memberToken.Column
+                    };
+                }
+
                 // Funktionsaufruf
                 if (Match(TokenType.OpenParenthesis))
                 {
-                    Advance(); // consume '('
+                    Advance(); // '(' konsumieren
                     var args = new List<Expression>();
 
                     if (!Check(TokenType.CloseParenthesis))
@@ -597,13 +701,26 @@ namespace Skriptorium.Parsing
                     }
 
                     Consume(TokenType.CloseParenthesis, "')' nach Argumenten erwartet");
-                    expr = new FunctionCallExpression
+                    if (expr is MemberExpression memberExpr)
                     {
-                        FunctionName = tok.Value,
-                        Arguments = args,
-                        Line = tok.Line,
-                        Column = tok.Column
-                    };
+                        expr = new FunctionCallExpression
+                        {
+                            FunctionName = memberExpr.MemberName,
+                            Arguments = args,
+                            Line = tok.Line,
+                            Column = tok.Column
+                        };
+                    }
+                    else
+                    {
+                        expr = new FunctionCallExpression
+                        {
+                            FunctionName = ((VariableExpression)expr).Name,
+                            Arguments = args,
+                            Line = tok.Line,
+                            Column = tok.Column
+                        };
+                    }
                 }
 
                 // Array-Zugriff
