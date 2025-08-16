@@ -10,7 +10,7 @@ namespace Skriptorium.Interpreter
         private readonly Dictionary<string, FunctionDeclaration> _functions = new();
         private readonly Dictionary<string, object> _globals = new();
         private readonly Stack<Dictionary<string, object>> _callStack = new();
-        private readonly Dictionary<string, InstanceDeclaration> _instances = new();
+        private readonly Dictionary<string, Dictionary<string, object>> _instances = new();
 
         public void LoadDeclarations(List<Declaration> decls)
         {
@@ -52,11 +52,22 @@ namespace Skriptorium.Interpreter
                         }
                         else
                         {
-                            // KEINE Prüfungen hier – nur registrieren!
-                            _instances[instance.Name] = instance;
+                            _instances[instance.Name] = new Dictionary<string, object>();
                         }
                         break;
                 }
+            }
+
+            // Zweiter Pass: Initialisiere Instanz-Assignments nach dem Laden aller Deklarationen
+            foreach (var instanceDecl in decls.OfType<InstanceDeclaration>())
+            {
+                var instanceDict = _instances[instanceDecl.Name];
+                _callStack.Push(instanceDict);
+                foreach (var assign in instanceDecl.Assignments)
+                {
+                    HandleAssignment(assign);
+                }
+                _callStack.Pop();
             }
 
             if (errors.Any())
@@ -96,39 +107,6 @@ namespace Skriptorium.Interpreter
                 .Select(g => g.Key);
             foreach (var d in duplicateGlobals)
                 errors.Add($"Semantischer Fehler: Doppelte globale Variable: '{d}'");
-
-            // Prüfe Instanzen (inkl. daily_routine & Ausdrücke)
-            foreach (var instance in _instances.Values)
-            {
-                var assignments = new Dictionary<string, (int Line, int Column)>();
-                foreach (var assign in instance.Assignments)
-                {
-                    if (assign.Left is VariableExpression varExpr)
-                    {
-                        if (assignments.ContainsKey(varExpr.Name))
-                        {
-                            errors.Add($"Semantischer Fehler: Zeile {assign.Line}, Spalte {assign.Column}. Doppelte Zuweisung für Attribut '{varExpr.Name}' in Instanz '{instance.Name}'.");
-                        }
-                        else
-                        {
-                            assignments[varExpr.Name] = (assign.Line, assign.Column);
-                        }
-
-                        // Prüfe daily_routine
-                        if (varExpr.Name.Equals("daily_routine", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (assign.Right is not VariableExpression)
-                            {
-                                errors.Add($"Semantischer Fehler: Zeile {assign.Line}, Spalte {assign.Column}. 'daily_routine' erwartet einen Funktionsnamen in Instanz '{instance.Name}'.");
-                            }
-                            // Keine Prüfung, ob die Funktion existiert, da sie extern definiert sein kann
-                        }
-                    }
-
-                    // Prüfe Ausdrücke in Zuweisungen
-                    errors.AddRange(CheckExpression(assign.Right));
-                }
-            }
 
             return errors;
         }
@@ -171,7 +149,6 @@ namespace Skriptorium.Interpreter
             switch (expr)
             {
                 case FunctionCallExpression funcCall:
-                    // Keine Prüfung, ob die Funktion in _functions existiert, da sie extern definiert sein kann
                     foreach (var arg in funcCall.Arguments)
                         errors.AddRange(CheckExpression(arg));
                     break;
@@ -179,6 +156,10 @@ namespace Skriptorium.Interpreter
                 case BinaryExpression bin:
                     errors.AddRange(CheckExpression(bin.Left));
                     errors.AddRange(CheckExpression(bin.Right));
+                    break;
+
+                case UnaryExpression un:
+                    errors.AddRange(CheckExpression(un.Operand));
                     break;
 
                 case IndexExpression:
@@ -192,6 +173,10 @@ namespace Skriptorium.Interpreter
                     {
                         errors.Add($"Semantischer Fehler: Zeile {varExpr.Line}, Spalte {varExpr.Column}. Unbekannte Variable oder Funktion '{varExpr.Name}'.");
                     }
+                    break;
+
+                case MemberExpression mem:
+                    errors.AddRange(CheckExpression(mem.Object));
                     break;
             }
 
@@ -249,6 +234,18 @@ namespace Skriptorium.Interpreter
                 else
                     throw new Exception($"Variable '{varExpr.Name}' not defined.");
             }
+            else if (assign.Left is MemberExpression memLeft)
+            {
+                var obj = EvaluateExpression(memLeft.Object);
+                if (obj is Dictionary<string, object> objDict)
+                {
+                    objDict[memLeft.MemberName] = value;
+                }
+                else
+                {
+                    throw new Exception($"Assignment to non-instance member at line {assign.Line}, column {assign.Column}.");
+                }
+            }
             else if (assign.Left is IndexExpression)
             {
                 throw new NotImplementedException("Index assignment not implemented.");
@@ -274,8 +271,41 @@ namespace Skriptorium.Interpreter
             IndexExpression => throw new NotImplementedException("Index evaluation not implemented."),
             BinaryExpression bin => EvaluateBinary(bin),
             FunctionCallExpression call => EvaluateCall(call),
+            MemberExpression mem => EvaluateMember(mem),
+            UnaryExpression un => EvaluateUnary(un),
             _ => throw new Exception("Unknown expression type.")
         };
+
+        private object EvaluateMember(MemberExpression mem)
+        {
+            var obj = EvaluateExpression(mem.Object);
+            if (obj is Dictionary<string, object> objDict && objDict.TryGetValue(mem.MemberName, out var value))
+            {
+                return value;
+            }
+            throw new Exception($"Member '{mem.MemberName}' not found or object is not an instance at line {mem.Line}, column {mem.Column}.");
+        }
+
+        private object EvaluateUnary(UnaryExpression un)
+        {
+            var val = EvaluateExpression(un.Operand);
+            return un.Operator switch
+            {
+                "!" => !IsTrue(val),
+                "-" => Negate(un, val),
+                _ => throw new Exception($"Unknown unary operator '{un.Operator}' at line {un.Line}, column {un.Column}.")
+            };
+        }
+
+        private object Negate(UnaryExpression un, object val)
+        {
+            return val switch
+            {
+                int i => -i,
+                float f => -f,
+                _ => throw new Exception($"Cannot negate value of type {val?.GetType().Name ?? "null"} at line {un.Line}, column {un.Column}.")
+            };
+        }
 
         private object ParseLiteral(string val)
         {
@@ -291,7 +321,9 @@ namespace Skriptorium.Interpreter
                 return loc;
             if (_globals.TryGetValue(name, out var glo))
                 return glo;
-            throw new Exception($"Variable '{name}' not defined.");
+            if (_instances.TryGetValue(name, out var instanceDict))
+                return instanceDict;
+            throw new Exception($"Variable or instance '{name}' not defined.");
         }
 
         private object EvaluateBinary(BinaryExpression bin)
@@ -484,6 +516,32 @@ namespace Skriptorium.Interpreter
         {
             FunctionName = functionName;
             Arguments = arguments;
+            Line = line;
+            Column = column;
+        }
+    }
+
+    public class MemberExpression : Expression
+    {
+        public Expression Object { get; }
+        public string MemberName { get; }
+        public MemberExpression(Expression objectExpr, string memberName, int line = -1, int column = -1)
+        {
+            Object = objectExpr;
+            MemberName = memberName;
+            Line = line;
+            Column = column;
+        }
+    }
+
+    public class UnaryExpression : Expression
+    {
+        public string Operator { get; }
+        public Expression Operand { get; }
+        public UnaryExpression(string @operator, Expression operand, int line = -1, int column = -1)
+        {
+            Operator = @operator;
+            Operand = operand;
             Line = line;
             Column = column;
         }

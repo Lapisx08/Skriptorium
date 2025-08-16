@@ -611,6 +611,20 @@ namespace Skriptorium.UI
                         functionName: call.FunctionName,
                         arguments: call.Arguments?.Select(a => ConvertExpression(a)).ToList() ?? new List<Skriptorium.Interpreter.Expression>()
                     );
+                case Skriptorium.Parsing.MemberExpression mem:
+                    return new Skriptorium.Interpreter.MemberExpression(
+                        ConvertExpression(mem.Object),
+                        mem.MemberName,
+                        mem.Line,
+                        mem.Column
+                    );
+                case Skriptorium.Parsing.UnaryExpression un:
+                    return new Skriptorium.Interpreter.UnaryExpression(
+                        @operator: un.Operator,
+                        operand: ConvertExpression(un.Operand),
+                        line: un.Line,
+                        column: un.Column
+                    );
                 default:
                     throw new Exception($"Unbekannter Expression-Typ: {expr.GetType().Name} bei Zeile {expr.Line}, Spalte {expr.Column}");
             }
