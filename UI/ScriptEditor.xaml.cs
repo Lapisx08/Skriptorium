@@ -573,6 +573,13 @@ namespace Skriptorium.UI
                     return new Skriptorium.Interpreter.ReturnStatement(
                         returnValue: ConvertExpression(retStmt.ReturnValue)
                     );
+                case Skriptorium.Parsing.VarDeclarationStatement varStmt:
+                    return new Skriptorium.Interpreter.VarDeclarationStatement(
+                        name: varStmt.Declaration.Name,
+                        typeName: varStmt.Declaration.TypeName,
+                        line: varStmt.Line,
+                        column: varStmt.Column
+                    );
                 default:
                     throw new Exception($"Unbekannter Statement-Typ: {stmt.GetType().Name} bei Zeile {stmt.Line}, Spalte {stmt.Column}");
             }

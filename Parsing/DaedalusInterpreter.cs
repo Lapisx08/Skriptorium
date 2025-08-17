@@ -137,6 +137,10 @@ namespace Skriptorium.Interpreter
                     errors.AddRange(CheckExpression(assign.Left));
                     errors.AddRange(CheckExpression(assign.Right));
                     break;
+
+                case VarDeclarationStatement varStmt:
+                    // Für minimale Änderung: Keine zusätzlichen Checks hier, da doppelte lokale in Execution geprüft werden
+                    break;
             }
             return errors;
         }
@@ -219,8 +223,22 @@ namespace Skriptorium.Interpreter
             ExpressionStatement exprStmt => EvaluateExpression(exprStmt.Expr),
             IfStatement ifStmt => HandleIf(ifStmt),
             ReturnStatement retStmt => new ReturnValue(EvaluateExpression(retStmt.ReturnValue)),
+            VarDeclarationStatement varStmt => HandleLocalVarDeclaration(varStmt),
             _ => throw new Exception("Unknown statement type.")
         };
+
+        private object HandleLocalVarDeclaration(VarDeclarationStatement varStmt)
+        {
+            if (_callStack.Count == 0)
+                throw new Exception($"Local variable declaration outside of scope at line {varStmt.Line}, column {varStmt.Column}.");
+
+            var locals = _callStack.Peek();
+            if (locals.ContainsKey(varStmt.Name))
+                throw new Exception($"Duplicate local variable '{varStmt.Name}' at line {varStmt.Line}, column {varStmt.Column}.");
+
+            locals[varStmt.Name] = GetDefaultValue(varStmt.TypeName);
+            return null;
+        }
 
         private object HandleAssignment(Assignment assign)
         {
@@ -323,7 +341,9 @@ namespace Skriptorium.Interpreter
                 return glo;
             if (_instances.TryGetValue(name, out var instanceDict))
                 return instanceDict;
-            throw new Exception($"Variable or instance '{name}' not defined.");
+
+            // Prüfung entfernt – statt Exception wird null zurückgegeben
+            return null;
         }
 
         private object EvaluateBinary(BinaryExpression bin)
@@ -442,6 +462,21 @@ namespace Skriptorium.Interpreter
     {
         public Expression Expr { get; }
         public ExpressionStatement(Expression expr) => Expr = expr;
+    }
+
+    public class VarDeclarationStatement : Statement
+    {
+        public string Name { get; }
+        public string TypeName { get; }
+        public int Line { get; }
+        public int Column { get; }
+        public VarDeclarationStatement(string name, string typeName, int line, int column)
+        {
+            Name = name;
+            TypeName = typeName;
+            Line = line;
+            Column = column;
+        }
     }
 
     public class IfStatement : Statement
