@@ -5,7 +5,6 @@ using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Rendering;
 using MahApps.Metro;
 using Skriptorium.Formatting;
-using Skriptorium.Interpreter;
 using Skriptorium.Managers;
 using Skriptorium.Parsing;
 using System;
@@ -76,7 +75,6 @@ namespace Skriptorium.UI
         private TextMarkerRenderer? _markerRenderer;
         private SyntaxColorizingTransformer? _colorizer = null!;
         private BookmarkManager? _bookmarkManager;
-        private DaedalusInterpreter? _interpreter;
         private bool _syntaxHighlightingEnabled = true;
 
         private FoldingManager? _foldingManager;
@@ -404,24 +402,6 @@ namespace Skriptorium.UI
             try
             {
                 var parsingDecls = new DaedalusParser(_cachedTokens).ParseScript();
-                var interpreterDecls = ConvertDeclarations(parsingDecls);
-
-                _interpreter = new DaedalusInterpreter();
-                _interpreter.LoadDeclarations(interpreterDecls);
-                var semErr = _interpreter.SemanticCheck();
-
-                errors.AddRange(semErr);
-
-                foreach (var msg in semErr)
-                {
-                    var m = ErrorPositionRegex().Match(msg);
-                    if (m.Success)
-                    {
-                        int line = int.Parse(m.Groups[1].Value);
-                        int column = int.Parse(m.Groups[2].Value);
-                        HighlightError(line, column, 1);
-                    }
-                }
             }
             catch (Exception ex)
             {
@@ -496,155 +476,6 @@ namespace Skriptorium.UI
                     element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(_defaultColor));
                 });
             }
-        }
-
-        private List<Skriptorium.Interpreter.Declaration> ConvertDeclarations(List<Skriptorium.Parsing.Declaration> parsingDecls)
-        {
-            var interpreterDecls = new List<Skriptorium.Interpreter.Declaration>();
-
-            foreach (var decl in parsingDecls)
-            {
-                switch (decl)
-                {
-                    case Skriptorium.Parsing.FunctionDeclaration func:
-                        interpreterDecls.Add(new Skriptorium.Interpreter.FunctionDeclaration(
-                            name: func.Name,
-                            parameters: func.Parameters,
-                            body: func.Body?.Select(s => ConvertStatement(s)).ToList() ?? new List<Skriptorium.Interpreter.Statement>(),
-                            line: func.Line,
-                            column: func.Column
-                        ));
-                        break;
-                    case Skriptorium.Parsing.VarDeclaration varDecl:
-                        interpreterDecls.Add(new Skriptorium.Interpreter.VarDeclaration(
-                            name: varDecl.Name,
-                            typeName: varDecl.TypeName,
-                            line: varDecl.Line,
-                            column: varDecl.Column
-                        ));
-                        break;
-                    case Skriptorium.Parsing.InstanceDeclaration instance:
-                        var assignments = instance.Body
-                            .OfType<Skriptorium.Parsing.Assignment>()
-                            .Select(a => ConvertAssignment(a))
-                            .ToList();
-                        interpreterDecls.Add(new Skriptorium.Interpreter.InstanceDeclaration(
-                            name: instance.Name,
-                            baseType: instance.BaseClass,
-                            assignments: assignments,
-                            line: instance.Line,
-                            column: instance.Column
-                        ));
-                        break;
-                    case Skriptorium.Parsing.ClassDeclaration:
-                    case Skriptorium.Parsing.PrototypeDeclaration:
-                        Console.WriteLine($"Warnung: Ignoriere Deklarationstyp {decl.GetType().Name} bei Zeile {decl.Line}, Spalte {decl.Column}");
-                        break;
-                    default:
-                        throw new Exception($"Unbekannter Deklarationstyp: {decl.GetType().Name} bei Zeile {decl.Line}, Spalte {decl.Column}");
-                }
-            }
-
-            return interpreterDecls;
-        }
-
-        private Skriptorium.Interpreter.Statement ConvertStatement(Skriptorium.Parsing.Statement stmt)
-        {
-            switch (stmt)
-            {
-                case Skriptorium.Parsing.Assignment assign:
-                    return new Skriptorium.Interpreter.Assignment(
-                        left: ConvertExpression(assign.Left),
-                        right: ConvertExpression(assign.Right),
-                        line: assign.Line,
-                        column: assign.Column
-                    );
-                case Skriptorium.Parsing.ExpressionStatement exprStmt:
-                    return new Skriptorium.Interpreter.ExpressionStatement(
-                        expr: ConvertExpression(exprStmt.Expr)
-                    );
-                case Skriptorium.Parsing.IfStatement ifStmt:
-                    return new Skriptorium.Interpreter.IfStatement(
-                        condition: ConvertExpression(ifStmt.Condition),
-                        thenBranch: ifStmt.ThenBranch?.Select(s => ConvertStatement(s)).ToList() ?? new List<Skriptorium.Interpreter.Statement>(),
-                        elseBranch: ifStmt.ElseBranch?.Select(s => ConvertStatement(s)).ToList() ?? new List<Skriptorium.Interpreter.Statement>()
-                    );
-                case Skriptorium.Parsing.ReturnStatement retStmt:
-                    return new Skriptorium.Interpreter.ReturnStatement(
-                        returnValue: ConvertExpression(retStmt.ReturnValue)
-                    );
-                case Skriptorium.Parsing.VarDeclarationStatement varStmt:
-                    return new Skriptorium.Interpreter.VarDeclarationStatement(
-                        name: varStmt.Declaration.Name,
-                        typeName: varStmt.Declaration.TypeName,
-                        line: varStmt.Line,
-                        column: varStmt.Column
-                    );
-                default:
-                    throw new Exception($"Unbekannter Statement-Typ: {stmt.GetType().Name} bei Zeile {stmt.Line}, Spalte {stmt.Column}");
-            }
-        }
-
-        private Skriptorium.Interpreter.Expression ConvertExpression(Skriptorium.Parsing.Expression expr)
-        {
-            if (expr == null)
-            {
-                return new Skriptorium.Interpreter.LiteralExpression(
-                    value: "" // Verwende leeren String statt null
-                );
-            }
-
-            switch (expr)
-            {
-                case Skriptorium.Parsing.LiteralExpression lit:
-                    return new Skriptorium.Interpreter.LiteralExpression(
-                        value: lit.Value
-                    );
-                case Skriptorium.Parsing.VariableExpression varExpr:
-                    return new Skriptorium.Interpreter.VariableExpression(
-                        name: varExpr.Name,
-                        typeName: "unknown"
-                    );
-                case Skriptorium.Parsing.IndexExpression:
-                    return new Skriptorium.Interpreter.IndexExpression();
-                case Skriptorium.Parsing.BinaryExpression bin:
-                    return new Skriptorium.Interpreter.BinaryExpression(
-                        left: ConvertExpression(bin.Left),
-                        op: bin.Operator,
-                        right: ConvertExpression(bin.Right)
-                    );
-                case Skriptorium.Parsing.FunctionCallExpression call:
-                    return new Skriptorium.Interpreter.FunctionCallExpression(
-                        functionName: call.FunctionName,
-                        arguments: call.Arguments?.Select(a => ConvertExpression(a)).ToList() ?? new List<Skriptorium.Interpreter.Expression>()
-                    );
-                case Skriptorium.Parsing.MemberExpression mem:
-                    return new Skriptorium.Interpreter.MemberExpression(
-                        ConvertExpression(mem.Object),
-                        mem.MemberName,
-                        mem.Line,
-                        mem.Column
-                    );
-                case Skriptorium.Parsing.UnaryExpression un:
-                    return new Skriptorium.Interpreter.UnaryExpression(
-                        @operator: un.Operator,
-                        operand: ConvertExpression(un.Operand),
-                        line: un.Line,
-                        column: un.Column
-                    );
-                default:
-                    throw new Exception($"Unbekannter Expression-Typ: {expr.GetType().Name} bei Zeile {expr.Line}, Spalte {expr.Column}");
-            }
-        }
-
-        private Skriptorium.Interpreter.Assignment ConvertAssignment(Skriptorium.Parsing.Assignment assign)
-        {
-            return new Skriptorium.Interpreter.Assignment(
-                left: ConvertExpression(assign.Left),
-                right: ConvertExpression(assign.Right),
-                line: assign.Line,
-                column: assign.Column
-            );
         }
 
         public void FormatCode()

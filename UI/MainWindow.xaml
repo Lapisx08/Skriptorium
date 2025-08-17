@@ -145,14 +145,14 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7E6;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Syntax und Semantik prüfen" InputGestureText="F5" Click="SemanticCheckButton_Click">
-                    <MenuItem.Icon>
-                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE768;" FontSize="14"/>
-                    </MenuItem.Icon>
-                </MenuItem>
                 <MenuItem Header="Text einrücken" InputGestureText="Strg + E" Click="MenuCodeFormatieren_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Syntax prüfen" InputGestureText="F5" Click="SyntaxCheckButton_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE768;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>

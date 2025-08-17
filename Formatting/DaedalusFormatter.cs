@@ -28,11 +28,9 @@ namespace Skriptorium.Formatting
                     continue;
                 }
 
-                // Prüfe, ob die Zeile eine öffnende Klammer enthält
                 bool hasOpeningBrace = trimmedLine.Contains("{");
-                // Prüfe, ob die Zeile eine schließende Klammer enthält
                 bool hasClosingBrace = trimmedLine.Contains("}");
-                // Ignoriere Klammern in Kommentaren oder Strings
+
                 if (IsInCommentOrString(trimmedLine))
                 {
                     hasOpeningBrace = false;

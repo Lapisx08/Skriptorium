@@ -2,7 +2,6 @@
 using AvalonDock.Layout;
 using AvalonDock.Controls;
 using MahApps.Metro.Controls;
-using Skriptorium.Interpreter;
 using Skriptorium.Managers;
 using Skriptorium.Parsing;
 using Skriptorium.UI.Views;
@@ -81,7 +80,7 @@ namespace Skriptorium.UI
                                       () => SyntaxHighlightingUmschalten_Click(null, null));
 
             _shortcutManager.Register(Key.F5, ModifierKeys.None,
-                                      () => SemanticCheckButton_Click(null, null));
+                                      () => SyntaxCheckButton_Click(null, null));
             _shortcutManager.Register(Key.E, ModifierKeys.Control,
                                       () => GetActiveScriptEditor()?.FormatCode());
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
@@ -387,7 +386,7 @@ namespace Skriptorium.UI
             editor.ToggleSyntaxHighlighting();
         }
 
-        private void SemanticCheckButton_Click(object sender, RoutedEventArgs e)
+        private void SyntaxCheckButton_Click(object sender, RoutedEventArgs e)
         {
             var editor = _tabManager.GetActiveScriptEditor();
             if (editor == null)
