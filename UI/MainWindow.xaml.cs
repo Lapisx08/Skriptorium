@@ -41,6 +41,32 @@ namespace Skriptorium.UI
             _shortcutManager = new ShortcutManager(this);
             _dataMenuManager = new DataMenuManager(_tabManager, MenuDateiZuletztGeoeffnet);
 
+            var fileExplorer = new FileExplorerView();
+
+            var anchorable = new LayoutAnchorable
+            {
+                Title = "Datei-Explorer",
+                Content = fileExplorer,
+                CanClose = true,
+                CanFloat = true,
+                CanHide = false,
+                ContentId = "FileExplorer"
+            };
+
+            // Füge das Anchorable links ein
+            anchorable.AddToLayout(dockingManager, AnchorableShowStrategy.Left);
+
+            // Standardbreite beim Erzeugen auf 150 px setzen
+            var pane = anchorable.FindParent<LayoutAnchorablePane>();
+            if (pane != null)
+            {
+                pane.DockWidth = new GridLength(150, GridUnitType.Pixel);
+            }
+
+            // Sichtbarkeit / Fokus setzen
+            anchorable.IsVisible = true;
+            anchorable.IsActive = true;
+
             // 2. Shortcuts registrieren
             _shortcutManager.Register(Key.I, ModifierKeys.Control,
                                   () => MenuSkriptoriumUeber_Click(null, null));
@@ -96,6 +122,11 @@ namespace Skriptorium.UI
             DataManager.LoadRecentFiles();
             _dataMenuManager.UpdateRecentFilesMenu();
             _tabManager.AddNewTab();
+        }
+
+        public void OpenFileInNewTab(string content, string path)
+        {
+            _tabManager.AddNewTab(content, System.IO.Path.GetFileName(path), path);
         }
 
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)

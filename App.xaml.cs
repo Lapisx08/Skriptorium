@@ -1,5 +1,6 @@
 ﻿using ControlzEx.Theming;
 using MahApps.Metro;
+using Skriptorium.Managers;
 using Skriptorium.Properties;
 using System;
 using System.Linq;
@@ -21,18 +22,30 @@ namespace Skriptorium
                 ? DefaultTheme
                 : Settings.Default.Theme;
 
-            // Theme setzen
             ThemeManager.Current.ChangeTheme(this, themeName);
-
-            // AvalonDock-Theme auf Basis des aktuell aktiven MahApps-Themes anwenden
             ApplyAvalonDockThemeFromMahApps();
-
-            // Theme-Wechsel-Handler synchronisieren
             ThemeManager.Current.ThemeChanged += (_, __) =>
                 ApplyAvalonDockThemeFromMahApps();
 
             // Hauptfenster starten
-            new UI.MainWindow().Show();
+            var mainWindow = new UI.MainWindow();
+            mainWindow.Show();
+
+            // Wenn Windows beim Start eine Datei übergibt (Doppelklick im Explorer)
+            if (e.Args.Length > 0)
+            {
+                string filePath = e.Args[0];
+                if (System.IO.File.Exists(filePath))
+                {
+                    DataManager.OpenFile(filePath, (content, path) =>
+                    {
+                        mainWindow.Dispatcher.Invoke(() =>
+                        {
+                            mainWindow.OpenFileInNewTab(content, path);
+                        });
+                    });
+                }
+            }
         }
 
         private void ApplyAvalonDockThemeFromMahApps()
