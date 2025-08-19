@@ -78,11 +78,12 @@ namespace Skriptorium.UI
             // Tool-Shortcuts
             _shortcutManager.Register(Key.H, ModifierKeys.Control,
                                       () => SyntaxHighlightingUmschalten_Click(null, null));
-
-            _shortcutManager.Register(Key.F5, ModifierKeys.None,
-                                      () => SyntaxCheckButton_Click(null, null));
+            _shortcutManager.Register(Key.M, ModifierKeys.Control,
+                                      () => ToggleFoldings_Click(null, null));
             _shortcutManager.Register(Key.E, ModifierKeys.Control,
                                       () => GetActiveScriptEditor()?.FormatCode());
+            _shortcutManager.Register(Key.F5, ModifierKeys.None,
+                                      () => SyntaxCheckButton_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
                                       () => MenuNPCGenerator_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift,
@@ -386,6 +387,24 @@ namespace Skriptorium.UI
             editor.ToggleSyntaxHighlighting();
         }
 
+        private void ToggleFoldings_Click(object sender, RoutedEventArgs e)
+        {
+            GetActiveScriptEditor()?.ToggleAllFoldings();
+        }
+
+        private void MenuCodeFormatieren_Click(object sender, RoutedEventArgs e)
+        {
+            var editor = _tabManager.GetActiveScriptEditor();
+            if (editor != null)
+            {
+                editor.FormatCode();
+            }
+            else
+            {
+                MessageBox.Show("Kein aktiver Editor gefunden.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
         private void SyntaxCheckButton_Click(object sender, RoutedEventArgs e)
         {
             var editor = _tabManager.GetActiveScriptEditor();
@@ -408,19 +427,6 @@ namespace Skriptorium.UI
             {
                 MessageBox.Show("Keine Fehler gefunden.", "Prüfung erfolgreich",
                                 MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-        private void MenuCodeFormatieren_Click(object sender, RoutedEventArgs e)
-        {
-            var editor = _tabManager.GetActiveScriptEditor();
-            if (editor != null)
-            {
-                editor.FormatCode();
-            }
-            else
-            {
-                MessageBox.Show("Kein aktiver Editor gefunden.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

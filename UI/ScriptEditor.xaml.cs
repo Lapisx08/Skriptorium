@@ -79,6 +79,7 @@ namespace Skriptorium.UI
 
         private FoldingManager? _foldingManager;
         private BraceFoldingStrategy _foldingStrategy;
+        private bool _allFolded = false;
 
         public ScriptEditor()
         {
@@ -183,6 +184,20 @@ namespace Skriptorium.UI
 
             var foldings = _foldingStrategy.CreateNewFoldings(avalonEditor.Document);
             _foldingManager.UpdateFoldings(foldings, -1); // -1 behält die aktuell geöffneten Faltungen bei
+        }
+
+        public void ToggleAllFoldings()
+        {
+            if (_foldingManager == null || !_foldingManager.AllFoldings.Any()) return;
+
+            bool shouldFold = !_allFolded;
+
+            foreach (var section in _foldingManager.AllFoldings)
+            {
+                section.IsFolded = shouldFold;
+            }
+
+            _allFolded = shouldFold;
         }
 
         public bool IsModified { get; private set; } = false;
