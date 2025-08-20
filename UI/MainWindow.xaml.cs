@@ -41,32 +41,6 @@ namespace Skriptorium.UI
             _shortcutManager = new ShortcutManager(this);
             _dataMenuManager = new DataMenuManager(_tabManager, MenuDateiZuletztGeoeffnet);
 
-            var fileExplorer = new FileExplorerView();
-
-            var anchorable = new LayoutAnchorable
-            {
-                Title = "Datei-Explorer",
-                Content = fileExplorer,
-                CanClose = true,
-                CanFloat = true,
-                CanHide = false,
-                ContentId = "FileExplorer"
-            };
-
-            // Füge das Anchorable links ein
-            anchorable.AddToLayout(dockingManager, AnchorableShowStrategy.Left);
-
-            // Standardbreite beim Erzeugen auf 150 px setzen
-            var pane = anchorable.FindParent<LayoutAnchorablePane>();
-            if (pane != null)
-            {
-                pane.DockWidth = new GridLength(150, GridUnitType.Pixel);
-            }
-
-            // Sichtbarkeit / Fokus setzen
-            anchorable.IsVisible = true;
-            anchorable.IsActive = true;
-
             // 2. Shortcuts registrieren
             _shortcutManager.Register(Key.I, ModifierKeys.Control,
                                   () => MenuSkriptoriumUeber_Click(null, null));
@@ -110,6 +84,8 @@ namespace Skriptorium.UI
                                       () => GetActiveScriptEditor()?.FormatCode());
             _shortcutManager.Register(Key.F5, ModifierKeys.None,
                                       () => SyntaxCheckButton_Click(null, null));
+            _shortcutManager.Register(Key.E, ModifierKeys.Control | ModifierKeys.Shift,
+                                     () => MenuToolsFileExplorer_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
                                       () => MenuNPCGenerator_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift,
@@ -473,6 +449,48 @@ namespace Skriptorium.UI
             var dialogGenerator = new DialogGenerator();
             dialogGenerator.Owner = this;
             dialogGenerator.Show();
+        }
+
+        private void MenuToolsFileExplorer_Click(object sender, RoutedEventArgs e)
+        {
+            ShowFileExplorer();
+        }
+
+        private void ShowFileExplorer()
+        {
+            var existing = dockingManager.Layout.Descendents()
+                .OfType<LayoutAnchorable>()
+                .FirstOrDefault(a => a.ContentId == "FileExplorer");
+
+            if (existing != null)
+            {
+                existing.IsVisible = true;
+                existing.IsActive = true;
+                return;
+            }
+
+            var fileExplorer = new FileExplorerView();
+
+            var anchorable = new LayoutAnchorable
+            {
+                Title = "Datei-Explorer",
+                Content = fileExplorer,
+                CanClose = true,
+                CanFloat = true,
+                CanHide = false,
+                ContentId = "FileExplorer"
+            };
+
+            anchorable.AddToLayout(dockingManager, AnchorableShowStrategy.Left);
+
+            var pane = anchorable.FindParent<LayoutAnchorablePane>();
+            if (pane != null)
+            {
+                pane.DockWidth = new GridLength(150, GridUnitType.Pixel);
+            }
+
+            anchorable.IsVisible = true;
+            anchorable.IsActive = true;
         }
 
         private void ScriptEditor_TextChanged(object sender, EventArgs e)

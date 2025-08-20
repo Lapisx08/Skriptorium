@@ -1,0 +1,63 @@
+﻿<UserControl x:Class="Skriptorium.UI.Views.FileExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Skriptorium.UI.Views">
+    
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5">
+            <!-- Datei -->
+            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnCreateFile_Click" ToolTip="Neue Datei">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7C3;" FontSize="12"/>
+            </Button>
+
+            <!-- Ordner -->
+            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnCreateFolder_Click" ToolTip="Neuer Ordner">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED25;" FontSize="12"/>
+            </Button>
+
+            <!-- Einklappen -->
+            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnCollapse_Click" ToolTip="Alle Ordner einklappen">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF165;" FontSize="12"/>
+            </Button>
+
+            <!-- Refresh -->
+            <Button Width="26" Height="26" Padding="0" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnRefresh_Click" ToolTip="Datei-Explorer aktualisieren">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEDAB;" FontSize="12"/>
+            </Button>
+
+        </StackPanel>
+
+        <!-- TreeView -->
+        <TreeView x:Name="FileTree"
+                  ItemsSource="{Binding RootDirectories}"
+                  MouseDoubleClick="FileTree_MouseDoubleClick">
+
+            <!-- EventSetter für Expanded -->
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <EventSetter Event="Expanded" Handler="FileTree_Expanded"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+
+            <TreeView.Resources>
+                <!-- Kontextmenü für Dateien & Ordner -->
+                <ContextMenu x:Key="FileContextMenu">
+                    <MenuItem Header="Umbenennen" Click="MenuRename_Click" FontSize="12"/>
+                    <MenuItem Header="Löschen" Click="MenuDelete_Click" FontSize="12"/>
+                </ContextMenu>
+            </TreeView.Resources>
+
+            <!-- Template für Nodes -->
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal"
+                                ContextMenu="{StaticResource FileContextMenu}">
+                        <Image Source="{Binding Icon}" Width="16" Height="16" Margin="2"/>
+                        <TextBlock Text="{Binding Name}" Margin="2"/>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+    </DockPanel>
+</UserControl>

@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Interop;
+using System.Linq;
 
 namespace Skriptorium.UI.Views
 {
@@ -38,10 +39,8 @@ namespace Skriptorium.UI.Views
         {
             RootDirectories.Clear();
 
-            // Startverzeichnis aus den App-Einstellungen holen
             string startPath = Properties.Settings.Default.ScriptSearchPath;
 
-            // Fallback, falls der Pfad leer oder nicht vorhanden ist
             if (string.IsNullOrWhiteSpace(startPath) || !Directory.Exists(startPath))
             {
                 startPath = @"C:\";
@@ -50,12 +49,13 @@ namespace Skriptorium.UI.Views
             RootDirectories.Add(new FileNode(startPath, isRoot: true));
         }
 
-        /// <summary>
-        /// Diese Methode kann aufgerufen werden, um den Explorer sofort neu zu laden
-        /// </summary>
         public void ReloadRootDirectory()
         {
-            LoadStartDirectory();
+            foreach (var root in RootDirectories)
+            {
+                if (root.IsDirectory)
+                    root.Refresh();
+            }
         }
 
         private void FileTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -82,6 +82,122 @@ namespace Skriptorium.UI.Views
                 node.LoadChildren();
             }
         }
+
+        private FileNode GetTargetNode()
+        {
+            if (FileTree.SelectedItem is FileNode node && node.IsDirectory)
+                return node;
+
+            return RootDirectories.FirstOrDefault();
+        }
+
+        private void BtnCreateFile_Click(object sender, RoutedEventArgs e)
+        {
+            var node = GetTargetNode();
+            if (node == null) return;
+
+            string newPath = Path.Combine(node.FullPath, "Neue_Datei.d");
+            int i = 1;
+            while (File.Exists(newPath))
+                newPath = Path.Combine(node.FullPath, $"Neue_Datei{i++}.d");
+
+            File.WriteAllText(newPath, "");
+            node.Refresh();
+        }
+
+        private void BtnCreateFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var node = GetTargetNode();
+            if (node == null) return;
+
+            string newPath = Path.Combine(node.FullPath, "Neuer Ordner");
+            int i = 1;
+            while (Directory.Exists(newPath))
+                newPath = Path.Combine(node.FullPath, $"Neuer Ordner {i++}");
+
+            Directory.CreateDirectory(newPath);
+            node.Refresh();
+        }
+
+        private void BtnCollapse_Click(object sender, RoutedEventArgs e)
+        {
+            CollapseAll(FileTree);
+        }
+
+        private void CollapseAll(ItemsControl parentContainer)
+        {
+            foreach (var item in parentContainer.Items)
+            {
+                if (parentContainer.ItemContainerGenerator.ContainerFromItem(item) is TreeViewItem treeItem)
+                {
+                    treeItem.IsExpanded = false;
+                    CollapseAll(treeItem);
+                }
+            }
+        }
+
+        private void MenuRename_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTree.SelectedItem is FileNode node && !node.IsDummy)
+            {
+                string input = Microsoft.VisualBasic.Interaction.InputBox(
+                    "Neuer Name:", "Umbenennen", node.Name);
+
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    string newPath = Path.Combine(Path.GetDirectoryName(node.FullPath), input);
+
+                    try
+                    {
+                        if (node.IsDirectory)
+                            Directory.Move(node.FullPath, newPath);
+                        else
+                            File.Move(node.FullPath, newPath);
+
+                        if (node.Parent != null)
+                            node.Parent.Refresh();
+                        else
+                            ReloadRootDirectory();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Fehler beim Umbenennen:\n{ex.Message}");
+                    }
+                }
+            }
+        }
+
+        private void MenuDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTree.SelectedItem is FileNode node && !node.IsDummy)
+            {
+                if (MessageBox.Show($"Soll „{node.Name}“ wirklich gelöscht werden?",
+                    "Löschen", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        if (node.IsDirectory)
+                            Directory.Delete(node.FullPath, true);
+                        else
+                            File.Delete(node.FullPath);
+
+                        if (node.Parent != null)
+                            node.Parent.Refresh();
+                        else
+                            ReloadRootDirectory();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Fehler beim Löschen:\n{ex.Message}");
+                    }
+                }
+            }
+        }
+
+        private void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            ReloadRootDirectory(); // RootNodes nur refreshen, nicht neu laden
+        }
     }
 
     public class FileNode
@@ -94,9 +210,12 @@ namespace Skriptorium.UI.Views
         public bool IsDirectory { get; }
         public ImageSource Icon => IconCache.GetIcon(FullPath, IsDirectory, IsRoot);
         public ObservableCollection<FileNode> Children { get; } = new ObservableCollection<FileNode>();
+        public FileNode Parent { get; }
 
-        public FileNode(string path, bool isDummy = false, bool isRoot = false)
+        public FileNode(string path, bool isDummy = false, bool isRoot = false, FileNode parent = null)
         {
+            Parent = parent;
+
             if (isDummy)
             {
                 IsDummy = true;
@@ -127,7 +246,7 @@ namespace Skriptorium.UI.Views
 
             if (IsDirectory)
             {
-                Children.Add(new FileNode(null, isDummy: true));
+                Children.Add(new FileNode(null, isDummy: true, parent: this));
             }
         }
 
@@ -140,13 +259,13 @@ namespace Skriptorium.UI.Views
             try
             {
                 foreach (var dir in Directory.GetDirectories(FullPath))
-                    Children.Add(new FileNode(dir));
+                    Children.Add(new FileNode(dir, parent: this));
 
                 var patterns = new[] { "*.d", "*.txt" };
                 foreach (var pattern in patterns)
                 {
                     foreach (var file in Directory.GetFiles(FullPath, pattern))
-                        Children.Add(new FileNode(file));
+                        Children.Add(new FileNode(file, parent: this));
                 }
             }
             catch (UnauthorizedAccessException) { }
@@ -154,6 +273,12 @@ namespace Skriptorium.UI.Views
             catch (IOException) { }
 
             _isLoaded = true;
+        }
+
+        public void Refresh()
+        {
+            _isLoaded = false;
+            LoadChildren();
         }
     }
 
