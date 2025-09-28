@@ -81,9 +81,17 @@ namespace Skriptorium.UI
         private BraceFoldingStrategy _foldingStrategy;
         private bool _allFolded = false;
 
+        public const double OriginalFontSize = 14;
+
+        public double Zoom { get; set; } = 1.0;
+
+        public double EffectiveFontSize => OriginalFontSize * Zoom;
+
+
         public ScriptEditor()
         {
             InitializeComponent();
+            DataContext = this; // Für Binding an EffectiveFontSize
             ApplyCaretBrushFromTheme();
             avalonEditor.TextChanged += AvalonEditor_TextChanged;
             avalonEditor.TextArea.Caret.PositionChanged += AvalonEditor_CaretPositionChanged;
@@ -115,6 +123,13 @@ namespace Skriptorium.UI
             _foldingManager = FoldingManager.Install(avalonEditor.TextArea);
             _foldingStrategy = new BraceFoldingStrategy();
             UpdateFoldings();
+        }
+
+        public void SetZoom(double zoomFactor)
+        {
+            Zoom = Math.Clamp(zoomFactor, 0.2, 4.0);
+            avalonEditor.FontSize = OriginalFontSize * Zoom;
+            avalonEditor.TextArea.TextView.Redraw();
         }
 
         private void OnThemeChanged(object? sender, ThemeChangedEventArgs e)

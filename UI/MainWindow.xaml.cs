@@ -172,22 +172,35 @@ namespace Skriptorium.UI
 
         private void DockingManager_ActiveContentChanged(object sender, EventArgs e)
         {
-            // Alte Ereignisbindungen entfernen
             if (_currentScriptEditor != null)
             {
                 _currentScriptEditor.TextChanged -= ScriptEditor_TextChanged;
                 _currentScriptEditor.CaretPositionChanged -= ScriptEditor_CaretPositionChanged;
             }
 
-            // Neuen ScriptEditor abrufen
             _currentScriptEditor = _tabManager.GetActiveScriptEditor();
 
-            // Neue Ereignisbindungen hinzufügen
             if (_currentScriptEditor != null)
             {
                 _currentScriptEditor.TextChanged += ScriptEditor_TextChanged;
                 _currentScriptEditor.CaretPositionChanged += ScriptEditor_CaretPositionChanged;
                 UpdateStatusBar();
+
+                int zoomPercent = (int)(_currentScriptEditor.Zoom * 100);
+                switch (zoomPercent)
+                {
+                    case 20: ZoomComboBox.SelectedIndex = 0; break;
+                    case 50: ZoomComboBox.SelectedIndex = 1; break;
+                    case 75: ZoomComboBox.SelectedIndex = 2; break;
+                    case 100: ZoomComboBox.SelectedIndex = 3; break;
+                    case 125: ZoomComboBox.SelectedIndex = 4; break;
+                    case 150: ZoomComboBox.SelectedIndex = 5; break;
+                    case 200: ZoomComboBox.SelectedIndex = 6; break;
+                    case 300: ZoomComboBox.SelectedIndex = 7; break;
+                    case 400: ZoomComboBox.SelectedIndex = 8; break;
+                    default: ZoomComboBox.SelectedIndex = 3; break;
+                }
+                _currentScriptEditor?.SetZoom(_currentScriptEditor.Zoom);
             }
             else
             {
@@ -561,6 +574,22 @@ namespace Skriptorium.UI
             {
                 StatusPositionText.Text = "Zeile 1, Spalte 1";
                 StatusCharCountText.Text = "0 Zeichen";
+            }
+        }
+
+        private void ZoomComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsLoaded) return; // ignoriert frühe Events
+
+            var editor = _tabManager.GetActiveScriptEditor();
+            if (editor != null)
+            {
+                if (ZoomComboBox.SelectedItem is ComboBoxItem selectedItem &&
+                    selectedItem.Content is string percentString &&
+                    double.TryParse(percentString.TrimEnd('%'), out double percent))
+                {
+                    editor.SetZoom(percent / 100.0);
+                }
             }
         }
     }

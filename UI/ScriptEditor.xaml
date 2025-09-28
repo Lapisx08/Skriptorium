@@ -1,4 +1,5 @@
 ﻿<UserControl x:Class="Skriptorium.UI.ScriptEditor"
+             x:Name="root"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
@@ -7,6 +8,6 @@
         <avalonedit:TextEditor Name="avalonEditor"
                        ShowLineNumbers="True"
                        FontFamily="Consolas"
-                       FontSize="14"/>
+                       FontSize="{Binding ElementName=root, Path=EffectiveFontSize}"/>
     </Grid>
 </UserControl>

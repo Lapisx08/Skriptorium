@@ -242,6 +242,22 @@
 
         <!-- Statusleiste unten -->
         <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem HorizontalAlignment="Left" Margin="0,0,20,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Zoom:" Margin="0,0,5,0"/>
+                    <ComboBox Name="ZoomComboBox" Width="60" SelectedIndex="3" SelectionChanged="ZoomComboBox_SelectionChanged">
+                        <ComboBoxItem Content="20%"/>
+                        <ComboBoxItem Content="50%"/>
+                        <ComboBoxItem Content="75%"/>
+                        <ComboBoxItem Content="100%"/>
+                        <ComboBoxItem Content="125%"/>
+                        <ComboBoxItem Content="150%"/>
+                        <ComboBoxItem Content="200%"/>
+                        <ComboBoxItem Content="300%"/>
+                        <ComboBoxItem Content="400%"/>
+                    </ComboBox>
+                </StackPanel>
+            </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right" Margin="0,0,20,0">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Name="StatusPositionText" Text="Zeile 1, Spalte 1" Margin="0,0,10,0"/>
