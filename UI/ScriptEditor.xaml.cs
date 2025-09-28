@@ -87,6 +87,7 @@ namespace Skriptorium.UI
 
         public double EffectiveFontSize => OriginalFontSize * Zoom;
 
+        private readonly double[] _zoomSteps = { 0.2, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0 };
 
         public ScriptEditor()
         {
@@ -96,6 +97,7 @@ namespace Skriptorium.UI
             avalonEditor.TextChanged += AvalonEditor_TextChanged;
             avalonEditor.TextArea.Caret.PositionChanged += AvalonEditor_CaretPositionChanged;
             avalonEditor.TextArea.TextEntering += TextArea_TextEntering;
+            avalonEditor.PreviewMouseWheel += AvalonEditor_PreviewMouseWheel;
 
             if (avalonEditor.Document == null)
             {
@@ -127,9 +129,63 @@ namespace Skriptorium.UI
 
         public void SetZoom(double zoomFactor)
         {
-            Zoom = Math.Clamp(zoomFactor, 0.2, 4.0);
+            Zoom = zoomFactor;
             avalonEditor.FontSize = OriginalFontSize * Zoom;
             avalonEditor.TextArea.TextView.Redraw();
+        }
+
+        private double GetNextZoomStep(bool zoomIn)
+        {
+            int currentIndex = Array.IndexOf(_zoomSteps, Zoom);
+
+            // Wenn der aktuelle Zoom-Wert nicht in der Liste ist, finde den nächsten
+            if (currentIndex == -1)
+            {
+                currentIndex = _zoomSteps.Length - 1;
+                for (int i = 0; i < _zoomSteps.Length; i++)
+                {
+                    if (Zoom <= _zoomSteps[i])
+                    {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // Berechne den neuen Index
+            int newIndex = zoomIn ? currentIndex + 1 : currentIndex - 1;
+            newIndex = Math.Clamp(newIndex, 0, _zoomSteps.Length - 1);
+
+            return _zoomSteps[newIndex];
+        }
+
+        private void AvalonEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                // Mausrad-Delta: positiv (hoch) oder negativ (runter)
+                bool zoomIn = e.Delta > 0;
+                double newZoom = GetNextZoomStep(zoomIn);
+
+                if (newZoom != Zoom)
+                {
+                    SetZoom(newZoom);
+
+                    // Aktualisiere die ZoomComboBox in der MainWindow
+                    if (Window.GetWindow(this) is MainWindow mainWindow)
+                    {
+                        int zoomPercent = (int)(newZoom * 100);
+                        var comboBox = mainWindow.FindName("ZoomComboBox") as ComboBox;
+                        if (comboBox != null)
+                        {
+                            int index = Array.IndexOf(_zoomSteps, newZoom);
+                            comboBox.SelectedIndex = index;
+                        }
+                    }
+                }
+
+                e.Handled = true; // Verhindert Standard-Scrollen
+            }
         }
 
         private void OnThemeChanged(object? sender, ThemeChangedEventArgs e)
@@ -489,7 +545,6 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.Redraw();  // explizites Neuzeichnen erzwingen
         }
 
-        // Neue Klasse für den Default-Color-LineTransformer
         public class DefaultColorLineTransformer : DocumentColorizingTransformer
         {
             private readonly Color _defaultColor;

@@ -579,16 +579,17 @@ namespace Skriptorium.UI
 
         private void ZoomComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!IsLoaded) return; // ignoriert frühe Events
+            if (!IsLoaded) return; // Ignoriert frühe Events
 
             var editor = _tabManager.GetActiveScriptEditor();
-            if (editor != null)
+            if (editor != null && ZoomComboBox.SelectedItem is ComboBoxItem selectedItem &&
+                selectedItem.Content is string percentString &&
+                double.TryParse(percentString.TrimEnd('%'), out double percent))
             {
-                if (ZoomComboBox.SelectedItem is ComboBoxItem selectedItem &&
-                    selectedItem.Content is string percentString &&
-                    double.TryParse(percentString.TrimEnd('%'), out double percent))
+                double newZoom = percent / 100.0;
+                if (editor.Zoom != newZoom) // Nur setzen, wenn sich der Zoom-Wert ändert
                 {
-                    editor.SetZoom(percent / 100.0);
+                    editor.SetZoom(newZoom);
                 }
             }
         }

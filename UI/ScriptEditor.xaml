@@ -6,8 +6,9 @@
              Height="Auto" Width="Auto">
     <Grid>
         <avalonedit:TextEditor Name="avalonEditor"
-                       ShowLineNumbers="True"
-                       FontFamily="Consolas"
-                       FontSize="{Binding ElementName=root, Path=EffectiveFontSize}"/>
+                               ShowLineNumbers="True"
+                               FontFamily="Consolas"
+                               FontSize="{Binding ElementName=root, Path=EffectiveFontSize}"
+                               PreviewMouseWheel="AvalonEditor_PreviewMouseWheel"/>
     </Grid>
 </UserControl>
