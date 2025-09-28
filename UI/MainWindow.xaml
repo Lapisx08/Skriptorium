@@ -61,7 +61,7 @@
                 </MenuItem>
                 <MenuItem Header="Alles speichern" InputGestureText="Strg + Alt + S" Click="MenuDateiAllesSpeichern_Click">
                     <MenuItem.Icon>
-                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE105;" FontSize="15"/>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEA35;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Schließen" InputGestureText="Strg + W" Click="MenuDateiSchließen_Click">
@@ -145,6 +145,14 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7E6;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Header="Kommentare">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="14"/>
+                    </MenuItem.Icon>
+                    <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + K" Click="KleinesKommentarfeld_Click"/>
+                    <MenuItem Header="Mitteleres Kommentarfeld" InputGestureText="Strg + Shift + K" Click="MittleresKommentarfeld_Click"/>
+                    <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Alt + K" Click="GroßesKommentarfeld_Click"/>
+                </MenuItem>
                 <MenuItem Header="Foldings ein- und ausklappen" InputGestureText="Strg + M" Click="ToggleFoldings_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="14"/>
@@ -179,6 +187,59 @@
             </MenuItem>
         </Menu>
 
+        <!-- Toolbar -->
+        <ToolBar DockPanel.Dock="Top" ToolBarTray.IsLocked="True" Height="28" Background="Transparent">
+            <Button ToolTip="Neues Skript" Click="MenuDateiNeuesSkript_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE710;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Öffnen" Click="MenuDateiÖffnen_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED25;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Speichern" Click="MenuDateiSpeichern_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE105;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Alles speichern" Click="MenuDateiAllesSpeichern_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEA35;" FontSize="12"/>
+            </Button>
+            <Separator />
+            <Button ToolTip="Rückgängig" Click="MenuBearbeitenRueckgaengig_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A7;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Wiederholen" Click="MenuBearbeitenWiederholen_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" FontSize="12"/>
+            </Button>
+            <Separator />
+            <Button ToolTip="Suchen und Ersetzen" Click="FindInEditor_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE721;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Kommentare" Click="KommentareButton_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;"/>
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + K" Click="KleinesKommentarfeld_Click" FontSize="12"/>
+                        <MenuItem Header="Mittleres Kommentarfeld" InputGestureText="Strg + Shift + K" Click="MittleresKommentarfeld_Click" FontSize="12"/>
+                        <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Alt + K" Click="GroßesKommentarfeld_Click" FontSize="12"/>
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
+            <Button ToolTip="Text einrücken" Click="MenuCodeFormatieren_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Foldings ein- und ausklappen" Click="ToggleFoldings_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="12"/>
+            </Button>
+            <Separator />
+            <Button ToolTip="Datei-Explorer" Click="MenuToolsFileExplorer_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="NPC Generator" Click="MenuNPCGenerator_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Dialog Generator" Click="MenuDialogGenerator_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="12"/>
+            </Button>
+        </ToolBar>
+
         <!-- Statusleiste unten -->
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem HorizontalAlignment="Right" Margin="0,0,20,0">
@@ -196,7 +257,7 @@
                 ActiveContent="{Binding ActiveContent, Mode=TwoWay}"
                 DocumentClosing="DockingManager_DocumentClosing"
                 DocumentClosed="DockingManager_DocumentClosed">
-          
+
             <avalon:LayoutRoot>
                 <avalon:LayoutPanel Orientation="Horizontal">
                     <avalon:LayoutDocumentPaneGroup>

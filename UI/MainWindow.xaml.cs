@@ -78,6 +78,12 @@ namespace Skriptorium.UI
             // Tool-Shortcuts
             _shortcutManager.Register(Key.H, ModifierKeys.Control,
                                       () => SyntaxHighlightingUmschalten_Click(null, null));
+            _shortcutManager.Register(Key.K, ModifierKeys.Control,
+                                     () => KleinesKommentarfeld_Click(null, null));
+            _shortcutManager.Register(Key.K, ModifierKeys.Control | ModifierKeys.Shift,
+                                     () => MittleresKommentarfeld_Click(null, null));
+            _shortcutManager.Register(Key.K, ModifierKeys.Control | ModifierKeys.Alt,
+                                     () => GroßesKommentarfeld_Click(null, null));
             _shortcutManager.Register(Key.M, ModifierKeys.Control,
                                       () => ToggleFoldings_Click(null, null));
             _shortcutManager.Register(Key.E, ModifierKeys.Control,
@@ -392,6 +398,46 @@ namespace Skriptorium.UI
             }
 
             editor.ToggleSyntaxHighlighting();
+        }
+
+        private void KommentareButton_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = (Button)sender;
+            btn.ContextMenu.PlacementTarget = btn;
+            btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            btn.ContextMenu.IsOpen = true;
+        }
+
+        private void KleinesKommentarfeld_Click(object sender, RoutedEventArgs e)
+        {
+            KommentarblockEinfügen("// ------  ------");
+        }
+
+        private void MittleresKommentarfeld_Click(object sender, RoutedEventArgs e)
+        {
+            KommentarblockEinfügen(
+        @"//**************************************************************
+//   
+//**************************************************************");
+        }
+
+        private void GroßesKommentarfeld_Click(object sender, RoutedEventArgs e)
+        {
+            KommentarblockEinfügen(
+        @"//##############################################################
+//###
+//###   
+//###
+//##############################################################");
+        }
+
+        private void KommentarblockEinfügen(string text)
+        {
+            var editor = GetActiveScriptEditor();
+            if (editor?.Avalon != null)
+            {
+                editor.Avalon.Document.Insert(editor.Avalon.CaretOffset, text + Environment.NewLine);
+            }
         }
 
         private void ToggleFoldings_Click(object sender, RoutedEventArgs e)
