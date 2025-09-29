@@ -7,11 +7,12 @@ using Skriptorium.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media; // Für ImageSource in SearchResultNode
+using System.Windows.Media;
 
 namespace Skriptorium.UI.Views
 {
@@ -208,6 +209,7 @@ namespace Skriptorium.UI.Views
             }
 
             bool isSearchInAllScripts = ChkSearchIn.IsChecked == true && SearchIn == "In allen offenen Skripten";
+            bool isSearchInDirectory = ChkSearchIn.IsChecked == true && SearchIn == "Im gesetzten Verzeichnis";
             bool restrictToSelection = ChkSelectionOnly.IsChecked == true && _scriptEditor.Avalon.SelectionLength > 0;
 
             if (isSearchInAllScripts)
@@ -221,6 +223,49 @@ namespace Skriptorium.UI.Views
                     {
                         _searchResults.Add(node);
                     }
+                }
+            }
+            else if (isSearchInDirectory)
+            {
+                string scriptPath = Properties.Settings.Default.ScriptSearchPath;
+                if (string.IsNullOrEmpty(scriptPath) || !Directory.Exists(scriptPath))
+                {
+                    MessageBox.Show("Kein gültiger Skript-Ordner festgelegt. Bitte wählen Sie einen Ordner in den Einstellungen.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                try
+                {
+                    // Search all .d and .txt files in the directory (adjust extensions as needed)
+                    var files = Directory.EnumerateFiles(scriptPath, "*.*", SearchOption.AllDirectories)
+                        .Where(file => file.EndsWith(".d", StringComparison.OrdinalIgnoreCase) ||
+                                      file.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
+
+                    foreach (var file in files)
+                    {
+                        try
+                        {
+                            string text = File.ReadAllText(file);
+                            var node = new SearchResultNode(file, text);
+                            FindMatchesInScript(text, searchText, node);
+                            if (node.Matches.Count > 0)
+                            {
+                                _searchResults.Add(node);
+                            }
+                        }
+                        catch (IOException ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Fehler beim Lesen der Datei {file}: {ex.Message}");
+                        }
+                    }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    MessageBox.Show($"Zugriff auf den Ordner verweigert: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Fehler beim Durchsuchen des Ordners: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
@@ -334,9 +379,9 @@ namespace Skriptorium.UI.Views
                 }
             }
 
-            if (ChkSearchIn.IsChecked == true && SearchIn == "In allen offenen Skripten")
+            if (ChkSearchIn.IsChecked == true && (SearchIn == "In allen offenen Skripten" || SearchIn == "Im gesetzten Verzeichnis"))
             {
-                // Suche in allen Skripten: Suchergebnisse in separatem Panel anzeigen
+                // Suche in allen Skripten oder Verzeichnis: Suchergebnisse in separatem Panel anzeigen
                 ShowSearchResultsPanel();
                 if (_searchResults.Count > 0)
                 {
