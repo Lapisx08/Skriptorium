@@ -12,88 +12,88 @@ namespace Skriptorium.Formatting
         public string Format(string script)
         {
             var sb = new StringBuilder();
-            int indentLevel = 0; // Aktuelle Verschachtelungsebene
-            bool isInsideDeclaration = false; // Verfolgt, ob wir in einer Deklaration (func/instance) sind
+            int indentLevel = 0;
 
-            // Zeilenweise Verarbeitung
             string[] lines = script.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
             foreach (string line in lines)
             {
-                string trimmedLine = line.TrimStart(); // Entferne führende Leerzeichen für die Analyse
+                string trimmedLine = line.Trim();
+
                 if (string.IsNullOrWhiteSpace(trimmedLine))
                 {
-                    // Leere Zeilen unverändert hinzufügen (optional mit Einrückung)
-                    sb.AppendLine();
+                    sb.AppendLine(); // Leere Zeilen beibehalten
                     continue;
                 }
 
-                bool hasOpeningBrace = trimmedLine.Contains("{");
-                bool hasClosingBrace = trimmedLine.Contains("}");
+                int netBraces = CountNetBraces(trimmedLine);
 
-                if (IsInCommentOrString(trimmedLine))
+                // Wenn die Zeile schließende Klammern enthält, vor der Zeile die Einrückung reduzieren
+                if (netBraces < 0)
                 {
-                    hasOpeningBrace = false;
-                    hasClosingBrace = false;
+                    indentLevel = Math.Max(0, indentLevel + netBraces);
                 }
 
-                // Wenn die Zeile eine schließende Klammer enthält, reduziere die Einrückungsebene *vor* der Zeile
-                if (hasClosingBrace)
-                {
-                    indentLevel = Math.Max(0, indentLevel - 1);
-                }
-
-                // Füge die Zeile mit der aktuellen Einrückung hinzu
+                // Zeile mit aktueller Einrückung hinzufügen
                 sb.AppendLine(Indent(indentLevel) + trimmedLine);
 
-                // Wenn die Zeile eine öffnende Klammer enthält, erhöhe die Einrückungsebene *nach* der Zeile
-                if (hasOpeningBrace)
+                // Wenn die Zeile öffnende Klammern enthält, nach der Zeile Einrückung erhöhen
+                if (netBraces > 0)
                 {
-                    indentLevel++;
-                }
-
-                // Prüfe, ob die Zeile eine func- oder instance-Deklaration beginnt
-                if (Regex.IsMatch(trimmedLine, @"^(func|instance)\b"))
-                {
-                    isInsideDeclaration = true;
-                }
-                // Prüfe, ob die Deklaration endet (nach schließender Klammer)
-                if (hasClosingBrace && indentLevel == 0)
-                {
-                    isInsideDeclaration = false;
-                    sb.AppendLine(); // Füge eine leere Zeile nach der Deklaration hinzu
+                    indentLevel += netBraces;
                 }
             }
 
             return sb.ToString().TrimEnd();
         }
 
-        // Hilfsmethode: Prüft, ob die Zeile ein Kommentar oder ein String ist (um Klammern zu ignorieren)
+        // Zählt die Differenz von { und } in einer Zeile unter Berücksichtigung von Strings/Kommentare
+        private int CountNetBraces(string line)
+        {
+            if (IsInCommentOrString(line))
+                return 0;
+
+            int count = 0;
+            bool insideString = false;
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                char c = line[i];
+
+                if (c == '"')
+                {
+                    insideString = !insideString;
+                    continue;
+                }
+
+                if (insideString)
+                    continue;
+
+                if (c == '{') count++;
+                if (c == '}') count--;
+            }
+
+            return count;
+        }
+
+        // Prüft, ob die Zeile ein Kommentar oder String ist
         private bool IsInCommentOrString(string line)
         {
-            // Einfache Prüfung: Ignoriere Zeilen, die mit // beginnen oder in Anführungszeichen sind
             line = line.TrimStart();
+
             if (line.StartsWith("//"))
                 return true;
 
-            // Prüfe auf Strings (einfache Heuristik, kann erweitert werden)
-            if (line.Contains("\""))
+            int quoteCount = 0;
+            foreach (char c in line)
             {
-                // Annahme: Wenn { oder } in einem String vorkommen, ignorieren wir sie
-                int quoteCount = line.Count(c => c == '"');
-                if (quoteCount % 2 == 0) // Nur geschlossene Strings
-                {
-                    // Prüfe, ob { oder } innerhalb von Anführungszeichen liegt
-                    bool insideString = false;
-                    foreach (char c in line)
-                    {
-                        if (c == '"')
-                            insideString = !insideString;
-                        if ((c == '{' || c == '}') && insideString)
-                            return true;
-                    }
-                }
+                if (c == '"')
+                    quoteCount++;
             }
+
+            // Ungeschlossene Strings oder leere Zeilen ignorieren
+            if (quoteCount % 2 != 0)
+                return true;
 
             return false;
         }
