@@ -597,8 +597,8 @@ namespace Skriptorium.UI.Views
 
             Settings.Default.Save();
 
-            // Suchergebnisse-Panel schließen
-            HideSearchResultsPanel();
+            // Suchergebnisse-Panel NICHT schließen, damit es bestehen bleibt
+            // HideSearchResultsPanel(); // Diese Zeile entfernen oder auskommentieren
         }
 
         private void ShowSearchResultsPanel()
