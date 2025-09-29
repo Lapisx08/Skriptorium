@@ -11,6 +11,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media; // Für ImageSource in SearchResultNode
 
 namespace Skriptorium.UI.Views
 {
@@ -596,9 +597,6 @@ namespace Skriptorium.UI.Views
             }
 
             Settings.Default.Save();
-
-            // Suchergebnisse-Panel NICHT schließen, damit es bestehen bleibt
-            // HideSearchResultsPanel(); // Diese Zeile entfernen oder auskommentieren
         }
 
         private void ShowSearchResultsPanel()
@@ -657,36 +655,6 @@ namespace Skriptorium.UI.Views
                 .FirstOrDefault(a => a.ContentId == "SearchResults");
 
             return anchorable?.Content as SearchResultsView;
-        }
-    }
-
-    public class SearchResultNode
-    {
-        public string FullPath { get; }
-        public string Name => string.IsNullOrEmpty(System.IO.Path.GetFileName(FullPath)) ? FullPath : System.IO.Path.GetFileName(FullPath);
-        public ObservableCollection<SearchMatch> Matches { get; } = new ObservableCollection<SearchMatch>();
-        public string Text { get; }
-
-        public SearchResultNode(string fullPath, string text = null)
-        {
-            FullPath = fullPath ?? string.Empty;
-            Text = text;
-        }
-    }
-
-    public class SearchMatch
-    {
-        public int Offset { get; }
-        public int Length { get; }
-        public string DisplayText { get; }
-        public SearchResultNode Parent { get; }
-
-        public SearchMatch(int offset, int length, string displayText, SearchResultNode parent = null)
-        {
-            Offset = offset;
-            Length = length;
-            DisplayText = displayText;
-            Parent = parent;
         }
     }
 }
