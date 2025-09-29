@@ -236,7 +236,6 @@ namespace Skriptorium.UI.Views
 
                 try
                 {
-                    // Search all .d and .txt files in the directory (adjust extensions as needed)
                     var files = Directory.EnumerateFiles(scriptPath, "*.*", SearchOption.AllDirectories)
                         .Where(file => file.EndsWith(".d", StringComparison.OrdinalIgnoreCase) ||
                                       file.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));

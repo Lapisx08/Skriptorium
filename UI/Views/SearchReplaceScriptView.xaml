@@ -57,7 +57,6 @@
             <ComboBox x:Name="ComboSearchIn" Margin="10,0,0,0" Width="Auto" IsEnabled="False">
                 <ComboBoxItem Content="In allen offenen Skripten"/>
                 <ComboBoxItem Content="Im gesetzten Verzeichnis"/>
-                <ComboBoxItem Content="Im Gothic-Skript-Verzeichnis"/>
             </ComboBox>
         </DockPanel>
 
