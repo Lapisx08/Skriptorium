@@ -196,9 +196,7 @@ namespace Skriptorium.UI
                 : DaedalusSyntaxHighlightingLightmode.TokenColors;
             var colorMap = tokenColorMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.WpfColor);
             _colorizer = new SyntaxColorizingTransformer(colorMap);
-            avalonEditor.TextArea.TextView.LineTransformers.Clear();
-            avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
-            _colorizer.UpdateTokens(_cachedTokens);
+            ApplySyntaxHighlightingState();
             ApplyCaretBrushFromTheme();
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
@@ -464,6 +462,26 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
 
+        public void ApplySyntaxHighlightingState()
+        {
+            avalonEditor.TextArea.TextView.LineTransformers.Clear();
+
+            if (_syntaxHighlightingEnabled)
+            {
+                avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
+                ApplySyntaxHighlighting();
+            }
+            else
+            {
+                var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
+                var defaultColor = isDark ? Colors.WhiteSmoke : Colors.Black;
+                avalonEditor.TextArea.TextView.LineTransformers.Add(new DefaultColorLineTransformer(defaultColor));
+            }
+
+            avalonEditor.TextArea.TextView.InvalidateVisual();
+            avalonEditor.TextArea.TextView.Redraw();
+        }
+
         [GeneratedRegex(@"Zeile\s+(\d+),\s*Spalte\s+(\d+)")]
         private static partial Regex ErrorPositionRegex();
 
@@ -525,7 +543,6 @@ namespace Skriptorium.UI
         public void ToggleSyntaxHighlighting()
         {
             _syntaxHighlightingEnabled = !_syntaxHighlightingEnabled;
-
             avalonEditor.TextArea.TextView.LineTransformers.Clear();
 
             if (_syntaxHighlightingEnabled)
@@ -537,12 +554,11 @@ namespace Skriptorium.UI
             {
                 var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
                 var defaultColor = isDark ? Colors.WhiteSmoke : Colors.Black;
-
                 avalonEditor.TextArea.TextView.LineTransformers.Add(new DefaultColorLineTransformer(defaultColor));
             }
 
             avalonEditor.TextArea.TextView.InvalidateVisual();
-            avalonEditor.TextArea.TextView.Redraw();  // explizites Neuzeichnen erzwingen
+            avalonEditor.TextArea.TextView.Redraw();
         }
 
         public class DefaultColorLineTransformer : DocumentColorizingTransformer

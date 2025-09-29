@@ -184,6 +184,7 @@ namespace Skriptorium.UI
             {
                 _currentScriptEditor.TextChanged += ScriptEditor_TextChanged;
                 _currentScriptEditor.CaretPositionChanged += ScriptEditor_CaretPositionChanged;
+                _currentScriptEditor.ApplySyntaxHighlightingState();
                 UpdateStatusBar();
 
                 int zoomPercent = (int)(_currentScriptEditor.Zoom * 100);
@@ -398,19 +399,11 @@ namespace Skriptorium.UI
 
         private void SyntaxHighlightingUmschalten_Click(object sender, RoutedEventArgs e)
         {
-            var layoutDocument = dockingManager.ActiveContent as LayoutDocument;
-            if (layoutDocument == null)
+            var editor = _tabManager.GetActiveScriptEditor();
+            if (editor != null)
             {
-                return;
+                editor.ToggleSyntaxHighlighting();
             }
-
-            var editor = layoutDocument.Content as ScriptEditor;
-            if (editor == null)
-            {
-                return;
-            }
-
-            editor.ToggleSyntaxHighlighting();
         }
 
         private void KommentareButton_Click(object sender, RoutedEventArgs e)
