@@ -350,7 +350,7 @@ namespace Skriptorium.UI
             var ed = _tabManager.GetActiveScriptEditor();
             if (ed != null)
             {
-                var dialog = new SearchReplaceScriptView(ed);
+                var dialog = new SearchReplaceScriptView(ed, _tabManager, dockingManager);
                 dialog.Owner = this;
                 dialog.Show();
             }
@@ -361,7 +361,7 @@ namespace Skriptorium.UI
             var ed = _tabManager.GetActiveScriptEditor();
             if (ed != null)
             {
-                var dialog = new SearchReplaceScriptView(ed);
+                var dialog = new SearchReplaceScriptView(ed, _tabManager, dockingManager);
                 dialog.Owner = this;
                 dialog.Show();
             }

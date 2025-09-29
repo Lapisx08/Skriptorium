@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Title="Suchen" TitleCharacterCasing="Normal"
-        Height="360" Width="600"
+        Height="420" Width="600"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Loaded="Window_Loaded"
@@ -14,6 +14,8 @@
             <!-- Suchen -->
             <RowDefinition Height="Auto"/>
             <!-- Ersetzen -->
+            <RowDefinition Height="Auto"/>
+            <!-- Suchen in -->
             <RowDefinition Height="Auto"/>
             <!-- Buttons -->
             <RowDefinition Height="*"/>
@@ -48,8 +50,19 @@
                       Margin="10,0,0,0"/>
         </DockPanel>
 
+        <!-- Suchen in -->
+        <DockPanel Grid.Row="2" Margin="0,0,0,10">
+            <CheckBox x:Name="ChkSearchIn" Content="Suchen in:" Width="110" VerticalAlignment="Center"
+                      Checked="ChkSearchIn_Checked" Unchecked="ChkSearchIn_Unchecked"/>
+            <ComboBox x:Name="ComboSearchIn" Margin="10,0,0,0" Width="Auto" IsEnabled="False">
+                <ComboBoxItem Content="In allen offenen Skripten"/>
+                <ComboBoxItem Content="Im gesetzten Verzeichnis"/>
+                <ComboBoxItem Content="Im Gothic-Skript-Verzeichnis"/>
+            </ComboBox>
+        </DockPanel>
+
         <!-- Buttons -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,10">
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,10">
             <Button x:Name="BtnFindNext" Width="100" Click="BtnFindNext_Click">
                 <TextBlock Text="Suchen"/>
             </Button>
@@ -62,7 +75,7 @@
         </StackPanel>
 
         <!-- Optionen -->
-        <GroupBox Header="Optionen" Grid.Row="3" Margin="0,0,0,10">
+        <GroupBox Header="Optionen" Grid.Row="4" Margin="0,0,0,10">
             <StackPanel Margin="10">
                 <CheckBox x:Name="ChkCase" Content="Groß-/Kleinschreibung"/>
                 <CheckBox x:Name="ChkWholeWord" Content="Nur ganzes Wort suchen"/>

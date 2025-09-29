@@ -58,5 +58,17 @@ namespace Skriptorium.Properties {
                 this["Theme"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SearchIn {
+            get {
+                return ((string)(this["SearchIn"]));
+            }
+            set {
+                this["SearchIn"] = value;
+            }
+        }
     }
 }
