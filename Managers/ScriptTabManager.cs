@@ -1,8 +1,10 @@
 ﻿using AvalonDock;
 using AvalonDock.Layout;
+using AvalonDock.Controls;
 using Skriptorium.UI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -83,6 +85,10 @@ namespace Skriptorium.Managers
             scriptEditor.SetTextAndResetModified(content);
 
             string baseTitle = tabTitle ?? $"Neu{_newScriptCounter++}";
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                baseTitle = Path.GetFileName(filePath);
+            }
 
             var document = new LayoutDocument
             {
@@ -206,7 +212,7 @@ namespace Skriptorium.Managers
                 .FirstOrDefault(d => d.Content == editor);
         }
 
-        private void UpdateTabTitle(ScriptEditor editor)
+        public void UpdateTabTitle(ScriptEditor editor)
         {
             var document = GetDocumentByEditor(editor);
             if (document == null) return;
@@ -228,6 +234,13 @@ namespace Skriptorium.Managers
                         yield return editor;
                 }
             }
+        }
+
+        public LayoutDocument? GetDocumentForEditor(ScriptEditor editor)
+        {
+            return _dockingManager.Layout.Descendents()
+                .OfType<LayoutDocument>()
+                .FirstOrDefault(d => d.Content == editor);
         }
     }
 

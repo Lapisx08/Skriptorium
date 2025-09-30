@@ -323,8 +323,6 @@ namespace Skriptorium.UI
 
         public TextEditor Avalon => avalonEditor;
 
-        public TextBlock? TitleTextBlock { get; set; }
-
         public void HighlightAllOccurrences(string searchText, bool matchCase = false, bool wholeWord = false, bool restrictToSelection = false, int selectionStart = 0, int selectionLength = 0)
         {
             if (string.IsNullOrWhiteSpace(searchText) || _markers == null || _markerRenderer == null)

@@ -264,13 +264,12 @@ namespace Skriptorium.UI
             if (ed != null && DataManager.SaveFile(ed))
             {
                 _dataMenuManager.UpdateRecentFilesMenu();
-                if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
+                var document = _tabManager.GetDocumentForEditor(ed);
+                if (document != null)
                 {
-                    ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
-                    var document = documentPane.Children.FirstOrDefault(d => d.Content == ed);
-                    if (document != null)
-                        document.Title = System.IO.Path.GetFileName(ed.FilePath);
+                    document.Title = System.IO.Path.GetFileName(ed.FilePath);
                 }
+                _tabManager.UpdateTabTitle(ed);  // Optional: Stelle sicher, dass Modified-Flag berücksichtigt wird
             }
         }
 
@@ -280,13 +279,12 @@ namespace Skriptorium.UI
             if (ed != null && DataManager.SaveFileAs(ed))
             {
                 _dataMenuManager.UpdateRecentFilesMenu();
-                if (!string.IsNullOrEmpty(ed.FilePath) && ed.TitleTextBlock != null)
+                var document = _tabManager.GetDocumentForEditor(ed);
+                if (document != null)
                 {
-                    ed.TitleTextBlock.Text = System.IO.Path.GetFileName(ed.FilePath);
-                    var document = documentPane.Children.FirstOrDefault(d => d.Content == ed);
-                    if (document != null)
-                        document.Title = System.IO.Path.GetFileName(ed.FilePath);
+                    document.Title = System.IO.Path.GetFileName(ed.FilePath);
                 }
+                _tabManager.UpdateTabTitle(ed);  // Optional: Stelle sicher, dass Modified-Flag berücksichtigt wird
             }
         }
 
@@ -300,13 +298,12 @@ namespace Skriptorium.UI
             {
                 if (DataManager.SaveFile(editor))
                 {
-                    if (editor.TitleTextBlock != null)
+                    var document = _tabManager.GetDocumentForEditor(editor);
+                    if (document != null)
                     {
-                        editor.TitleTextBlock.Text = System.IO.Path.GetFileName(editor.FilePath);
-                        var document = documentPane.Children.FirstOrDefault(d => d.Content == editor);
-                        if (document != null)
-                            document.Title = System.IO.Path.GetFileName(editor.FilePath);
+                        document.Title = System.IO.Path.GetFileName(editor.FilePath);
                     }
+                    _tabManager.UpdateTabTitle(editor);  // Optional: Stelle sicher, dass Modified-Flag berücksichtigt wird
                 }
                 else
                 {
