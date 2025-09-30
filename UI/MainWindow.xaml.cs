@@ -92,6 +92,8 @@ namespace Skriptorium.UI
                                       () => SyntaxCheckButton_Click(null, null));
             _shortcutManager.Register(Key.E, ModifierKeys.Control | ModifierKeys.Shift,
                                      () => MenuToolsFileExplorer_Click(null, null));
+            _shortcutManager.Register(Key.C, ModifierKeys.Control | ModifierKeys.Shift,
+                                     () => MenuToolsCodeStructure_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
                                       () => MenuNPCGenerator_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift,
@@ -522,7 +524,7 @@ namespace Skriptorium.UI
 
             var anchorable = new LayoutAnchorable
             {
-                Title = "Datei-Explorer",
+                Title = "Datei Explorer",
                 Content = fileExplorer,
                 CanClose = true,
                 CanFloat = true,
@@ -542,9 +544,52 @@ namespace Skriptorium.UI
             anchorable.IsActive = true;
         }
 
+        private void MenuToolsCodeStructure_Click(object sender, RoutedEventArgs e)
+        {
+            ShowCodeStructureView();
+        }
+
+        private void ShowCodeStructureView()
+        {
+            var existing = dockingManager.Layout.Descendents()
+                .OfType<LayoutAnchorable>()
+                .FirstOrDefault(a => a.ContentId == "CodeStructure");
+
+            if (existing != null)
+            {
+                existing.IsVisible = true;
+                existing.IsActive = true;
+                return;
+            }
+
+            var codeStructureView = new CodeStructureView(_tabManager, dockingManager);
+
+            var anchorable = new LayoutAnchorable
+            {
+                Title = "Code Struktur",
+                Content = codeStructureView,
+                CanClose = true,
+                CanFloat = true,
+                CanHide = false,
+                ContentId = "CodeStructure"
+            };
+
+            anchorable.AddToLayout(dockingManager, AnchorableShowStrategy.Right);
+
+            var pane = anchorable.FindParent<LayoutAnchorablePane>();
+            if (pane != null)
+            {
+                pane.DockWidth = new GridLength(250, GridUnitType.Pixel);
+            }
+
+            anchorable.IsVisible = true;
+            anchorable.IsActive = true;
+        }
+
         private void ScriptEditor_TextChanged(object sender, EventArgs e)
         {
             UpdateStatusBar();
+            UpdateCodeStructureView();
         }
 
         private void ScriptEditor_CaretPositionChanged(object sender, EventArgs e)
@@ -565,6 +610,16 @@ namespace Skriptorium.UI
                 StatusPositionText.Text = "Zeile 1, Spalte 1";
                 StatusCharCountText.Text = "0 Zeichen";
             }
+        }
+
+        private void UpdateCodeStructureView()
+        {
+            var codeStructureView = dockingManager.Layout.Descendents()
+                .OfType<LayoutAnchorable>()
+                .FirstOrDefault(a => a.ContentId == "CodeStructure")
+                ?.Content as CodeStructureView;
+
+            codeStructureView?.UpdateStructure();
         }
 
         private void ZoomComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

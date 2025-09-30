@@ -4,7 +4,7 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:Skriptorium.UI.Views.Tools"
         Title="NPC Generator" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
-        Height="700" Width="700">
+        Height="750" Width="700">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>

@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="Skriptorium.UI.Views.Tools.CodeStructureView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d">
+    <Grid>
+        <TabControl>
+            <!-- Tab für Instanzen -->
+            <TabItem Header="Instanzen">
+                <DataGrid x:Name="InstancesGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="InstancesGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Basisklasse" Binding="{Binding BaseClass}" Width="*"/>
+                        <DataGridTextColumn Header="Zeile" Binding="{Binding Line}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <!-- Tab für Funktionen -->
+            <TabItem Header="Funktionen">
+                <DataGrid x:Name="FunctionsGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="FunctionsGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Rückgabetyp" Binding="{Binding ReturnType}" Width="100"/>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Parameter" Binding="{Binding ParametersString}" Width="*"/>
+                        <DataGridTextColumn Header="Zeile" Binding="{Binding Line}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <!-- Tab für Variablen -->
+            <TabItem Header="Variablen">
+                <DataGrid x:Name="VariablesGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="VariablesGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Typ" Binding="{Binding TypeName}" Width="*"/>
+                        <DataGridTextColumn Header="Zeile" Binding="{Binding Line}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

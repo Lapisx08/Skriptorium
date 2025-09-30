@@ -169,9 +169,14 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Datei-Explorer" InputGestureText="Strg + Shift + E" Click="MenuToolsFileExplorer_Click">
+                <MenuItem Header="Datei Explorer" InputGestureText="Strg + Shift + E" Click="MenuToolsFileExplorer_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Code Struktur" InputGestureText="Strg + Shift + C" Click="MenuToolsCodeStructure_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="NPC Generator" InputGestureText="Strg + G" Click="MenuNPCGenerator_Click">
@@ -213,7 +218,7 @@
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE721;" FontSize="12"/>
             </Button>
             <Button ToolTip="Kommentare" Click="KommentareButton_Click">
-                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;"/>
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="12"/>
                 <Button.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + K" Click="KleinesKommentarfeld_Click" FontSize="12"/>
@@ -229,7 +234,7 @@
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="12"/>
             </Button>
             <Separator />
-            <Button ToolTip="Datei-Explorer" Click="MenuToolsFileExplorer_Click">
+            <Button ToolTip="Datei Explorer" Click="MenuToolsFileExplorer_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="12"/>
             </Button>
             <Button ToolTip="NPC Generator" Click="MenuNPCGenerator_Click">

@@ -22,7 +22,7 @@
             </Button>
 
             <!-- Refresh -->
-            <Button Width="26" Height="26" Padding="0" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnRefresh_Click" ToolTip="Datei-Explorer aktualisieren">
+            <Button Width="26" Height="26" Padding="0" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnRefresh_Click" ToolTip="Datei Explorer aktualisieren">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEDAB;" FontSize="12"/>
             </Button>
 

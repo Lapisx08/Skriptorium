@@ -86,7 +86,7 @@ namespace Skriptorium.UI.Views.Tools
                 Visibility = Visibility.Collapsed
             };
 
-            var itemNameEntry = CreateTextBox(100, Visibility.Collapsed);
+            var itemNameEntry = CreateTextBox(200, Visibility.Collapsed);
 
             var itemQuantityLabel = new TextBlock
             {
@@ -96,7 +96,7 @@ namespace Skriptorium.UI.Views.Tools
                 Visibility = Visibility.Collapsed
             };
 
-            var itemQuantityEntry = CreateTextBox(40, Visibility.Collapsed);
+            var itemQuantityEntry = CreateTextBox(78, Visibility.Collapsed);
 
             var itemRecipientDropdown = CreateComboBox(new[] { "Held", "NPC" }, width: 70, visibility: Visibility.Collapsed);
 
