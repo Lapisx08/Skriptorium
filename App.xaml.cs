@@ -3,7 +3,11 @@ using MahApps.Metro;
 using Skriptorium.Managers;
 using Skriptorium.Properties;
 using System;
+using System.IO;
+using System.IO.Pipes;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Windows;
 
 namespace Skriptorium
@@ -12,6 +16,9 @@ namespace Skriptorium
     {
         private const string ThemePathTemplate = "/AvalonDock.Themes.VS2013;component/{0}Theme.xaml";
         private const string DefaultTheme = "Light.Steel";
+        private const string MutexName = "SkriptoriumSingleInstance";
+        private const string PipeName = "SkriptoriumPipe";
+        private Mutex _mutex;
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -27,25 +34,109 @@ namespace Skriptorium
             ThemeManager.Current.ThemeChanged += (_, __) =>
                 ApplyAvalonDockThemeFromMahApps();
 
-            // Hauptfenster starten
+            // Single Instance Check
+            bool isNewInstance = false;
+            _mutex = new Mutex(true, MutexName, out isNewInstance);
+
+            if (!isNewInstance)
+            {
+                // Zweite Instanz: Sende Argumente an laufende Instanz und beende
+                SendArgsToRunningInstance(e.Args);
+                Shutdown();
+                return;
+            }
+
+            // Erste Instanz: Starte Hauptfenster
             var mainWindow = new UI.MainWindow();
             mainWindow.Show();
 
-            // Wenn Windows beim Start eine Datei übergibt (Doppelklick im Explorer)
+            // Starte Pipe-Server in MainWindow (nachdem es geladen ist)
+            mainWindow.Loaded += (s, ev) =>
+            {
+                StartPipeServer(mainWindow);
+            };
+
+            // Wenn Argumente übergeben (z.B. erste Instanz mit Datei)
             if (e.Args.Length > 0)
             {
-                string filePath = e.Args[0];
-                if (System.IO.File.Exists(filePath))
+                foreach (var arg in e.Args)
                 {
-                    DataManager.OpenFile(filePath, (content, path) =>
+                    string filePath = arg;
+                    if (File.Exists(filePath))
                     {
-                        mainWindow.Dispatcher.Invoke(() =>
+                        DataManager.OpenFile(filePath, (content, path) =>
                         {
-                            mainWindow.OpenFileInNewTab(content, path);
+                            mainWindow.Dispatcher.Invoke(() =>
+                            {
+                                mainWindow.OpenFileInNewTab(content, path);
+                            });
                         });
-                    });
+                    }
                 }
             }
+        }
+
+        private void SendArgsToRunningInstance(string[] args)
+        {
+            using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out))
+            {
+                try
+                {
+                    client.Connect(1000); // Timeout 1 Sekunde
+                    using (var writer = new StreamWriter(client))
+                    {
+                        foreach (var arg in args)
+                        {
+                            writer.WriteLine(arg);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Optional: Zeige eine Fehlermeldung, falls die Pipe nicht erreichbar ist
+                    MessageBox.Show($"Fehler beim Öffnen der Datei in laufender Instanz: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void StartPipeServer(UI.MainWindow mainWindow)
+        {
+            var thread = new Thread(() =>
+            {
+                while (true)
+                {
+                    using (var server = new NamedPipeServerStream(PipeName, PipeDirection.In))
+                    {
+                        try
+                        {
+                            server.WaitForConnection();
+                            using (var reader = new StreamReader(server))
+                            {
+                                string filePath;
+                                while ((filePath = reader.ReadLine()) != null)
+                                {
+                                    if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+                                    {
+                                        DataManager.OpenFile(filePath, (content, path) =>
+                                        {
+                                            mainWindow.Dispatcher.Invoke(() =>
+                                            {
+                                                mainWindow.OpenFileInNewTab(content, path);
+                                            });
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Optional: Logge Fehler im Pipe-Server
+                        }
+                    }
+                }
+            });
+            thread.IsBackground = true;
+            thread.Start();
         }
 
         private void ApplyAvalonDockThemeFromMahApps()
