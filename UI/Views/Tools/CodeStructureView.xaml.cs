@@ -33,7 +33,8 @@ namespace Skriptorium.UI.Views.Tools
 
         private void DockingManager_ActiveContentChanged(object sender, System.EventArgs e)
         {
-            // Ignoriere, wenn das aktive Content ein Anchorable ist (z.B. FileExplorer, Suchergebnisse, CodeStructure selbst)
+            // Wenn ein Anchorable aktiv ist, keine Aktualisierung ausführen
+            // (dadurch bleibt die letzte Editor-Struktur erhalten)
             if (_dockingManager.ActiveContent is LayoutAnchorable)
             {
                 return;
@@ -42,54 +43,52 @@ namespace Skriptorium.UI.Views.Tools
             // Hole den neuen aktiven Editor
             var newEditor = _tabManager.GetActiveScriptEditor();
 
-            // Wenn kein Editor aktiv ist oder es derselbe Editor ist, keine Aktualisierung
-            if (newEditor == null || newEditor == _lastProcessedEditor)
+            // Wenn kein Editor aktiv ist → nichts tun (Struktur bleibt)
+            if (newEditor == null)
             {
                 return;
             }
 
+            // Wenn derselbe Editor wie beim letzten Mal → nichts tun
+            if (newEditor == _lastProcessedEditor)
+            {
+                return;
+            }
+
+            // Struktur aktualisieren und merken
             UpdateStructure();
             _lastProcessedEditor = newEditor;
         }
 
         public void UpdateStructure()
         {
-            _currentEditor = _tabManager.GetActiveScriptEditor();
+            var activeEditor = _tabManager.GetActiveScriptEditor();
 
-            // Wenn das aktive Skript leer ist, leere die Grids
-            if (_currentEditor != null && string.IsNullOrEmpty(_currentEditor.Text))
+            // Wenn ein Editor aktiv ist und Text enthält → merken und Struktur aufbauen
+            if (activeEditor != null && !string.IsNullOrEmpty(activeEditor.Text))
             {
-                InstancesGrid.ItemsSource = null;
-                FunctionsGrid.ItemsSource = null;
-                VariablesGrid.ItemsSource = null;
-                return;
+                _lastActiveEditor = activeEditor;
+                _currentEditor = activeEditor;
             }
 
-            // Wenn ein Editor aktiv ist und nicht leer, aktualisiere den letzten aktiven Editor
-            if (_currentEditor != null)
-            {
-                _lastActiveEditor = _currentEditor;
-            }
-
-            // Verwende den letzten aktiven Editor, wenn kein aktueller Editor aktiv ist
+            // Editor wählen: wenn kein neuer aktiv, dann den letzten bekannten verwenden
             var editorToUse = _lastActiveEditor ?? _currentEditor;
 
             if (editorToUse == null || string.IsNullOrEmpty(editorToUse.Text))
             {
-                // Leere die Grids, wenn kein Editor jemals aktiv war
+                // Nur dann leeren, wenn wirklich noch nie ein Editor da war
                 InstancesGrid.ItemsSource = null;
                 FunctionsGrid.ItemsSource = null;
                 VariablesGrid.ItemsSource = null;
                 return;
             }
 
-            // Parse das aktuelle oder letzte Skript
+            // Parse und fülle Grids
             var lines = editorToUse.Text.Split(new[] { "\r\n", "\n" }, System.StringSplitOptions.None);
             var tokens = _lexer.Tokenize(lines);
             var parser = new DaedalusParser(tokens);
             var declarations = parser.ParseScript();
 
-            // Fülle die Grids
             InstancesGrid.ItemsSource = declarations.OfType<InstanceDeclaration>()
                 .Select(d => new { d.Name, d.BaseClass, d.Line });
             FunctionsGrid.ItemsSource = declarations.OfType<FunctionDeclaration>()
