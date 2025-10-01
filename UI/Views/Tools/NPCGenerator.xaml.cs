@@ -93,6 +93,90 @@ namespace Skriptorium.UI.Views.Tools
             }
         }
 
+        public enum Gender { MALE, FEMALE }
+
+        private readonly Random rng = new Random();
+
+        private readonly List<string> maleHeads = new()
+        {
+            "Hum_Head_Psionic", "Hum_Head_Thief", "Hum_Head_Bald", "Hum_Head_Pony",
+            "Hum_Head_Fighter", "Hum_Head_FatBald", "HUM_HEAD_BALD_BART", "HUM_HEAD_BEARD",
+            "HUM_HEAD_BEARD2", "HUM_HEAD_BEARD4", "HUM_HEAD_BRODA2", "HUM_HEAD_IRO",
+            "HUM_HEAD_KRUSSEL_BART", "HUM_HEAD_KRUSSEL_NOBART", "HUM_HEAD_LANGOFFEN_BART",
+            "HUM_HEAD_LANGOFFEN_NOBART", "HUM_HEAD_LONG", "HUM_HEAD_LONGHAIR", "HUM_HEAD_MUSTACHE",
+            "HUM_HEAD_NEMORA", "HUM_HEAD_PONYBEARD", "HUM_HEAD_PONYNEU", "HUM_HEAD_SABROSA",
+            "HUM_HEAD_SIDEBURNS", "HUM_HEAD_ZOPFI_BART", "HUM_HEAD_ZOPFI_NOBART"
+        };
+
+        private readonly List<string> femaleHeads = new()
+        {
+            "Hum_Head_BabeHair", "Hum_Head_Babe8", "Hum_Head_Babe7", "Hum_Head_Babe6", "Hum_Head_Babe5",
+            "Hum_Head_Babe4", "Hum_Head_Babe3", "Hum_Head_Babe2", "Hum_Head_Babe1", "Hum_Head_Babe",
+            "HUM_HEAD_BABE9", "HUM_HEAD_BABE11", "HUM_HEAD_BABE12", "HUM_HEAD_BABE13", "HUM_HEAD_BABE14",
+            "HUM_HEAD_GRELKA", "HUM_HEAD_REMI"
+        };
+
+        private readonly List<string> maleFaces = new()
+        {
+            "Face_P_ToughBald", "Face_P_Tough_Drago", "Face_P_Tough_Torrez", "Face_P_Tough_Rodriguez",
+            "Face_P_ToughBald_Nek", "Face_P_NormalBald", "Face_P_Normal01", "Face_P_Normal02",
+            "Face_P_Normal_Fletcher", "Face_P_Normal03", "Face_P_NormalBart01", "Face_P_NormalBart_Cronos",
+            "Face_P_NormalBart_Nefarius", "Face_P_NormalBart_Riordian", "Face_P_OldMan_Gravo",
+            "Face_P_Weak_Cutter", "Face_P_Weak_Ulf_Wohlers", "Face_N_Important_Arto", "Face_N_ImportantGrey",
+            "Face_N_ImportantOld", "Face_N_Tough_Lee", "Face_N_Tough_Skip", "Face_N_ToughBart01",
+            "Face_N_Tough_Okyl", "Face_N_Normal01", "Face_N_Normal_Cord", "Face_N_Normal_Olli_Kahn",
+            "Face_N_Normal02", "Face_N_Normal_Spassvogel", "Face_N_Normal03", "Face_N_Normal04",
+            "Face_N_Normal05", "Face_N_Normal_Stone", "Face_N_Normal06", "Face_N_Normal_Erpresser",
+            "Face_N_Normal07", "Face_N_Normal_Blade", "Face_N_Normal08", "Face_N_Normal14",
+            "Face_N_Normal_Sly", "Face_N_Normal16", "Face_N_Normal17", "Face_N_Normal18",
+            "Face_N_Normal19", "Face_N_Normal20", "Face_N_NormalBart01", "Face_N_NormalBart02",
+            "Face_N_NormalBart03", "Face_N_NormalBart04", "Face_N_NormalBart05", "Face_N_NormalBart06",
+            "Face_N_NormalBart_Senyan", "Face_N_NormalBart08", "Face_N_NormalBart09", "Face_N_NormalBart10",
+            "Face_N_NormalBart11", "Face_N_NormalBart12", "Face_N_NormalBart_Dexter", "Face_N_NormalBart_Graham",
+            "Face_N_NormalBart_Dusty", "Face_N_NormalBart16", "Face_N_NormalBart17", "Face_N_NormalBart_Huno",
+            "Face_N_NormalBart_Grim", "Face_N_NormalBart20", "Face_N_NormalBart21", "Face_N_NormalBart22",
+            "Face_N_OldBald_Jeremiah", "Face_N_Weak_Ulbert", "Face_N_Weak_BaalNetbek", "Face_N_Weak_Herek",
+            "Face_N_Weak04", "Face_N_Weak05", "Face_N_Weak_Orry", "Face_N_Weak_Asghan", "Face_N_Weak_Markus_Kark",
+            "Face_N_Weak_Cipher_alt", "Face_N_NormalBart_Swiney", "Face_N_Weak12", "Face_L_ToughBald01",
+            "Face_L_Tough01", "Face_L_Tough02", "Face_L_Tough_Santino", "Face_L_ToughBart_Quentin",
+            "Face_L_Normal_GorNaBar", "Face_L_NormalBart01", "Face_L_NormalBart02", "Face_L_NormalBart_Rufus",
+            "Face_B_ToughBald", "Face_B_Tough_Pacho", "Face_B_Tough_Silas", "Face_B_Normal01",
+            "Face_B_Normal_Kirgo", "Face_B_Normal_Sharky", "Face_B_Normal_Orik", "Face_B_Normal_Kharim"
+        };
+
+        private readonly List<string> femaleFaces = new()
+        {
+            "FaceBabe_N_BlackHair", "FaceBabe_N_Blondie", "FaceBabe_N_BlondTattoo", "FaceBabe_N_PinkHair",
+            "FaceBabe_L_Charlotte", "FaceBabe_B_RedLocks", "FaceBabe_N_HairAndCloth", "FaceBabe_N_WhiteCloth",
+            "FaceBabe_N_GreyCloth", "FaceBabe_N_Brown", "FaceBabe_N_VlkBlonde", "FaceBabe_N_BauBlonde",
+            "FaceBabe_N_YoungBlonde", "FaceBabe_N_OldBlonde", "FaceBabe_P_MidBlonde", "FaceBabe_N_MidBauBlonde",
+            "FaceBabe_N_OldBrown", "FaceBabe_N_Lilo", "FaceBabe_N_Hure", "FaceBabe_N_Anne",
+            "FaceBabe_B_RedLocks2", "FaceBabe_L_Charlotte2"
+        };
+
+        private readonly List<string> maleBodyTexes = new() { "BodyTex_P", "BodyTex_N", "BodyTex_L", "BodyTex_B", "BodyTex_T" };
+        private readonly List<string> femaleBodyTexes = new() { "BodyTexBabe_P", "BodyTexBabe_N", "BodyTexBabe_L", "BodyTexBabe_B", "BodyTexBabe_F", "BodyTexBabe_S" };
+
+        private string GenerateNpcVisual()
+        {
+            string selectedGender = ((ComboBoxItem)genderDropdown.SelectedItem)?.Content.ToString();
+            Gender gender = selectedGender == "Weiblich" ? Gender.FEMALE : Gender.MALE;
+
+            string head = gender == Gender.MALE
+                ? maleHeads[rng.Next(maleHeads.Count)]
+                : femaleHeads[rng.Next(femaleHeads.Count)];
+
+            string bodyTex = gender == Gender.MALE
+                ? maleBodyTexes[rng.Next(maleBodyTexes.Count)]
+                : femaleBodyTexes[rng.Next(femaleBodyTexes.Count)];
+
+            string face = gender == Gender.MALE
+                ? maleFaces[rng.Next(maleFaces.Count)]
+                : femaleFaces[rng.Next(femaleFaces.Count)];
+
+            return $"B_SetNpcVisual (self, {gender}, \"{head}\", {face}, {bodyTex}, ITAR_Platzhalter); // Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird\")";
+        }
+
         private void GenerateCode_Click(object sender, RoutedEventArgs e)
         {
             // Pflichtfelder prüfen
@@ -165,7 +249,7 @@ namespace Skriptorium.UI.Views.Tools
 
             // Ausgerüstete Waffen
             sb.AppendLine("    // ------ Ausgerüstete Waffen ------");
-            sb.AppendLine($"    EquipItem (self, Item-Instanz); // Munition wird automatisch generiert, darf aber angegeben werden"); 
+            sb.AppendLine($"    EquipItem (self, Item_Instanz); // Munition wird automatisch generiert, darf aber angegeben werden"); 
             sb.AppendLine();
 
             // Inventar
@@ -175,7 +259,7 @@ namespace Skriptorium.UI.Views.Tools
 
             // Aussehen
             sb.AppendLine("    // ------ Aussehen ------");
-            sb.AppendLine("    B_SetNpcVisual      (self, MALE, \"Hum_Head_Fat_Platzhalter\", Face_N_Platzhalter, BodyTex_Platzhalter, ITAR_Platzhalter); // Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird");
+            sb.AppendLine($"    {GenerateNpcVisual()}");
             sb.AppendLine("    Mdl_SetModelFatness (self, 0); // -1 / 0 / 1 / 2");
             sb.AppendLine("    Mdl_ApplyOverlayMds (self, \"Humans_Platzhalter.mds\"); // Tired / Militia / Mage / Arrogance / Relaxed");
             sb.AppendLine();
@@ -236,6 +320,7 @@ namespace Skriptorium.UI.Views.Tools
             aivarsDropdown.SelectedIndex = 1;     // "Nein"
             attributesDropdown.SelectedIndex = 1; // "Nein"
             fightSkillsDropdown.SelectedIndex = 1; // "Nein"
+            genderDropdown.SelectedIndex = 0; // "Männlich"
 
             // Dynamischen Inhalt leeren (optional)
             detailsPanel.Children.Clear();

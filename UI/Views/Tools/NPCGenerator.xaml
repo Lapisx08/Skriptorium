@@ -4,7 +4,7 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:Skriptorium.UI.Views.Tools"
         Title="NPC Generator" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
-        Height="750" Width="700">
+        Height="800" Width="700">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -39,6 +39,7 @@
                 <!-- Attribute -->
                 <RowDefinition Height="Auto"/>
                 <!-- Kampf-Talente -->
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Text="Name:" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
@@ -82,6 +83,13 @@
                 <ComboBoxItem Content="Ja"/>
                 <ComboBoxItem Content="Nein"/>
             </ComboBox>
+
+            <TextBlock Text="Geschlecht:" Grid.Row="9" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="genderDropdown" Grid.Row="9" Grid.Column="1" Margin="5" SelectedIndex="0">
+                <ComboBoxItem Content="Männlich"/>
+                <ComboBoxItem Content="Weiblich"/>
+            </ComboBox>
+
         </Grid>
 
         <!-- Dynamischer Bereich für AIVars, Equipment, Talents etc. -->
