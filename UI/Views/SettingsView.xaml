@@ -20,6 +20,11 @@
         <TabControl Grid.Row="0">
             <!-- Tab: Allgemein -->
             <TabItem Header="Allgemein">
+                <TabItem.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16" />
+                    </DataTemplate>
+                </TabItem.HeaderTemplate>
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -49,6 +54,11 @@
 
             <!-- Tab: Pfade -->
             <TabItem Header="Pfade">
+                <TabItem.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16" />
+                    </DataTemplate>
+                </TabItem.HeaderTemplate>
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>

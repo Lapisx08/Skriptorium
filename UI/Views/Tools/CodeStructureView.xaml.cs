@@ -13,12 +13,14 @@ namespace Skriptorium.UI.Views.Tools
     {
         private ScriptEditor? _currentEditor;
         private ScriptEditor? _lastActiveEditor; // Speichert den letzten nicht-leeren Editor
+        private ScriptEditor? _lastProcessedEditor; // Für aktive, nicht-leere Editor-Updates
+
         private readonly DaedalusLexer _lexer = new DaedalusLexer();
         private readonly ScriptTabManager _tabManager;
         private readonly DockingManager _dockingManager;
 
-        // Neue Variable zur Verfolgung des zuletzt verarbeiteten Editors
-        private ScriptEditor? _lastProcessedEditor;
+        // Alle abonnierte LayoutDocuments
+        private readonly List<LayoutDocument> _subscribedDocs = new List<LayoutDocument>();
 
         public CodeStructureView(ScriptTabManager tabManager, DockingManager dockingManager)
         {
@@ -26,64 +28,94 @@ namespace Skriptorium.UI.Views.Tools
             _tabManager = tabManager;
             _dockingManager = dockingManager;
 
-            // Registriere Event für Änderungen des aktiven Editors
+            // LayoutUpdated nutzen, um neue Dokumente zu abonnieren
+            _dockingManager.LayoutUpdated += DockingManager_LayoutUpdated;
+
+            // Optional: ActiveContentChanged minimal belassen
             _dockingManager.ActiveContentChanged += DockingManager_ActiveContentChanged;
+
+            // Initial vorhandene Dokumente abonnieren
+            AttachDocumentHandlers();
+
             UpdateStructure();
         }
 
+        private void DockingManager_LayoutUpdated(object? sender, System.EventArgs e)
+        {
+            AttachDocumentHandlers();
+        }
+
+        private void AttachDocumentHandlers()
+        {
+            if (_dockingManager.Layout == null) return;
+
+            var docs = _dockingManager.Layout.Descendents().OfType<LayoutDocument>().ToList();
+
+            foreach (var doc in docs)
+            {
+                if (!_subscribedDocs.Contains(doc))
+                {
+                    doc.IsActiveChanged += LayoutDocument_IsActiveChanged;
+                    _subscribedDocs.Add(doc);
+                }
+            }
+
+            // Entferne Dokumente, die nicht mehr existieren
+            for (int i = _subscribedDocs.Count - 1; i >= 0; i--)
+            {
+                if (!docs.Contains(_subscribedDocs[i]))
+                {
+                    try
+                    {
+                        _subscribedDocs[i].IsActiveChanged -= LayoutDocument_IsActiveChanged;
+                    }
+                    catch { }
+                    _subscribedDocs.RemoveAt(i);
+                }
+            }
+        }
+
+        private void LayoutDocument_IsActiveChanged(object? sender, System.EventArgs e)
+        {
+            if (sender is not LayoutDocument doc)
+                return;
+
+            if (!doc.IsActive)
+                return;
+
+            if (doc.Content is not ScriptEditor editor)
+                return;
+
+            // Leeres Skript → Grids entladen
+            if (string.IsNullOrWhiteSpace(editor.Text))
+            {
+                InstancesGrid.ItemsSource = null;
+                FunctionsGrid.ItemsSource = null;
+                VariablesGrid.ItemsSource = null;
+
+                // _lastProcessedEditor nicht setzen, damit wieder entladen werden kann
+                return;
+            }
+
+            // Nicht-leeres Skript → Struktur aufbauen
+            _lastProcessedEditor = editor;
+            _currentEditor = editor;
+            UpdateStructure();
+        }
+
+        // Minimal, optional; wird jetzt primär über IsActiveChanged gesteuert
         private void DockingManager_ActiveContentChanged(object sender, System.EventArgs e)
         {
-            // Wenn ein Anchorable aktiv ist, keine Aktualisierung ausführen
-            // (dadurch bleibt die letzte Editor-Struktur erhalten)
-            if (_dockingManager.ActiveContent is LayoutAnchorable)
-            {
-                return;
-            }
-
-            // Hole den neuen aktiven Editor
-            var newEditor = _tabManager.GetActiveScriptEditor();
-
-            // Wenn kein Editor aktiv ist → nichts tun (Struktur bleibt)
-            if (newEditor == null)
-            {
-                return;
-            }
-
-            // Wenn derselbe Editor wie beim letzten Mal → nichts tun
-            if (newEditor == _lastProcessedEditor)
-            {
-                return;
-            }
-
-            // Struktur aktualisieren und merken
-            UpdateStructure();
-            _lastProcessedEditor = newEditor;
+            // Leer lassen oder nur Fallback-Logging
         }
 
         public void UpdateStructure()
         {
-            var activeEditor = _tabManager.GetActiveScriptEditor();
-
-            // Wenn ein Editor aktiv ist und Text enthält → merken und Struktur aufbauen
-            if (activeEditor != null && !string.IsNullOrEmpty(activeEditor.Text))
-            {
-                _lastActiveEditor = activeEditor;
-                _currentEditor = activeEditor;
-            }
-
-            // Editor wählen: wenn kein neuer aktiv, dann den letzten bekannten verwenden
             var editorToUse = _lastActiveEditor ?? _currentEditor;
-
             if (editorToUse == null || string.IsNullOrEmpty(editorToUse.Text))
-            {
-                // Nur dann leeren, wenn wirklich noch nie ein Editor da war
-                InstancesGrid.ItemsSource = null;
-                FunctionsGrid.ItemsSource = null;
-                VariablesGrid.ItemsSource = null;
                 return;
-            }
 
-            // Parse und fülle Grids
+            // Parse Script
             var lines = editorToUse.Text.Split(new[] { "\r\n", "\n" }, System.StringSplitOptions.None);
             var tokens = _lexer.Tokenize(lines);
             var parser = new DaedalusParser(tokens);
@@ -125,12 +157,10 @@ namespace Skriptorium.UI.Views.Tools
         {
             if (_lastActiveEditor?.Avalon != null)
             {
-                // Stelle sicher, dass der Editor aktiviert wird
                 var document = _tabManager.GetDocumentForEditor(_lastActiveEditor);
                 if (document != null)
-                {
                     document.IsActive = true;
-                }
+
                 _lastActiveEditor.Avalon.ScrollToLine(line);
                 _lastActiveEditor.Avalon.TextArea.Caret.Line = line;
                 _lastActiveEditor.Avalon.TextArea.Caret.Column = 1;
