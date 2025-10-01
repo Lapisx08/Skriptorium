@@ -17,6 +17,9 @@ namespace Skriptorium.UI.Views.Tools
         private readonly ScriptTabManager _tabManager;
         private readonly DockingManager _dockingManager;
 
+        // Neue Variable zur Verfolgung des zuletzt verarbeiteten Editors
+        private ScriptEditor? _lastProcessedEditor;
+
         public CodeStructureView(ScriptTabManager tabManager, DockingManager dockingManager)
         {
             InitializeComponent();
@@ -30,7 +33,23 @@ namespace Skriptorium.UI.Views.Tools
 
         private void DockingManager_ActiveContentChanged(object sender, System.EventArgs e)
         {
+            // Ignoriere, wenn das aktive Content ein Anchorable ist (z.B. FileExplorer, Suchergebnisse, CodeStructure selbst)
+            if (_dockingManager.ActiveContent is LayoutAnchorable)
+            {
+                return;
+            }
+
+            // Hole den neuen aktiven Editor
+            var newEditor = _tabManager.GetActiveScriptEditor();
+
+            // Wenn kein Editor aktiv ist oder es derselbe Editor ist, keine Aktualisierung
+            if (newEditor == null || newEditor == _lastProcessedEditor)
+            {
+                return;
+            }
+
             UpdateStructure();
+            _lastProcessedEditor = newEditor;
         }
 
         public void UpdateStructure()

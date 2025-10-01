@@ -11,7 +11,6 @@
                 <DataGrid x:Name="InstancesGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="InstancesGrid_MouseDoubleClick">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTextColumn Header="Basisklasse" Binding="{Binding BaseClass}" Width="*"/>
                         <DataGridTextColumn Header="Zeile" Binding="{Binding Line}" Width="80"/>
                     </DataGrid.Columns>
                 </DataGrid>
@@ -22,7 +21,6 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Rückgabetyp" Binding="{Binding ReturnType}" Width="100"/>
                         <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTextColumn Header="Parameter" Binding="{Binding ParametersString}" Width="*"/>
                         <DataGridTextColumn Header="Zeile" Binding="{Binding Line}" Width="80"/>
                     </DataGrid.Columns>
                 </DataGrid>
