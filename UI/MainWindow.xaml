@@ -237,6 +237,9 @@
             <Button ToolTip="Datei Explorer" Click="MenuToolsFileExplorer_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="12"/>
             </Button>
+            <Button ToolTip="Code Struktur" Click="MenuToolsCodeStructure_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="12"/>
+            </Button>
             <Button ToolTip="NPC Generator" Click="MenuNPCGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="12"/>
             </Button>
