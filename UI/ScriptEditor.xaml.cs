@@ -239,6 +239,39 @@ namespace Skriptorium.UI
                 _completionWindow.StartOffset = wordStart;
                 _completionWindow.EndOffset = avalonEditor.CaretOffset;
 
+                // Themenabhängige Anpassung der CompletionWindow
+                bool isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
+                if (isDark)
+                {
+                    _completionWindow.Background = new SolidColorBrush(Color.FromRgb(30, 30, 30)); // Dunkler Hintergrund
+                    _completionWindow.Foreground = Brushes.White; // Helle Schrift für nicht ausgewählte Einträge
+                    _completionWindow.CompletionList.ListBox.Background = new SolidColorBrush(Color.FromRgb(30, 30, 30));
+                    _completionWindow.CompletionList.ListBox.Foreground = Brushes.White;
+
+                    // Stil für ListBoxItems anpassen
+                    Style listBoxItemStyle = new Style(typeof(ListBoxItem));
+                    listBoxItemStyle.Setters.Add(new Setter(ListBoxItem.ForegroundProperty, Brushes.White));
+                    listBoxItemStyle.Setters.Add(new Setter(ListBoxItem.BackgroundProperty, new SolidColorBrush(Color.FromRgb(30, 30, 30))));
+                    // Stil für ausgewählte Einträge
+                    Trigger selectedTrigger = new Trigger
+                    {
+                        Property = ListBoxItem.IsSelectedProperty,
+                        Value = true
+                    };
+                    selectedTrigger.Setters.Add(new Setter(ListBoxItem.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0, 120, 215)))); // Blaue Hervorhebung
+                    selectedTrigger.Setters.Add(new Setter(ListBoxItem.ForegroundProperty, Brushes.White));
+                    listBoxItemStyle.Triggers.Add(selectedTrigger);
+                    _completionWindow.CompletionList.ListBox.ItemContainerStyle = listBoxItemStyle;
+                }
+                else
+                {
+                    // Standard-Stil für hellen Modus
+                    _completionWindow.Background = Brushes.White;
+                    _completionWindow.Foreground = Brushes.Black;
+                    _completionWindow.CompletionList.ListBox.Background = Brushes.White;
+                    _completionWindow.CompletionList.ListBox.Foreground = Brushes.Black;
+                }
+
                 _completionWindow.Show();
             }
 

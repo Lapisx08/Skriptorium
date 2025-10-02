@@ -14,39 +14,96 @@ namespace TestProgram.Analysis
         // Initialisierung mit den vordefinierten Schlüsselwörtern, speziellen Schlüsselwörtern und häufigen Konstanten/Funktionen
         private static readonly HashSet<string> predefinedSuggestions = new(StringComparer.OrdinalIgnoreCase)
         {
-            // Schlüsselwörter aus DaedalusLexer
+            // Schlüsselwörter
             "func", "var", "const", "return", "if", "else", "instance", "class", "prototype",
             "int", "float", "void", "string", "c_npc", "true", "false",
+    
             // Spezielle Schlüsselwörter
             "self", "other", "hero", "slf",
+    
             // Häufige Konstanten und Funktionen
-            "Npc_Default", "aivar", "MALE", "FEMALE", "ZS_Talk",
-            "EquipItem", "PrintScreen",
-            // Erweiterte Liste von Konstanten und Funktionen mit Präfixen
+            "Npc_Default", "aivar", "MALE", "FEMALE", "ZS_Talk", "EquipItem", "PrintScreen",
+    
             // Npc_-Funktionen und -Konstanten
-            "Npc_GetDistToNpc", "Npc_GetDistToWP", "Npc_SetTarget", "Npc_InsertItem", "Npc_HasItems", "Npc_GetStateTime",
+            "Npc_GetDistToNpc", "Npc_GetDistToWP", "Npc_SetTarget", "Npc_InsertItem",
+            "Npc_HasItems", "Npc_GetStateTime", "Npc_IsInState", "Npc_KnowsInfo",
+            "Npc_IsDead", "Npc_SetTrueGuild", "Npc_ExchangeRoutine",
+    
+            // NPC_-Konstanten
             "NPC_HUMAN", "NPC_ORC", "NPC_TROLL", "NPC_SKELETON",
+            "NPCTYPE_MAIN", "NPC_FLAG_IMMORTAL",
+            "NPC_TALENT_1H", "NPC_TALENT_2H", "NPC_TALENT_BOW", "NPC_TALENT_CROSSBOW",
+    
             // AI_-Funktionen
-            "AI_StandUp", "AI_GotoWP", "AI_AlignToWP", "AI_PlayAni", "AI_Wait", "AI_Queue", "AI_ContinueRoutine",
+            "AI_StandUp", "AI_GotoWP", "AI_AlignToWP", "AI_PlayAni", "AI_Wait",
+            "AI_Queue", "AI_ContinueRoutine", "AI_EndProcessInfos", "AI_Output",
+            "AI_UnequipArmor", "AI_EquipArmor",
+    
+            // AIV_-Konstanten
+            "AIV_ToughGuy", "AIV_ToughGuyNewsOverride", "AIV_IGNORE_Murder",
+            "AIV_IGNORE_Theft", "AIV_IGNORE_Sheepkiller", "AIV_TalkedToPlayer",
+    
+            // FAI_-Konstanten
+            "FAI_HUMAN_MASTER", "FAI_HUMAN_NORMAL", "FAI_HUMAN_STRONG",
+    
             // Wld_-Funktionen
-            "Wld_InsertNpc", "Wld_SetTime", "Wld_GetDay", "Wld_IsRaining", "Wld_InsertItem", "Wld_PlayEffect",
+            "Wld_InsertNpc", "Wld_SetTime", "Wld_GetDay", "Wld_IsRaining",
+            "Wld_InsertItem", "Wld_PlayEffect",
+    
             // Mdl_-Funktionen
-            "Mdl_SetVisual", "Mdl_ApplyOverlayMds", "Mdl_SetModelScale",
+            "Mdl_SetVisual", "Mdl_ApplyOverlayMds", "Mdl_SetModelScale", "Mdl_SetModelFatness",
+    
             // Info_-Funktionen
             "Info_AddChoice", "Info_ClearChoices", "Info_Advance",
-            // Create-Funktionen
+    
+            // Create_-Funktionen
             "CreateInvItem", "CreateInvItems",
+    
             // Log_-Funktionen
             "Log_CreateTopic", "Log_SetTopicStatus", "Log_AddEntry",
+    
             // Hlp_-Funktionen
             "Hlp_GetNpc", "Hlp_IsValidNpc", "Hlp_GetInstanceID",
+    
             // Snd_-Funktionen
             "Snd_Play", "Snd_Play3d",
+    
             // TA_-Funktionen
             "TA_BeginOverlay", "TA_EndOverlay", "TA_Min",
+            "TA_Sit_Bench", "TA_Stand_Drinking", "TA_Sleep", "TA_Bognern",
+            "TA_Pfeileschnitzen", "TA_Guide_Player", "TA_Sit_Chair",
+            "TA_Stand_Sweeping", "TA_Smalltalk", "TA_Campfire",
+            "TA_Stand_WP", "TA_Follow_Player", "TA_Stand_ArmsCrossed", "TA_Stand_Guarding",
+    
+            // B_-Funktionen
+            "B_SetAttributesToChapter", "B_SetNpcVisual", "B_CreateAmbientInv",
+            "B_GiveNpcTalents", "B_SetFightSkills", "B_GiveInvItems", "B_Say_Gold",
+            "B_GrantAbsolution", "B_LogEntry", "B_UseFakeScroll", "B_KillNpc",
+            "B_TeachFightTalentPercent", "B_BuildLearnString", "B_GetLearnCostTalent",
+            "B_GetTotalPetzCounter", "B_GetGreatestPetzCrime", "B_Kapitelwechsel",
+            "B_StartOtherRoutine", "B_RaiseFightTalent", "B_GivePlayerXP",
+    
+            // GIL_-Konstanten
+            "GIL_HUMAN", "GIL_ORC", "GIL_TROLL", "GIL_PAL", "GIL_MIL", "GIL_KDF",
+            "GIL_NOV", "GIL_SLD", "GIL_OUT", "GIL_STRF",
+    
             // Weitere Konstanten
-            "GIL_HUMAN", "GIL_ORC", "GIL_TROLL", "ATR_STRENGTH", "ATR_DEXTERITY", "ATR_MANA", "AR_KILL",
-            "LOC_TEMPLE", "LOG_SUCCESS", "FONT_SCREEN", "PETZCOUNTER_MURDER"
+            "ATR_STRENGTH", "ATR_DEXTERITY", "ATR_MANA", "AR_KILL",
+            "LOC_TEMPLE", "LOC_CITY",
+            "LOG_RUNNING", "LOG_SUCCESS", "LOG_MISSION", "FONT_SCREEN",
+            "PETZCOUNTER_MURDER", "PETZCOUNTER_City_Theft", "PETZCOUNTER_City_Attack", "PETZCOUNTER_City_Sheepkiller",
+    
+            // REAL_-Konstanten
+            "PRINT_Learn2h1", "PRINT_Learn2h5", "PRINT_Addon_GuildNeeded", "PRINT_Addon_GuildNeeded_NOV",
+    
+            // ZEN_-Konstanten
+            "NEWWORLD_ZEN",
+    
+            // Sex_-Konstanten
+            "MALE", "FEMALE",
+    
+            // Weitere Funktionen
+            "EquipItem", "PrintScreen", "ZS_Talk"
         };
 
         public AutocompletionEngine()
