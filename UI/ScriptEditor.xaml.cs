@@ -159,7 +159,10 @@ namespace Skriptorium.UI
 
         private void InitializeAutocompletion()
         {
-            _autocompletionEngine = new AutocompletionEngine(_ast);
+            _autocompletionEngine = new AutocompletionEngine();
+            // Quellcode aus avalonEditor.Text in Zeilen aufteilen
+            string[] lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            _autocompletionEngine.UpdateSymbolsFromCode(lines);
         }
 
         public void ToggleAutocompletion()
@@ -289,7 +292,9 @@ namespace Skriptorium.UI
             {
                 var parser = new DaedalusParser(_cachedTokens);
                 _ast = parser.ParseScript();
-                _autocompletionEngine = new AutocompletionEngine(_ast);
+                // Quellcode aus avalonEditor.Text in Zeilen aufteilen
+                string[] lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                _autocompletionEngine.UpdateSymbolsFromCode(lines);
             }
             catch (Exception ex)
             {

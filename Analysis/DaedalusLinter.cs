@@ -22,7 +22,7 @@ namespace Skriptorium.Analysis
             // Basis-Funktionen aus der AutocompletionEngine
             knownFunctions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                "Wild_InsertNpc"
+                "Wld_InsertNpc"
                 // Weitere Standard-Funktionen hier
             };
             if (additionalFunctions != null)

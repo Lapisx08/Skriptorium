@@ -7,60 +7,193 @@ namespace TestProgram.Analysis
 {
     public class AutocompletionEngine
     {
-        // Symboltabelle (Name -> Typ), ähnlich wie im SemanticAnalyzer
-        private readonly Dictionary<string, string> symbolTable = new();
+        private readonly DaedalusLexer lexer = new DaedalusLexer();
+        private readonly Dictionary<string, string> symbolTable = new(); // Name -> Typ
+        private readonly HashSet<string> suggestions = new(StringComparer.OrdinalIgnoreCase);
 
-        // Liste der verfügbaren Keywords, Funktionen etc.
-        private static readonly List<string> keywords = new()
+        // Initialisierung mit den vordefinierten Schlüsselwörtern, speziellen Schlüsselwörtern und häufigen Konstanten/Funktionen
+        private static readonly HashSet<string> predefinedSuggestions = new(StringComparer.OrdinalIgnoreCase)
         {
-            "instance", "func", "var", "const", "if", "else", "return",
-            "class", "prototype", "int", "float", "void", "string",
-            "true", "false"
+            // Schlüsselwörter aus DaedalusLexer
+            "func", "var", "const", "return", "if", "else", "instance", "class", "prototype",
+            "int", "float", "void", "string", "c_npc", "true", "false",
+            // Spezielle Schlüsselwörter
+            "self", "other", "hero", "slf",
+            // Häufige Konstanten und Funktionen
+            "Npc_Default", "aivar", "MALE", "FEMALE", "ZS_Talk",
+            "EquipItem", "PrintScreen",
+            // Erweiterte Liste von Konstanten und Funktionen mit Präfixen
+            // Npc_-Funktionen und -Konstanten
+            "Npc_GetDistToNpc", "Npc_GetDistToWP", "Npc_SetTarget", "Npc_InsertItem", "Npc_HasItems", "Npc_GetStateTime",
+            "NPC_HUMAN", "NPC_ORC", "NPC_TROLL", "NPC_SKELETON",
+            // AI_-Funktionen
+            "AI_StandUp", "AI_GotoWP", "AI_AlignToWP", "AI_PlayAni", "AI_Wait", "AI_Queue", "AI_ContinueRoutine",
+            // Wld_-Funktionen
+            "Wld_InsertNpc", "Wld_SetTime", "Wld_GetDay", "Wld_IsRaining", "Wld_InsertItem", "Wld_PlayEffect",
+            // Mdl_-Funktionen
+            "Mdl_SetVisual", "Mdl_ApplyOverlayMds", "Mdl_SetModelScale",
+            // Info_-Funktionen
+            "Info_AddChoice", "Info_ClearChoices", "Info_Advance",
+            // Create-Funktionen
+            "CreateInvItem", "CreateInvItems",
+            // Log_-Funktionen
+            "Log_CreateTopic", "Log_SetTopicStatus", "Log_AddEntry",
+            // Hlp_-Funktionen
+            "Hlp_GetNpc", "Hlp_IsValidNpc", "Hlp_GetInstanceID",
+            // Snd_-Funktionen
+            "Snd_Play", "Snd_Play3d",
+            // TA_-Funktionen
+            "TA_BeginOverlay", "TA_EndOverlay", "TA_Min",
+            // Weitere Konstanten
+            "GIL_HUMAN", "GIL_ORC", "GIL_TROLL", "ATR_STRENGTH", "ATR_DEXTERITY", "ATR_MANA", "AR_KILL",
+            "LOC_TEMPLE", "LOG_SUCCESS", "FONT_SCREEN", "PETZCOUNTER_MURDER"
         };
 
-        // Hier könnten auch Funktionen mit Signaturen gepflegt werden:
-        private readonly List<string> functions = new()
+        public AutocompletionEngine()
         {
-            "Wild_InsertNpc",
-            // weitere Funktionsnamen hier ergänzen
-        };
+            // Vorschläge mit vordefinierten Schlüsselwörtern und Konstanten initialisieren
+            suggestions.UnionWith(predefinedSuggestions);
+        }
 
-        public AutocompletionEngine(List<Declaration> declarations)
+        // Tokenisierung des Eingabecodes und Extraktion von Symbolen für die Autovervollständigung
+        public void UpdateSymbolsFromCode(string[] lines)
         {
-            // Symboltabelle aus den Declarations füllen
-            foreach (var decl in declarations)
+            var tokens = lexer.Tokenize(lines);
+            symbolTable.Clear();
+            suggestions.Clear();
+            suggestions.UnionWith(predefinedSuggestions);
+
+            // Token verarbeiten, um Bezeichner, Funktionsnamen, Instanznamen und Konstanten/Funktionen zu extrahieren
+            for (int i = 0; i < tokens.Count; i++)
             {
-                switch (decl)
+                var token = tokens[i];
+                // Debugging: Token-Werte und -Typen ausgeben
+                Console.WriteLine($"Token: {token.Value}, Type: {token.Type}, Line: {token.Line}, Column: {token.Column}");
+
+                switch (token.Type)
                 {
-                    case VarDeclaration varDecl:
-                        if (!symbolTable.ContainsKey(varDecl.Name))
-                            symbolTable.Add(varDecl.Name, varDecl.TypeName);
+                    case TokenType.Identifier:
+                    case TokenType.FunctionName:
+                    case TokenType.InstanceName:
+                        // Nur Bezeichner mit Mindestlänge 3 und nach var, func oder instance aufnehmen
+                        if (!symbolTable.ContainsKey(token.Value) && token.Value.Length >= 3 && IsDeclaredIdentifier(tokens, i))
+                        {
+                            // Typ basierend auf Kontext ableiten
+                            string inferredType = InferTypeFromContext(tokens, i);
+                            symbolTable[token.Value] = inferredType;
+                            suggestions.Add(token.Value);
+                            Console.WriteLine($"Added to suggestions: {token.Value} (Type: {inferredType})");
+                        }
                         break;
 
-                    case FunctionDeclaration funcDecl:
-                        if (!symbolTable.ContainsKey(funcDecl.Name))
-                            symbolTable.Add(funcDecl.Name, funcDecl.ReturnType);
+                    case TokenType.GuildConstant:
+                    case TokenType.NPC_Constant:
+                    case TokenType.AIVConstant:
+                    case TokenType.FAIConstant:
+                    case TokenType.CRIMEConstant:
+                    case TokenType.LOCConstant:
+                    case TokenType.PETZCOUNTERConstant:
+                    case TokenType.LOGConstant:
+                    case TokenType.FONTConstant:
+                    case TokenType.REALConstant:
+                    case TokenType.ATRConstant:
+                    case TokenType.ARConstant:
+                    case TokenType.PLAYERConstant:
+                    case TokenType.BuiltInFunction:
+                    case TokenType.MdlFunction:
+                    case TokenType.AIFunction:
+                    case TokenType.NpcFunction:
+                    case TokenType.InfoFunction:
+                    case TokenType.CreateFunction:
+                    case TokenType.WldFunction:
+                    case TokenType.LogFunction:
+                    case TokenType.HlpFunction:
+                    case TokenType.SndFunction:
+                    case TokenType.TAFunction:
+                    case TokenType.EquipFunction:
+                    case TokenType.ZENConstant:
+                    case TokenType.SexConstant:
+                    case TokenType.AiVariable:
+                        if (!symbolTable.ContainsKey(token.Value))
+                        {
+                            symbolTable[token.Value] = token.Type.ToString();
+                            suggestions.Add(token.Value);
+                            Console.WriteLine($"Added to suggestions: {token.Value} (Type: {token.Type})");
+                        }
                         break;
                 }
             }
+
+            // Debugging: Gesamte suggestions-Menge ausgeben
+            Console.WriteLine("Current suggestions: " + string.Join(", ", suggestions));
         }
 
-        // Methode, um Vorschläge basierend auf aktuellem Eingabetext zu bekommen
+        // Prüfen, ob ein Bezeichner nach var, func oder instance deklariert ist
+        private bool IsDeclaredIdentifier(List<DaedalusToken> tokens, int currentIndex)
+        {
+            if (currentIndex <= 0)
+                return false;
+
+            var prevToken = tokens[currentIndex - 1];
+            // Prüfen, ob das vorherige Token var, func oder instance ist
+            if (prevToken.Type == TokenType.VarKeyword ||
+                prevToken.Type == TokenType.FuncKeyword ||
+                prevToken.Type == TokenType.InstanceKeyword)
+            {
+                return true;
+            }
+
+            // Für Funktionen: Prüfen, ob ein TypeKeyword (z. B. void, int) vor dem func-Keyword steht
+            if (prevToken.Type == TokenType.TypeKeyword && currentIndex > 1)
+            {
+                var prevPrevToken = tokens[currentIndex - 2];
+                if (prevPrevToken.Type == TokenType.FuncKeyword)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Typ aus Kontext ableiten (z. B. vorhergehende Schlüsselwörter)
+        private string InferTypeFromContext(List<DaedalusToken> tokens, int currentIndex)
+        {
+            if (currentIndex > 0)
+            {
+                var prevToken = tokens[currentIndex - 1];
+                if (prevToken.Type == TokenType.TypeKeyword)
+                {
+                    return prevToken.Value; // z. B. "int", "string", "c_npc"
+                }
+                else if (prevToken.Type == TokenType.FuncKeyword)
+                {
+                    // Nach Rückgabetyp suchen
+                    for (int i = currentIndex - 2; i >= 0; i--)
+                    {
+                        if (tokens[i].Type == TokenType.TypeKeyword)
+                        {
+                            return tokens[i].Value; // z. B. "void", "int"
+                        }
+                    }
+                    return "void"; // Standard für Funktionen
+                }
+                else if (prevToken.Type == TokenType.InstanceKeyword)
+                {
+                    return "instance";
+                }
+            }
+            return "unknown";
+        }
+
+        // Autovervollständigungs-Vorschläge basierend auf Präfix abrufen
         public List<string> GetSuggestions(string prefix)
         {
-            var suggestions = new List<string>();
-
-            // Keywords vorschlagen
-            suggestions.AddRange(keywords.Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)));
-
-            // Variablen vorschlagen
-            suggestions.AddRange(symbolTable.Keys.Where(v => v.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)));
-
-            // Funktionen vorschlagen
-            suggestions.AddRange(functions.Where(f => f.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)));
-
-            // Dopplungen entfernen und sortieren
-            return suggestions.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(s => s).ToList();
+            return suggestions
+                .Where(s => s.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(s => s)
+                .ToList();
         }
     }
 }
