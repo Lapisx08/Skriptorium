@@ -82,8 +82,8 @@ namespace Skriptorium
             {
                 try
                 {
-                    client.Connect(1000); // Timeout 1 Sekunde
-                    using (var writer = new StreamWriter(client))
+                    client.Connect(5000); // Timeout 5 Sekunden für Sicherheit
+                    using (var writer = new StreamWriter(client) { AutoFlush = true })
                     {
                         foreach (var arg in args)
                         {
@@ -93,8 +93,8 @@ namespace Skriptorium
                 }
                 catch (Exception ex)
                 {
-                    // Optional: Zeige eine Fehlermeldung, falls die Pipe nicht erreichbar ist
-                    MessageBox.Show($"Fehler beim Öffnen der Datei in laufender Instanz: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Fehler beim Öffnen der Datei in laufender Instanz: {ex.Message}",
+                        "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -128,9 +128,9 @@ namespace Skriptorium
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
-                            // Optional: Logge Fehler im Pipe-Server
+                            // Optional: Logging
                         }
                     }
                 }
