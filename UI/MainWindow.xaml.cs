@@ -64,6 +64,8 @@ namespace Skriptorium.UI
                                       () => _editMenuManager.SelectAll());
             _shortcutManager.Register(Key.F, ModifierKeys.Control,
                                       () => FindInEditor_Click(null, null));
+            _shortcutManager.Register(Key.A, ModifierKeys.Control | ModifierKeys.Shift,
+                                      () => ToggleAutocompletion_Click(null, null));
 
             // Lesezeichen-Shortcuts
             _shortcutManager.Register(Key.F2, ModifierKeys.None,
@@ -271,7 +273,7 @@ namespace Skriptorium.UI
                 {
                     document.Title = System.IO.Path.GetFileName(ed.FilePath);
                 }
-                _tabManager.UpdateTabTitle(ed);  // Optional: Stelle sicher, dass Modified-Flag berücksichtigt wird
+                _tabManager.UpdateTabTitle(ed);
             }
         }
 
@@ -286,7 +288,7 @@ namespace Skriptorium.UI
                 {
                     document.Title = System.IO.Path.GetFileName(ed.FilePath);
                 }
-                _tabManager.UpdateTabTitle(ed);  // Optional: Stelle sicher, dass Modified-Flag berücksichtigt wird
+                _tabManager.UpdateTabTitle(ed);
             }
         }
 
@@ -305,7 +307,7 @@ namespace Skriptorium.UI
                     {
                         document.Title = System.IO.Path.GetFileName(editor.FilePath);
                     }
-                    _tabManager.UpdateTabTitle(editor);  // Optional: Stelle sicher, dass Modified-Flag berücksichtigt wird
+                    _tabManager.UpdateTabTitle(editor);
                 }
                 else
                 {
@@ -384,16 +386,18 @@ namespace Skriptorium.UI
             => GetActiveScriptEditor()?.ClearAllBookmarks();
         #endregion
 
-        public void SetTheme(string themeName)
+        #region Menü "Tools"
+        private void ToggleAutocompletion_Click(object sender, RoutedEventArgs e)
         {
-            var dicts = Application.Current.Resources.MergedDictionaries;
-            dicts.Clear();
-
-            string assembly = "Skriptorium";
-            var uri = new Uri($"pack://application:,,,/{assembly};component/UI/Themes/{themeName}.xaml",
-                              UriKind.Absolute);
-
-            dicts.Add(new ResourceDictionary { Source = uri });
+            var editor = _tabManager.GetActiveScriptEditor();
+            if (editor != null)
+            {
+                editor.ToggleAutocompletion();
+            }
+            else
+            {
+                MessageBox.Show("Kein aktiver Editor gefunden.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         private void SyntaxHighlightingUmschalten_Click(object sender, RoutedEventArgs e)
@@ -585,6 +589,7 @@ namespace Skriptorium.UI
             anchorable.IsVisible = true;
             anchorable.IsActive = true;
         }
+        #endregion
 
         private void ScriptEditor_TextChanged(object sender, EventArgs e)
         {
@@ -637,6 +642,18 @@ namespace Skriptorium.UI
                     editor.SetZoom(newZoom);
                 }
             }
+        }
+
+        public void SetTheme(string themeName)
+        {
+            var dicts = Application.Current.Resources.MergedDictionaries;
+            dicts.Clear();
+
+            string assembly = "Skriptorium";
+            var uri = new Uri($"pack://application:,,,/{assembly};component/UI/Themes/{themeName}.xaml",
+                              UriKind.Absolute);
+
+            dicts.Add(new ResourceDictionary { Source = uri });
         }
     }
 }

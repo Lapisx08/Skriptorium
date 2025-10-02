@@ -145,12 +145,17 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7E6;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Header="Autovervollständigung umschalten" InputGestureText="Strg + Shift + A" Click="ToggleAutocompletion_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE932;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="Kommentare">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="14"/>
                     </MenuItem.Icon>
                     <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + K" Click="KleinesKommentarfeld_Click"/>
-                    <MenuItem Header="Mitteleres Kommentarfeld" InputGestureText="Strg + Shift + K" Click="MittleresKommentarfeld_Click"/>
+                    <MenuItem Header="Mittleres Kommentarfeld" InputGestureText="Strg + Shift + K" Click="MittleresKommentarfeld_Click"/>
                     <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Alt + K" Click="GroßesKommentarfeld_Click"/>
                 </MenuItem>
                 <MenuItem Header="Foldings ein- und ausklappen" InputGestureText="Strg + M" Click="ToggleFoldings_Click">

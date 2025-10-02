@@ -141,7 +141,17 @@ namespace Skriptorium.UI.Views
 
                 if (!string.IsNullOrWhiteSpace(input))
                 {
-                    string newPath = Path.Combine(Path.GetDirectoryName(node.FullPath), input);
+                    string newFileName = input;
+                    // Prüfen, ob die Datei eine .d-Datei ist und die Eingabe keine Erweiterung enthält
+                    if (!node.IsDirectory && Path.GetExtension(node.FullPath).Equals(".d", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!Path.HasExtension(input))
+                        {
+                            newFileName = input + ".d"; // .d-Erweiterung hinzufügen
+                        }
+                    }
+
+                    string newPath = Path.Combine(Path.GetDirectoryName(node.FullPath), newFileName);
 
                     try
                     {
@@ -193,6 +203,133 @@ namespace Skriptorium.UI.Views
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
             ReloadRootDirectory();
+        }
+
+        // Drag-and-Drop-Handler
+        private FileNode _dragSource;
+
+        private void TreeViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TreeViewItem item && item.DataContext is FileNode node && !node.IsDummy)
+            {
+                _dragSource = node;
+            }
+        }
+
+        private void TreeViewItem_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && _dragSource != null)
+            {
+                var data = new DataObject(typeof(FileNode), _dragSource);
+                DragDrop.DoDragDrop((DependencyObject)sender, data, DragDropEffects.Move);
+                _dragSource = null; // Reset nach Drag
+            }
+        }
+
+        private void FileTree_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(FileNode)))
+            {
+                var sourceNode = e.Data.GetData(typeof(FileNode)) as FileNode;
+                var target = GetDropTarget(e.OriginalSource);
+
+                if (sourceNode != null && target != null && target.IsDirectory && !sourceNode.IsDummy)
+                {
+                    // Verhindern, dass ein Ordner in sich selbst oder einen Unterordner verschoben wird
+                    if (sourceNode.IsDirectory && IsParentOrSelf(sourceNode, target))
+                    {
+                        e.Effects = DragDropEffects.None;
+                    }
+                    else
+                    {
+                        e.Effects = DragDropEffects.Move;
+                    }
+                }
+                else
+                {
+                    e.Effects = DragDropEffects.None;
+                }
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+            e.Handled = true;
+        }
+
+        private void FileTree_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(FileNode)))
+            {
+                var sourceNode = e.Data.GetData(typeof(FileNode)) as FileNode;
+                var targetNode = GetDropTarget(e.OriginalSource);
+
+                if (sourceNode != null && targetNode != null && targetNode.IsDirectory && !sourceNode.IsDummy)
+                {
+                    // Verhindern, dass ein Ordner in sich selbst oder einen Unterordner verschoben wird
+                    if (sourceNode.IsDirectory && IsParentOrSelf(sourceNode, targetNode))
+                    {
+                        return;
+                    }
+
+                    try
+                    {
+                        string newPath = Path.Combine(targetNode.FullPath, sourceNode.Name);
+
+                        // Prüfen, ob das Ziel bereits existiert
+                        int i = 1;
+                        string baseName = Path.GetFileNameWithoutExtension(sourceNode.Name);
+                        string extension = sourceNode.IsDirectory ? "" : Path.GetExtension(sourceNode.Name);
+                        while (File.Exists(newPath) || Directory.Exists(newPath))
+                        {
+                            newPath = Path.Combine(targetNode.FullPath, $"{baseName} ({i++}){extension}");
+                        }
+
+                        // Verschieben der Datei oder des Ordners
+                        if (sourceNode.IsDirectory)
+                            Directory.Move(sourceNode.FullPath, newPath);
+                        else
+                            File.Move(sourceNode.FullPath, newPath);
+
+                        // Aktualisieren der Baumansicht
+                        if (sourceNode.Parent != null)
+                            sourceNode.Parent.Refresh();
+                        else
+                            ReloadRootDirectory();
+
+                        targetNode.Refresh();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Fehler beim Verschieben:\n{ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            e.Handled = true;
+        }
+
+        private FileNode GetDropTarget(object originalSource)
+        {
+            if (originalSource is FrameworkElement element && element.DataContext is FileNode node)
+            {
+                return node;
+            }
+            return RootDirectories.FirstOrDefault();
+        }
+
+        private bool IsParentOrSelf(FileNode source, FileNode target)
+        {
+            if (source == target)
+                return true;
+
+            var current = target;
+            while (current != null)
+            {
+                if (current == source)
+                    return true;
+                current = current.Parent;
+            }
+            return false;
         }
     }
 

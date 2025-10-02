@@ -12,7 +12,8 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 * Moderne WPF-Oberfläche mit hellem und dunklem Anzeigemodus
 * Effiziente Tabverwaltung und Docking der Skripte
 * Daedalus-Syntax-Highlighting für bessere Lesbarkeit
-* NPC- und Dialogenerator zur Zeitersparnis beim Skripten
+* NPC und Dialog Generator zur Zeitersparnis beim Skripten
+* Weitere gängige Funktionen 
 
 
 
@@ -39,7 +40,7 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 
 ### Abhängigkeiten
 
-* MahApps.Metro (2.4.10)
+* MahApps.Metro (2.4.11)
 * AvalonEdit, Version (6.3.1.120)
 * Dirkster.AvalonDock (4.72.1)
 * Dirkster.AvalonDock.Themes.VS2013 (4.72.1)
@@ -51,7 +52,7 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 
 ### Entwicklung
 
-Das Projekt ist in C# mit .NET 8.0 WPF entwickelt.
+Das Projekt wurde in C# mit .NET 8.0 WPF entwickelt.
 
 
 

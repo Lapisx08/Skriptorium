@@ -1,6 +1,8 @@
 ﻿using ControlzEx.Theming;
 using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Rendering;
 using MahApps.Metro;
@@ -15,6 +17,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using TestProgram.Analysis;
 
 namespace Skriptorium.UI
 {
@@ -63,6 +66,29 @@ namespace Skriptorium.UI
         }
     }
 
+    public class CompletionData : ICompletionData
+    {
+        public CompletionData(string text)
+        {
+            Text = text;
+        }
+
+        public System.Windows.Media.ImageSource Image => null;
+
+        public string Text { get; }
+
+        public object Content => Text;
+
+        public object Description => $"Vorschlag: {Text}";
+
+        public double Priority => 0;
+
+        public void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionArgs)
+        {
+            textArea.Document.Replace(completionSegment, Text);
+        }
+    }
+
     public partial class ScriptEditor : UserControl
     {
         private string _originalText = "";
@@ -70,16 +96,17 @@ namespace Skriptorium.UI
         private bool _suppressChangeTracking = false;
         private string _filePath = "";
         private List<DaedalusToken> _cachedTokens = new();
-
         private TextSegmentCollection<TextMarker>? _markers;
         private TextMarkerRenderer? _markerRenderer;
         private SyntaxColorizingTransformer? _colorizer = null!;
         private BookmarkManager? _bookmarkManager;
         private bool _syntaxHighlightingEnabled = true;
-
         private FoldingManager? _foldingManager;
         private BraceFoldingStrategy _foldingStrategy;
         private bool _allFolded = false;
+        private AutocompletionEngine? _autocompletionEngine;
+        private CompletionWindow? _completionWindow;
+        private bool _autocompletionEnabled = true;
 
         public const double OriginalFontSize = 14;
 
@@ -92,11 +119,12 @@ namespace Skriptorium.UI
         public ScriptEditor()
         {
             InitializeComponent();
-            DataContext = this; // Für Binding an EffectiveFontSize
+            DataContext = this;
             ApplyCaretBrushFromTheme();
             avalonEditor.TextChanged += AvalonEditor_TextChanged;
             avalonEditor.TextArea.Caret.PositionChanged += AvalonEditor_CaretPositionChanged;
             avalonEditor.TextArea.TextEntering += TextArea_TextEntering;
+            avalonEditor.TextArea.TextEntered += TextArea_TextEntered;
             avalonEditor.PreviewMouseWheel += AvalonEditor_PreviewMouseWheel;
 
             if (avalonEditor.Document == null)
@@ -111,8 +139,8 @@ namespace Skriptorium.UI
 
             var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
             var tokenColorMap = isDark
-                 ? DaedalusSyntaxHighlightingDarkmode.TokenColors
-                 : DaedalusSyntaxHighlightingLightmode.TokenColors;
+                ? DaedalusSyntaxHighlightingDarkmode.TokenColors
+                : DaedalusSyntaxHighlightingLightmode.TokenColors;
             var colorMap = tokenColorMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.WpfColor);
             _colorizer = new SyntaxColorizingTransformer(colorMap);
             avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
@@ -125,6 +153,148 @@ namespace Skriptorium.UI
             _foldingManager = FoldingManager.Install(avalonEditor.TextArea);
             _foldingStrategy = new BraceFoldingStrategy();
             UpdateFoldings();
+
+            InitializeAutocompletion();
+        }
+
+        private void InitializeAutocompletion()
+        {
+            _autocompletionEngine = new AutocompletionEngine(_ast);
+        }
+
+        public void ToggleAutocompletion()
+        {
+            _autocompletionEnabled = !_autocompletionEnabled;
+            if (!_autocompletionEnabled && _completionWindow != null)
+            {
+                _completionWindow.Close();
+                _completionWindow = null;
+            }
+            Console.WriteLine($"Autovervollständigung: {(_autocompletionEnabled ? "Aktiviert" : "Deaktiviert")}");
+        }
+
+        private void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
+        {
+            if (!_autocompletionEnabled)
+            {
+                if (_completionWindow != null)
+                {
+                    _completionWindow.Close();
+                    _completionWindow = null;
+                }
+                return;
+            }
+
+            if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '_')
+            {
+                if (_completionWindow != null)
+                {
+                    _completionWindow.Close();
+                    _completionWindow = null;
+                }
+                return;
+            }
+
+            if (IsInCommentOrString(avalonEditor.CaretOffset))
+            {
+                if (_completionWindow != null)
+                {
+                    _completionWindow.Close();
+                    _completionWindow = null;
+                }
+                return;
+            }
+
+            string prefix = GetCurrentWordPrefix();
+            if (string.IsNullOrEmpty(prefix) || prefix.Length < 2)
+            {
+                if (_completionWindow != null)
+                {
+                    _completionWindow.Close();
+                    _completionWindow = null;
+                }
+                return;
+            }
+
+            var suggestions = _autocompletionEngine.GetSuggestions(prefix);
+            if (!suggestions.Any())
+            {
+                if (_completionWindow != null)
+                {
+                    _completionWindow.Close();
+                    _completionWindow = null;
+                }
+                return;
+            }
+
+            if (_completionWindow == null)
+            {
+                _completionWindow = new CompletionWindow(avalonEditor.TextArea);
+                _completionWindow.Closed += (o, args) => _completionWindow = null;
+
+                int wordStart = avalonEditor.CaretOffset - prefix.Length;
+                _completionWindow.StartOffset = wordStart;
+                _completionWindow.EndOffset = avalonEditor.CaretOffset;
+
+                _completionWindow.Show();
+            }
+
+            _completionWindow.CompletionList.CompletionData.Clear();
+            foreach (var suggestion in suggestions)
+            {
+                _completionWindow.CompletionList.CompletionData.Add(new CompletionData(suggestion));
+            }
+
+            _completionWindow.CompletionList.SelectItem(prefix);
+        }
+
+        private bool IsInCommentOrString(int offset)
+        {
+            var currentLine = avalonEditor.Document.GetLineByOffset(offset);
+            var tokens = _cachedTokens.Where(t => t.Line == currentLine.LineNumber).ToList();
+            foreach (var token in tokens)
+            {
+                int startOffset = avalonEditor.Document.GetOffset(token.Line, token.Column);
+                int endOffset = startOffset + token.Value.Length;
+                if (offset >= startOffset && offset <= endOffset)
+                {
+                    if (token.Type == TokenType.Comment || token.Type == TokenType.CommentBlock || token.Type == TokenType.StringLiteral)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        private string GetCurrentWordPrefix()
+        {
+            var document = avalonEditor.Document;
+            var offset = avalonEditor.CaretOffset;
+            if (offset <= 0)
+                return "";
+
+            int start = offset - 1;
+            while (start >= 0 && (char.IsLetterOrDigit(document.GetCharAt(start)) || document.GetCharAt(start) == '_'))
+                start--;
+
+            start++;
+            if (start >= offset || (offset - start) < 2)
+                return "";
+
+            return document.GetText(start, offset - start);
+        }
+
+        private void UpdateAutocompletion()
+        {
+            try
+            {
+                var parser = new DaedalusParser(_cachedTokens);
+                _ast = parser.ParseScript();
+                _autocompletionEngine = new AutocompletionEngine(_ast);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler beim Aktualisieren der Autovervollständigung: {ex.Message}");
+            }
         }
 
         public void SetZoom(double zoomFactor)
@@ -137,8 +307,6 @@ namespace Skriptorium.UI
         private double GetNextZoomStep(bool zoomIn)
         {
             int currentIndex = Array.IndexOf(_zoomSteps, Zoom);
-
-            // Wenn der aktuelle Zoom-Wert nicht in der Liste ist, finde den nächsten
             if (currentIndex == -1)
             {
                 currentIndex = _zoomSteps.Length - 1;
@@ -152,10 +320,8 @@ namespace Skriptorium.UI
                 }
             }
 
-            // Berechne den neuen Index
             int newIndex = zoomIn ? currentIndex + 1 : currentIndex - 1;
             newIndex = Math.Clamp(newIndex, 0, _zoomSteps.Length - 1);
-
             return _zoomSteps[newIndex];
         }
 
@@ -163,15 +329,12 @@ namespace Skriptorium.UI
         {
             if (Keyboard.Modifiers == ModifierKeys.Control)
             {
-                // Mausrad-Delta: positiv (hoch) oder negativ (runter)
                 bool zoomIn = e.Delta > 0;
                 double newZoom = GetNextZoomStep(zoomIn);
 
                 if (newZoom != Zoom)
                 {
                     SetZoom(newZoom);
-
-                    // Aktualisiere die ZoomComboBox in der MainWindow
                     if (Window.GetWindow(this) is MainWindow mainWindow)
                     {
                         int zoomPercent = (int)(newZoom * 100);
@@ -183,8 +346,7 @@ namespace Skriptorium.UI
                         }
                     }
                 }
-
-                e.Handled = true; // Verhindert Standard-Scrollen
+                e.Handled = true;
             }
         }
 
@@ -214,6 +376,7 @@ namespace Skriptorium.UI
             _cachedTokens = new DaedalusLexer().Tokenize(lines);
             _colorizer.UpdateTokens(_cachedTokens);
             avalonEditor.TextArea.TextView.InvalidateVisual();
+            UpdateAutocompletion();
         }
 
         protected override void OnVisualParentChanged(DependencyObject oldParent)
@@ -230,8 +393,8 @@ namespace Skriptorium.UI
         {
             var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
             avalonEditor.TextArea.Caret.CaretBrush = isDark
-                ? new SolidColorBrush(Colors.WhiteSmoke) // Helle Farbe für Darkmode
-                : new SolidColorBrush(Colors.Black);     // Dunkle Farbe für Lightmode
+                ? new SolidColorBrush(Colors.WhiteSmoke)
+                : new SolidColorBrush(Colors.Black);
         }
 
         private void AvalonEditor_TextChanged(object? sender, EventArgs e)
@@ -243,16 +406,16 @@ namespace Skriptorium.UI
             TextChanged?.Invoke(this, null);
             ApplySyntaxHighlighting();
             UpdateFoldings();
+            UpdateAutocompletion();
         }
 
-        // Methode zum Aktualisieren der Faltungen
         private void UpdateFoldings()
         {
             if (_foldingManager == null || avalonEditor.Document == null)
                 return;
 
             var foldings = _foldingStrategy.CreateNewFoldings(avalonEditor.Document);
-            _foldingManager.UpdateFoldings(foldings, -1); // -1 behält die aktuell geöffneten Faltungen bei
+            _foldingManager.UpdateFoldings(foldings, -1);
         }
 
         public void ToggleAllFoldings()
@@ -260,12 +423,10 @@ namespace Skriptorium.UI
             if (_foldingManager == null || !_foldingManager.AllFoldings.Any()) return;
 
             bool shouldFold = !_allFolded;
-
             foreach (var section in _foldingManager.AllFoldings)
             {
                 section.IsFolded = shouldFold;
             }
-
             _allFolded = shouldFold;
         }
 
@@ -282,6 +443,7 @@ namespace Skriptorium.UI
                 _originalText = avalonEditor.Text;
                 ResetModifiedFlag();
                 UpdateFoldings();
+                UpdateAutocompletion();
             }
         }
 
@@ -290,32 +452,33 @@ namespace Skriptorium.UI
             _suppressChangeTracking = true;
             avalonEditor.Text = text;
             _originalText = text;
-            _lastText = ""; // Erzwinge Neuverarbeitung in ApplySyntaxHighlighting
+            _lastText = "";
             _suppressChangeTracking = false;
             IsModified = false;
             ClearHighlighting();
             ApplySyntaxHighlighting();
             UpdateFoldings();
+            UpdateAutocompletion();
         }
 
         public void SetTextAndMarkAsModified(string text)
         {
             _suppressChangeTracking = true;
             avalonEditor.Text = text;
-            _lastText = ""; // Erzwinge Neuverarbeitung in ApplySyntaxHighlighting
+            _lastText = "";
             _suppressChangeTracking = false;
             IsModified = true;
             TextChanged?.Invoke(this, null);
             ClearHighlighting();
             ApplySyntaxHighlighting();
             UpdateFoldings();
+            UpdateAutocompletion();
         }
 
         public void ResetModifiedFlag()
         {
             _originalText = avalonEditor.Text;
             IsModified = false;
-
             TextChanged?.Invoke(this, null);
         }
 
@@ -338,7 +501,6 @@ namespace Skriptorium.UI
             StringComparison cmp = matchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
             int offset = 0;
-
             while ((offset = text.IndexOf(searchText, offset, cmp)) >= 0)
             {
                 if (wholeWord)
@@ -360,7 +522,6 @@ namespace Skriptorium.UI
                     ForegroundColor = Colors.Black
                 };
                 _markers.Add(marker);
-
                 offset += searchText.Length;
             }
 
@@ -443,10 +604,11 @@ namespace Skriptorium.UI
                     var parsedDeclarations = parser.ParseScript();
                     Errors.Clear();
                     _ast = parsedDeclarations;
+                    UpdateAutocompletion();
                 }
                 catch (Exception ex)
                 {
-                    // Optional: Fehler für spätere Nutzung speichern oder ignorieren
+                    Console.WriteLine($"Fehler beim Parsen: {ex.Message}");
                 }
 
                 _lastText = avalonEditor.Text;
