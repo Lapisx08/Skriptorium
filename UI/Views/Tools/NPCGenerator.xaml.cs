@@ -197,16 +197,34 @@ namespace Skriptorium.UI.Views.Tools
             var sb = new StringBuilder();
 
             // NSC
-            string guildShort = guildEntry.Text.StartsWith("GIL_") ? guildEntry.Text.Substring(4) : guildEntry.Text;
+            string guildText;
+
+            // Wenn kein "GIL_" vorhanden ist, automatisch hinzufügen
+            if (guildEntry.Text.StartsWith("GIL_", StringComparison.OrdinalIgnoreCase))
+            {
+                guildText = guildEntry.Text;
+            }
+            else
+            {
+                guildText = $"GIL_{guildEntry.Text}";
+            }
+
+            string guildShort = guildText.Length > 4 ? guildText.Substring(4) : guildText;
+
             sb.AppendLine($"instance {guildShort}_{idEntry.Text}_{nameEntry.Text.Replace(" ", "_")} (Npc_Default)");
             sb.AppendLine("{");
             sb.AppendLine("    // ------ NSC ------");
             sb.AppendLine($"    name     =  \"{nameEntry.Text}\";");
-            sb.AppendLine($"    guild    =  {guildEntry.Text};");
+            sb.AppendLine($"    guild    =  {guildText};");
             sb.AppendLine($"    id       =  {idEntry.Text};");
             sb.AppendLine($"    voice    =  {voiceEntry.Text};");
             sb.AppendLine($"    flags    =  {flagsEntry.Text}; // NPC_FLAG_IMMORTAL oder 0");
             sb.AppendLine($"    npctype  =  {((ComboBoxItem)npcTypeDropdown.SelectedItem)?.Content};");
+
+            if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == "Ja")
+            {
+                sb.AppendLine("    level    =  1;");
+            }
             sb.AppendLine();
 
             if (((ComboBoxItem)aivarsDropdown.SelectedItem)?.Content.ToString() == "Ja")
@@ -244,7 +262,7 @@ namespace Skriptorium.UI.Views.Tools
 
             // Kampf-Taktik
             sb.AppendLine("    // ------ Kampf-Taktik ------");
-            sb.AppendLine($"    fight_tactic  =  FAI_HUMAN_Platzhalter; // COWARD / STRONG / MASTER");
+            sb.AppendLine($"    fight_tactic  =  FAI_HUMAN_Platzhalter; // COWARD / NORMAL / STRONG / MASTER");
             sb.AppendLine();
 
             // Ausgerüstete Waffen
@@ -287,7 +305,7 @@ namespace Skriptorium.UI.Views.Tools
             // TA anmelden
             sb.AppendLine("    // ------ TA anmelden ------");
             sb.AppendLine($"    daily_routine  =  Rtn_Start_{idEntry.Text};");
-            sb.AppendLine("}");
+            sb.AppendLine("};");
             sb.AppendLine();
 
             // Tagesroutine-Funktion

@@ -48,13 +48,12 @@ namespace Skriptorium
 
             // Erste Instanz: Starte Hauptfenster
             var mainWindow = new UI.MainWindow();
-            mainWindow.Show();
 
-            // Starte Pipe-Server in MainWindow (nachdem es geladen ist)
-            mainWindow.Loaded += (s, ev) =>
-            {
-                StartPipeServer(mainWindow);
-            };
+            // 🔧 FIX: Starte den Pipe-Server SOFORT (nicht erst nach Show oder Loaded)
+            StartPipeServer(mainWindow);
+
+            // Jetzt das Fenster anzeigen
+            mainWindow.Show();
 
             // Wenn Argumente übergeben (z.B. erste Instanz mit Datei)
             if (e.Args.Length > 0)
@@ -78,12 +77,14 @@ namespace Skriptorium
 
         private void SendArgsToRunningInstance(string[] args)
         {
-            using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out))
+            try
             {
-                try
+                using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out))
                 {
-                    client.Connect(5000); // Timeout 5 Sekunden für Sicherheit
-                    using (var writer = new StreamWriter(client) { AutoFlush = true })
+                    // 🔧 FIX: Erhöhe Timeout leicht, um stabilere Verbindung zu ermöglichen
+                    client.Connect(10000); // wartet bis zu 10 Sekunden auf Verbindung
+
+                    using (var writer = new StreamWriter(client, Encoding.UTF8) { AutoFlush = true })
                     {
                         foreach (var arg in args)
                         {
@@ -91,11 +92,16 @@ namespace Skriptorium
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Fehler beim Öffnen der Datei in laufender Instanz: {ex.Message}",
-                        "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+            }
+            catch (TimeoutException)
+            {
+                MessageBox.Show("Keine aktive Instanz gefunden (Pipe-Verbindung abgelaufen).",
+                    "Skriptorium", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Öffnen der Datei in laufender Instanz: {ex.Message}",
+                    "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -105,18 +111,27 @@ namespace Skriptorium
             {
                 while (true)
                 {
-                    using (var server = new NamedPipeServerStream(PipeName, PipeDirection.In))
+                    try
                     {
-                        try
+                        // PipeTransmissionMode.Message sorgt dafür, dass Nachrichten klar getrennt sind
+                        using (var server = new NamedPipeServerStream(
+                            PipeName,
+                            PipeDirection.In,
+                            NamedPipeServerStream.MaxAllowedServerInstances,
+                            PipeTransmissionMode.Message,
+                            PipeOptions.Asynchronous))
                         {
                             server.WaitForConnection();
-                            using (var reader = new StreamReader(server))
+
+                            using (var reader = new StreamReader(server, Encoding.UTF8))
                             {
                                 string filePath;
                                 while ((filePath = reader.ReadLine()) != null)
                                 {
-                                    if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+                                    if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
                                     {
+                                        Console.WriteLine($"[PipeServer] Datei empfangen: {filePath}");
+
                                         DataManager.OpenFile(filePath, (content, path) =>
                                         {
                                             mainWindow.Dispatcher.Invoke(() =>
@@ -125,16 +140,22 @@ namespace Skriptorium
                                             });
                                         });
                                     }
+                                    else
+                                    {
+                                        Console.WriteLine($"[PipeServer] Ungültiger Pfad empfangen: {filePath}");
+                                    }
                                 }
                             }
                         }
-                        catch (Exception)
-                        {
-                            // Optional: Logging
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[PipeServer] Fehler: {ex.Message}");
+                        Thread.Sleep(1000); // kurze Pause, damit Schleife bei Fehler nicht rotiert
                     }
                 }
             });
+
             thread.IsBackground = true;
             thread.Start();
         }
