@@ -331,6 +331,46 @@ namespace Skriptorium.UI.Views
             }
             return false;
         }
+
+        public void SelectAndExpandToFile(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                return;
+
+            // Root-Node finden (angenommen, es gibt nur einen Root)
+            var currentNode = RootDirectories.FirstOrDefault();
+            if (currentNode == null) return;
+
+            // Pfad in Segmente aufteilen (Ordner und Datei)
+            var segments = filePath.Replace(currentNode.FullPath, "").TrimStart(Path.DirectorySeparatorChar).Split(Path.DirectorySeparatorChar);
+            var treeItem = FileTree.ItemContainerGenerator.ContainerFromItem(currentNode) as TreeViewItem;
+
+            foreach (var segment in segments)
+            {
+                if (currentNode == null) return;
+
+                // Kinder laden und erweitern
+                currentNode.LoadChildren();
+                currentNode = currentNode.Children.FirstOrDefault(child => string.Equals(child.Name, segment, StringComparison.OrdinalIgnoreCase));
+
+                if (currentNode == null) return; // Pfad nicht gefunden
+
+                // TreeViewItem finden und erweitern
+                if (treeItem != null)
+                {
+                    treeItem.IsExpanded = true;
+                    treeItem.UpdateLayout(); // Layout aktualisieren, um Kinder zu generieren
+                    treeItem = treeItem.ItemContainerGenerator.ContainerFromItem(currentNode) as TreeViewItem;
+                }
+            }
+
+            // Datei-Node auswählen und scrollen
+            if (treeItem != null)
+            {
+                treeItem.IsSelected = true;
+                treeItem.BringIntoView();
+            }
+        }
     }
 
     public class FileNode

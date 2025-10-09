@@ -253,7 +253,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine($"    important    =  {important};");
             sb.AppendLine($"    permanent    =  {permanent};");
             sb.AppendLine($"    Description  =  \"{description}\";");
-            sb.AppendLine("}");
+            sb.AppendLine("};");
             sb.AppendLine();
 
             // Kondition

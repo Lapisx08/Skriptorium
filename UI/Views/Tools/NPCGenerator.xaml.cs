@@ -174,7 +174,7 @@ namespace Skriptorium.UI.Views.Tools
                 ? maleFaces[rng.Next(maleFaces.Count)]
                 : femaleFaces[rng.Next(femaleFaces.Count)];
 
-            return $"B_SetNpcVisual (self, {gender}, \"{head}\", {face}, {bodyTex}, ITAR_Platzhalter); // Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird\")";
+            return $"B_SetNpcVisual (self, {gender}, \"{head}\", {face}, {bodyTex}, ITAR_Platzhalter); // Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird";
         }
 
         private void GenerateCode_Click(object sender, RoutedEventArgs e)
@@ -309,7 +309,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             // Tagesroutine-Funktion
-            sb.AppendLine($"func void Rtn_Start_{idEntry.Text} () // Tages-Routine muss insgesamt immer 24 h ergeben");
+            sb.AppendLine($"func void Rtn_Start_{idEntry.Text} () // Tages-Routine muss insgesamt immer 24 h ergeben und sie muss mindestens zwei Tagesabläufe umfassen");
             sb.AppendLine("{");
             sb.AppendLine("    TA_Platzhalter  (08,00,20,00,\"WP_Platzhalter\");");
             sb.AppendLine("    TA_Platzhalter  (20,00,08,00,\"WP_Platzhalter\");");

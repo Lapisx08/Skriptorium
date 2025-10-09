@@ -208,11 +208,33 @@ namespace Skriptorium.UI
                     default: ZoomComboBox.SelectedIndex = 3; break;
                 }
                 _currentScriptEditor?.SetZoom(_currentScriptEditor.Zoom);
+
+                // Neue Synchronisation: FileExplorer zur Datei springen
+                SyncFileExplorerToActiveScript();
             }
             else
             {
                 StatusPositionText.Text = "Zeile 1, Spalte 1";
                 StatusCharCountText.Text = "0 Zeichen";
+            }
+        }
+
+        private void SyncFileExplorerToActiveScript()
+        {
+            if (_currentScriptEditor == null || string.IsNullOrWhiteSpace(_currentScriptEditor.FilePath))
+                return;
+
+            // FileExplorer im Layout finden
+            var fileExplorerAnchorable = dockingManager.Layout.Descendents()
+                .OfType<LayoutAnchorable>()
+                .FirstOrDefault(a => a.ContentId == "FileExplorer");
+
+            // Nur synchronisieren, wenn FileExplorer existiert und sichtbar ist
+            if (fileExplorerAnchorable != null && fileExplorerAnchorable.IsVisible &&
+                fileExplorerAnchorable.Content is FileExplorerView fileExplorer)
+            {
+                // Zum Pfad springen
+                fileExplorer.SelectAndExpandToFile(_currentScriptEditor.FilePath);
             }
         }
 
