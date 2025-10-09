@@ -64,8 +64,6 @@ namespace Skriptorium.UI
                                       () => _editMenuManager.SelectAll());
             _shortcutManager.Register(Key.F, ModifierKeys.Control,
                                       () => FindInEditor_Click(null, null));
-            _shortcutManager.Register(Key.A, ModifierKeys.Control | ModifierKeys.Shift,
-                                      () => ToggleAutocompletion_Click(null, null));
 
             // Lesezeichen-Shortcuts
             _shortcutManager.Register(Key.F2, ModifierKeys.None,
@@ -80,12 +78,16 @@ namespace Skriptorium.UI
             // Tool-Shortcuts
             _shortcutManager.Register(Key.H, ModifierKeys.Control,
                                       () => SyntaxHighlightingUmschalten_Click(null, null));
+            _shortcutManager.Register(Key.A, ModifierKeys.Control | ModifierKeys.Shift,
+                                      () => ToggleAutocompletion_Click(null, null));
             _shortcutManager.Register(Key.K, ModifierKeys.Control,
-                                     () => KleinesKommentarfeld_Click(null, null));
+                                      () => Blockkommentar_Click(null, null));
             _shortcutManager.Register(Key.K, ModifierKeys.Control | ModifierKeys.Shift,
-                                     () => MittleresKommentarfeld_Click(null, null));
+                                      () => KleinesKommentarfeld_Click(null, null));
             _shortcutManager.Register(Key.K, ModifierKeys.Control | ModifierKeys.Alt,
-                                     () => GroßesKommentarfeld_Click(null, null));
+                                      () => MittleresKommentarfeld_Click(null, null));
+            _shortcutManager.Register(Key.K, ModifierKeys.Control | ModifierKeys.Shift | ModifierKeys.Alt,
+                                      () => GroßesKommentarfeld_Click(null, null));
             _shortcutManager.Register(Key.M, ModifierKeys.Control,
                                       () => ToggleFoldings_Click(null, null));
             _shortcutManager.Register(Key.E, ModifierKeys.Control,
@@ -93,9 +95,9 @@ namespace Skriptorium.UI
             _shortcutManager.Register(Key.F5, ModifierKeys.None,
                                       () => SyntaxCheckButton_Click(null, null));
             _shortcutManager.Register(Key.E, ModifierKeys.Control | ModifierKeys.Shift,
-                                     () => MenuToolsFileExplorer_Click(null, null));
+                                      () => MenuToolsFileExplorer_Click(null, null));
             _shortcutManager.Register(Key.C, ModifierKeys.Control | ModifierKeys.Shift,
-                                     () => MenuToolsCodeStructure_Click(null, null));
+                                      () => MenuToolsCodeStructure_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
                                       () => MenuNPCGenerator_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift,
@@ -415,6 +417,11 @@ namespace Skriptorium.UI
             btn.ContextMenu.PlacementTarget = btn;
             btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             btn.ContextMenu.IsOpen = true;
+        }
+
+        private void Blockkommentar_Click(object sender, RoutedEventArgs e)
+        {
+            KommentarblockEinfügen("/* */");
         }
 
         private void KleinesKommentarfeld_Click(object sender, RoutedEventArgs e)

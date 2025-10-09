@@ -154,9 +154,10 @@
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="14"/>
                     </MenuItem.Icon>
-                    <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + K" Click="KleinesKommentarfeld_Click"/>
-                    <MenuItem Header="Mittleres Kommentarfeld" InputGestureText="Strg + Shift + K" Click="MittleresKommentarfeld_Click"/>
-                    <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Alt + K" Click="GroßesKommentarfeld_Click"/>
+                    <MenuItem Header="Blockkommentar" InputGestureText="Strg + K" Click="Blockkommentar_Click"/>
+                    <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + Shift + K" Click="KleinesKommentarfeld_Click"/>
+                    <MenuItem Header="Mittleres Kommentarfeld" InputGestureText="Strg + Alt + K" Click="MittleresKommentarfeld_Click"/>
+                    <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Shift + Alt + K" Click="GroßesKommentarfeld_Click"/>
                 </MenuItem>
                 <MenuItem Header="Foldings ein- und ausklappen" InputGestureText="Strg + M" Click="ToggleFoldings_Click">
                     <MenuItem.Icon>
@@ -226,9 +227,10 @@
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="12"/>
                 <Button.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + K" Click="KleinesKommentarfeld_Click" FontSize="12"/>
-                        <MenuItem Header="Mittleres Kommentarfeld" InputGestureText="Strg + Shift + K" Click="MittleresKommentarfeld_Click" FontSize="12"/>
-                        <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Alt + K" Click="GroßesKommentarfeld_Click" FontSize="12"/>
+                        <MenuItem Header="Blockkommentar" InputGestureText="Strg + K" Click="Blockkommentar_Click" FontSize="12"/>
+                        <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + Shift + K" Click="KleinesKommentarfeld_Click" FontSize="12"/>
+                        <MenuItem Header="Mittleres Kommentarfeld" InputGestureText="Strg + Alt + K" Click="MittleresKommentarfeld_Click" FontSize="12"/>
+                        <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Shift + Alt + K" Click="GroßesKommentarfeld_Click" FontSize="12"/>
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>

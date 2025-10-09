@@ -9,18 +9,24 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Timers;
+using System.Threading;
 
 namespace Skriptorium.UI.Views
 {
     public partial class SearchReplaceScriptView : MetroWindow
     {
         private const int MaxHistory = 10;
+        private const int MaxCacheSize = 1000;
         private readonly ScriptEditor _scriptEditor;
         private readonly ScriptTabManager _tabManager;
         private readonly DockingManager _dockingManager;
+        private readonly System.Timers.Timer _searchDebounceTimer = new System.Timers.Timer(300) { AutoReset = false };
+        private readonly Dictionary<string, (string Content, DateTime LastModified)> _fileCache = new();
         private List<string> _searchHistory = new();
         private List<int> _searchOffsets = new();
         private int _currentIndex = -1;
@@ -54,7 +60,10 @@ namespace Skriptorium.UI.Views
 
             var searchTextBox = GetComboBoxTextBox(ComboSearchText);
             if (searchTextBox is not null)
+            {
                 searchTextBox.TextChanged += ComboSearchText_TextChanged;
+                _searchDebounceTimer.Elapsed += (s, args) => Dispatcher.InvokeAsync(FindAllOccurrencesAsync);
+            }
 
             var replaceTextBox = GetComboBoxTextBox(ComboReplaceText);
             if (replaceTextBox is not null)
@@ -95,7 +104,7 @@ namespace Skriptorium.UI.Views
             UpdateSearchResultsVisibility();
             if (!string.IsNullOrEmpty(SearchText))
             {
-                FindAllOccurrences();
+                Dispatcher.InvokeAsync(FindAllOccurrencesAsync);
             }
         }
 
@@ -106,7 +115,7 @@ namespace Skriptorium.UI.Views
             UpdateSearchResultsVisibility();
             if (!string.IsNullOrEmpty(SearchText))
             {
-                FindAllOccurrences();
+                Dispatcher.InvokeAsync(FindAllOccurrencesAsync);
             }
         }
 
@@ -115,7 +124,7 @@ namespace Skriptorium.UI.Views
             UpdateSearchResultsVisibility();
             if (!string.IsNullOrEmpty(SearchText))
             {
-                FindAllOccurrences();
+                Dispatcher.InvokeAsync(FindAllOccurrencesAsync);
             }
         }
 
@@ -137,7 +146,7 @@ namespace Skriptorium.UI.Views
         {
             if (!string.IsNullOrEmpty(SearchText))
             {
-                FindAllOccurrences();
+                Dispatcher.InvokeAsync(FindAllOccurrencesAsync);
             }
         }
 
@@ -145,7 +154,7 @@ namespace Skriptorium.UI.Views
         {
             if (!string.IsNullOrEmpty(SearchText))
             {
-                FindAllOccurrences();
+                Dispatcher.InvokeAsync(FindAllOccurrencesAsync);
             }
         }
 
@@ -156,6 +165,7 @@ namespace Skriptorium.UI.Views
 
         private void ComboSearchText_TextChanged(object sender, TextChangedEventArgs e)
         {
+            _searchDebounceTimer.Stop();
             if (string.IsNullOrEmpty(SearchText))
             {
                 _searchOffsets.Clear();
@@ -166,7 +176,7 @@ namespace Skriptorium.UI.Views
             }
             else
             {
-                FindAllOccurrences();
+                _searchDebounceTimer.Start();
             }
         }
 
@@ -175,23 +185,33 @@ namespace Skriptorium.UI.Views
             // Keine Aktion nötig
         }
 
-        private void FindAllOccurrences()
+        private async Task FindAllOccurrencesAsync()
         {
             _searchOffsets.Clear();
             _currentIndex = -1;
-            _searchResults.Clear();
+            var tempResults = new List<SearchResultNode>();
 
             string searchText = SearchText;
             if (string.IsNullOrEmpty(searchText))
             {
+                _searchResults.Clear();
                 _scriptEditor.ClearHighlighting();
                 System.Diagnostics.Debug.WriteLine("Kein Suchtext eingegeben.");
                 return;
             }
 
-            bool isSearchInAllScripts = ChkSearchIn.IsChecked == true && SearchIn == "In allen offenen Skripten";
-            bool isSearchInDirectory = ChkSearchIn.IsChecked == true && SearchIn == "Im gesetzten Verzeichnis";
-            bool restrictToSelection = ChkSelectionOnly.IsChecked == true && _scriptEditor.Avalon.SelectionLength > 0;
+            // UI-Elemente einmalig im Dispatcher-Thread abfragen
+            var (isCaseSensitive, isWholeWord, isSearchInAllScripts, isSearchInDirectory, restrictToSelection, selectedText, selectionStart, documentText, scriptPath) = await Dispatcher.InvokeAsync(() => (
+                ChkCase.IsChecked == true,
+                ChkWholeWord.IsChecked == true,
+                ChkSearchIn.IsChecked == true && SearchIn == "In allen offenen Skripten",
+                ChkSearchIn.IsChecked == true && SearchIn == "Im gesetzten Verzeichnis",
+                ChkSelectionOnly.IsChecked == true && _scriptEditor.Avalon.SelectionLength > 0,
+                _scriptEditor.Avalon.SelectedText,
+                _scriptEditor.Avalon.SelectionStart,
+                _scriptEditor.Avalon.Document.Text,
+                Properties.Settings.Default.ScriptSearchPath
+            ));
 
             if (isSearchInAllScripts)
             {
@@ -205,7 +225,6 @@ namespace Skriptorium.UI.Views
                 foreach (var editor in editors)
                 {
                     string filePath = editor.FilePath ?? "Unbenanntes Skript";
-                    var node = new SearchResultNode(filePath, editor.Text);
                     string text = editor.Avalon.Document.Text;
                     if (string.IsNullOrEmpty(text))
                     {
@@ -213,88 +232,92 @@ namespace Skriptorium.UI.Views
                         continue;
                     }
 
-                    FindMatchesInScript(text, searchText, node);
+                    var node = new SearchResultNode(filePath, text);
+                    FindMatchesInScript(text, searchText, node, isCaseSensitive, isWholeWord);
                     if (node.Matches.Count > 0)
                     {
-                        _searchResults.Add(node);
+                        tempResults.Add(node);
                         System.Diagnostics.Debug.WriteLine($"Treffer gefunden in {filePath}: {node.Matches.Count} Matches");
                     }
                 }
             }
             else if (isSearchInDirectory)
             {
-                string scriptPath = Properties.Settings.Default.ScriptSearchPath;
                 if (string.IsNullOrEmpty(scriptPath) || !Directory.Exists(scriptPath))
                 {
-                    MessageBox.Show("Kein gültiger Skript-Ordner festgelegt. Bitte wählen Sie einen Ordner in den Einstellungen.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    await Dispatcher.InvokeAsync(() =>
+                        MessageBox.Show("Kein gültiger Skript-Ordner festgelegt.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning));
                     System.Diagnostics.Debug.WriteLine("Ungültiger oder nicht existierender Skript-Ordner.");
                     return;
                 }
 
-                try
-                {
-                    var files = Directory.EnumerateFiles(scriptPath, "*.*", SearchOption.AllDirectories)
-                        .Where(file => file.EndsWith(".d", StringComparison.OrdinalIgnoreCase) ||
-                                      file.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
+                var files = Directory.EnumerateFiles(scriptPath, "*.*", SearchOption.AllDirectories)
+                    .Where(file => file.EndsWith(".d", StringComparison.OrdinalIgnoreCase) ||
+                                   file.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
+                                   file.EndsWith(".src", StringComparison.OrdinalIgnoreCase)) // ✅ NEU: auch .src-Dateien durchsuchen
+                    .ToList();
 
-                    foreach (var file in files)
+                await Task.Run(() =>
+                {
+                    var lockObject = new object();
+                    Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, file =>
                     {
                         try
                         {
-                            string text = File.ReadAllText(file);
+                            string text;
+                            var lastModified = File.GetLastWriteTime(file);
+                            lock (_fileCache)
+                            {
+                                if (_fileCache.Count > MaxCacheSize)
+                                    _fileCache.Clear();
+
+                                if (_fileCache.TryGetValue(file, out var cached) && cached.LastModified == lastModified)
+                                {
+                                    text = cached.Content; // Verwende Cache
+                                }
+                                else
+                                {
+                                    text = File.ReadAllText(file);
+                                    _fileCache[file] = (text, lastModified);
+                                }
+                            }
+
                             var node = new SearchResultNode(file, text);
-                            FindMatchesInScript(text, searchText, node);
+                            FindMatchesInScript(text, searchText, node, isCaseSensitive, isWholeWord);
                             if (node.Matches.Count > 0)
                             {
-                                _searchResults.Add(node);
-                                System.Diagnostics.Debug.WriteLine($"Treffer gefunden in {file}: {node.Matches.Count} Matches");
+                                lock (lockObject)
+                                {
+                                    tempResults.Add(node);
+                                    System.Diagnostics.Debug.WriteLine($"Treffer gefunden in {file}: {node.Matches.Count} Matches");
+                                }
                             }
                         }
                         catch (IOException ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"Fehler beim Lesen der Datei {file}: {ex.Message}");
                         }
-                    }
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    MessageBox.Show($"Zugriff auf den Ordner verweigert: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
-                    System.Diagnostics.Debug.WriteLine($"Zugriffsfehler: {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Fehler beim Durchsuchen des Ordners: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
-                    System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
-                }
+                    });
+                });
             }
             else
             {
-                string text;
-                int offsetBase = 0;
-
-                if (restrictToSelection)
-                {
-                    text = _scriptEditor.Avalon.SelectedText;
-                    offsetBase = _scriptEditor.Avalon.SelectionStart;
-                }
-                else
-                {
-                    text = _scriptEditor.Avalon.Document.Text;
-                }
+                string text = restrictToSelection ? selectedText : documentText;
+                int offsetBase = restrictToSelection ? selectionStart : 0;
 
                 var node = new SearchResultNode(_scriptEditor.FilePath ?? "Aktives Skript");
-                FindMatchesInScript(text, searchText, node, offsetBase);
+                FindMatchesInScript(text, searchText, node, isCaseSensitive, isWholeWord, offsetBase);
                 if (node.Matches.Count > 0)
                 {
-                    _searchResults.Add(node);
+                    tempResults.Add(node);
                 }
 
                 int offset = 0;
-                var comparison = ChkCase.IsChecked == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                var comparison = isCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
                 while ((offset = text.IndexOf(searchText, offset, comparison)) >= 0)
                 {
-                    if (ChkWholeWord.IsChecked == true)
+                    if (isWholeWord)
                     {
                         bool leftOk = offset == 0 || !char.IsLetterOrDigit(text[offset - 1]);
                         int afterIndex = offset + searchText.Length;
@@ -312,33 +335,49 @@ namespace Skriptorium.UI.Views
 
                 _scriptEditor.HighlightAllOccurrences(
                     searchText,
-                    ChkCase.IsChecked == true,
-                    ChkWholeWord.IsChecked == true,
+                    isCaseSensitive,
+                    isWholeWord,
                     restrictToSelection,
                     _scriptEditor.Avalon.SelectionStart,
                     _scriptEditor.Avalon.SelectionLength
                 );
             }
 
-            if (_searchResults.Count == 0)
+            // Ergebnisse in einem Rutsch in die UI übertragen
+            await Dispatcher.InvokeAsync(() =>
             {
-                System.Diagnostics.Debug.WriteLine("Keine Suchergebnisse gefunden.");
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine($"Insgesamt {_searchResults.Sum(n => n.Matches.Count)} Treffer in {_searchResults.Count} Dateien.");
-            }
+                _searchResults.Clear();
+                foreach (var node in tempResults)
+                {
+                    _searchResults.Add(node);
+                }
+
+                if (_searchResults.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("Keine Suchergebnisse gefunden.");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Insgesamt {_searchResults.Sum(n => n.Matches.Count)} Treffer in {_searchResults.Count} Dateien.");
+                }
+            });
         }
 
-        private void FindMatchesInScript(string text, string searchText, SearchResultNode node, int offsetBase = 0)
+        private void FindMatchesInScript(string text, string searchText, SearchResultNode node, bool isCaseSensitive, bool isWholeWord, int offsetBase = 0)
         {
-            int offset = 0;
-            var comparison = ChkCase.IsChecked == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+            var comparison = isCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
             var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            var lineOffsets = new List<int> { 0 };
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] == '\n')
+                    lineOffsets.Add(i + 1);
+            }
 
+            int offset = 0;
             while ((offset = text.IndexOf(searchText, offset, comparison)) >= 0)
             {
-                if (ChkWholeWord.IsChecked == true)
+                if (isWholeWord)
                 {
                     bool leftOk = offset == 0 || !char.IsLetterOrDigit(text[offset - 1]);
                     int afterIndex = offset + searchText.Length;
@@ -350,7 +389,8 @@ namespace Skriptorium.UI.Views
                     }
                 }
 
-                int lineNumber = GetLineNumber(text, offset);
+                int lineNumber = Array.BinarySearch(lineOffsets.ToArray(), offset);
+                lineNumber = lineNumber >= 0 ? lineNumber : ~lineNumber - 1;
                 string lineText = lineNumber < lines.Length ? lines[lineNumber].Trim() : "";
                 string displayText = $"Zeile {lineNumber + 1}: {(lineText.Length > 50 ? lineText.Substring(0, 50) + "..." : lineText)}";
                 node.Matches.Add(new SearchMatch(offsetBase + offset, searchText.Length, displayText, node));
@@ -358,18 +398,7 @@ namespace Skriptorium.UI.Views
             }
         }
 
-        private int GetLineNumber(string text, int offset)
-        {
-            int lineCount = 0;
-            for (int i = 0; i < offset && i < text.Length; i++)
-            {
-                if (text[i] == '\n')
-                    lineCount++;
-            }
-            return lineCount;
-        }
-
-        private void BtnFindNext_Click(object sender, RoutedEventArgs e)
+        private async void BtnFindNext_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(SearchText))
             {
@@ -379,7 +408,7 @@ namespace Skriptorium.UI.Views
 
             if (_searchOffsets.Count == 0 && _searchResults.Count == 0)
             {
-                FindAllOccurrences();
+                await FindAllOccurrencesAsync();
                 if (_searchOffsets.Count == 0 && _searchResults.Count == 0)
                 {
                     MessageBox.Show("Keine Treffer gefunden.", "Suchen", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -432,11 +461,11 @@ namespace Skriptorium.UI.Views
             }
         }
 
-        private void BtnReplace_Click(object sender, RoutedEventArgs e)
+        private async void BtnReplace_Click(object sender, RoutedEventArgs e)
         {
             if (_searchOffsets.Count == 0)
             {
-                FindAllOccurrences();
+                await FindAllOccurrencesAsync();
                 if (_searchOffsets.Count == 0)
                 {
                     MessageBox.Show("Keine Treffer gefunden, nichts zu ersetzen.", "Ersetzen", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -463,7 +492,7 @@ namespace Skriptorium.UI.Views
                     MessageBox.Show("Der nächste Treffer liegt außerhalb der Auswahl.", "Ersetzen", MessageBoxButton.OK, MessageBoxImage.Information);
                     _currentIndex = -1;
                     _searchOffsets.Clear();
-                    FindAllOccurrences();
+                    await FindAllOccurrencesAsync();
                     return;
                 }
             }
@@ -557,7 +586,7 @@ namespace Skriptorium.UI.Views
             );
         }
 
-        private void BtnReplaceAll_Click(object sender, RoutedEventArgs e)
+        private async void BtnReplaceAll_Click(object sender, RoutedEventArgs e)
         {
             string searchText = SearchText;
             if (string.IsNullOrEmpty(searchText))
@@ -566,7 +595,7 @@ namespace Skriptorium.UI.Views
                 return;
             }
 
-            FindAllOccurrences();
+            await FindAllOccurrencesAsync();
 
             bool isSearchInAllScripts = ChkSearchIn.IsChecked == true && SearchIn == "In allen offenen Skripten";
             bool isSearchInDirectory = ChkSearchIn.IsChecked == true && SearchIn == "Im gesetzten Verzeichnis";
@@ -615,7 +644,7 @@ namespace Skriptorium.UI.Views
                         }
 
                         doc.Replace(offset, searchText.Length, ReplaceText);
-                        text = doc.Text; // Text nach jeder Ersetzung aktualisieren
+                        text = doc.Text;
                         offset += ReplaceText.Length;
                         replacedCount++;
                     }
@@ -650,7 +679,24 @@ namespace Skriptorium.UI.Views
                     string filePath = node.FullPath;
                     try
                     {
-                        string text = File.ReadAllText(filePath);
+                        string text;
+                        var lastModified = File.GetLastWriteTime(filePath);
+                        lock (_fileCache)
+                        {
+                            if (_fileCache.Count > MaxCacheSize)
+                                _fileCache.Clear();
+
+                            if (_fileCache.TryGetValue(filePath, out var cached) && cached.LastModified == lastModified)
+                            {
+                                text = cached.Content;
+                            }
+                            else
+                            {
+                                text = File.ReadAllText(filePath);
+                                _fileCache[filePath] = (text, lastModified);
+                            }
+                        }
+
                         string newText = text;
                         int offset = 0;
                         int replacedCount = 0;
@@ -678,6 +724,10 @@ namespace Skriptorium.UI.Views
                         if (replacedCount > 0)
                         {
                             File.WriteAllText(filePath, newText);
+                            lock (_fileCache)
+                            {
+                                _fileCache[filePath] = (newText, File.GetLastWriteTime(filePath));
+                            }
                             totalReplacedCount += replacedCount;
                             System.Diagnostics.Debug.WriteLine($"Ersetzt {replacedCount} Treffer in {filePath}");
                         }
@@ -763,7 +813,7 @@ namespace Skriptorium.UI.Views
                 MessageBox.Show($"{totalReplacedCount} Treffer wurden ersetzt.", "Ersetzen Alle", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
-            FindAllOccurrences();
+            await FindAllOccurrencesAsync();
             if (isSearchInAllScripts || isSearchInDirectory)
             {
                 ShowSearchResultsPanel();

@@ -394,7 +394,7 @@ namespace Skriptorium.UI.Views
                 foreach (var dir in Directory.GetDirectories(FullPath))
                     Children.Add(new FileNode(dir, parent: this));
 
-                var patterns = new[] { "*.d", "*.txt" };
+                var patterns = new[] { "*.d", "*.txt", "*.src" };
                 foreach (var pattern in patterns)
                 {
                     foreach (var file in Directory.GetFiles(FullPath, pattern))

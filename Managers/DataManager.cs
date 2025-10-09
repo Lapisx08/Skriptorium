@@ -22,9 +22,9 @@ namespace Skriptorium.Managers
         {
             var dlg = new OpenFileDialog
             {
-                Filter = "Textdateien (*.txt)|*.txt|Daedalus-Skripte (*.d)|*.d",
+                Filter = "Textdateien (*.txt)|*.txt|Daedalus-Skripte (*.d)|*.d|Source-Skripte (*.src)|*.src|Alle unterstützten Dateien (*.d;*.txt;*.src)|*.d;*.txt;*.src",
                 DefaultExt = ".d",
-                FilterIndex = 2,
+                FilterIndex = 4,
                 InitialDirectory = GetInitialDirectory()
             };
 
@@ -101,9 +101,9 @@ namespace Skriptorium.Managers
 
             var dlg = new SaveFileDialog
             {
-                Filter = "Textdateien (*.txt)|*.txt|Daedalus-Skripte (*.d)|*.d",
+                Filter = "Textdateien (*.txt)|*.txt|Daedalus-Skripte (*.d)|*.d|Source-Skripte (*.src)|*.src|Alle unterstützten Dateien (*.d;*.txt;*.src)|*.d;*.txt;*.src",
                 DefaultExt = ".d",
-                FilterIndex = 2,
+                FilterIndex = 4,
                 InitialDirectory = GetInitialDirectory(),
                 FileName = string.IsNullOrWhiteSpace(activeEditor.FilePath)
                     ? ""
