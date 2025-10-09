@@ -4,19 +4,71 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 
 namespace Skriptorium.Managers
 {
-    public class DataManager
+    public static class DataManager
     {
-        private const int MaxRecentFiles = 20;
+        private const int MaxRecentFiles = 100;
         private static readonly string RecentFilesPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "Skriptorium", "recent_files.txt"
         );
+        private static readonly string TabStateFilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Skriptorium", "tabs.json"
+        );
 
         private static readonly List<string> recentFiles = new();
+
+        public static void SaveOpenTabs(IEnumerable<ScriptEditor> editors)
+        {
+            try
+            {
+                var tabStates = new List<TabState>();
+                foreach (var editor in editors)
+                {
+                    // Leere Skripte (nur Whitespaces oder leer) und nicht gespeicherte Skripte ignorieren
+                    if (string.IsNullOrWhiteSpace(editor.Text) || string.IsNullOrWhiteSpace(editor.FilePath))
+                        continue;
+
+                    var tabState = new TabState
+                    {
+                        FilePath = editor.FilePath,
+                        Content = editor.Text
+                    };
+                    tabStates.Add(tabState);
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(TabStateFilePath)!);
+                var json = JsonSerializer.Serialize(tabStates, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(TabStateFilePath, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler beim Speichern der offenen Tabs: {ex.Message}");
+            }
+        }
+
+        public static List<TabState> LoadOpenTabs()
+        {
+            try
+            {
+                if (File.Exists(TabStateFilePath))
+                {
+                    var json = File.ReadAllText(TabStateFilePath);
+                    var tabStates = JsonSerializer.Deserialize<List<TabState>>(json);
+                    return tabStates ?? new List<TabState>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler beim Laden der offenen Tabs: {ex.Message}");
+            }
+            return new List<TabState>();
+        }
 
         public static void OpenFile(Action<string, string> onFileLoaded)
         {

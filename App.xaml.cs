@@ -23,8 +23,6 @@ namespace Skriptorium
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             Settings.Default.Reload();
-
-            // Theme aus Einstellungen oder Fallback
             string themeName = string.IsNullOrWhiteSpace(Settings.Default.Theme)
                 ? DefaultTheme
                 : Settings.Default.Theme;
@@ -34,28 +32,39 @@ namespace Skriptorium
             ThemeManager.Current.ThemeChanged += (_, __) =>
                 ApplyAvalonDockThemeFromMahApps();
 
-            // Single Instance Check
             bool isNewInstance = false;
             _mutex = new Mutex(true, MutexName, out isNewInstance);
 
             if (!isNewInstance)
             {
-                // Zweite Instanz: Sende Argumente an laufende Instanz und beende
                 SendArgsToRunningInstance(e.Args);
                 Shutdown();
                 return;
             }
 
-            // Erste Instanz: Starte Hauptfenster
             var mainWindow = new UI.MainWindow();
-
-            // 🔧 FIX: Starte den Pipe-Server SOFORT (nicht erst nach Show oder Loaded)
             StartPipeServer(mainWindow);
 
-            // Jetzt das Fenster anzeigen
-            mainWindow.Show();
+            var tabStates = DataManager.LoadOpenTabs();
+            if (tabStates.Count > 0)
+            {
+                foreach (var tabState in tabStates)
+                {
+                    mainWindow.Dispatcher.Invoke(() =>
+                    {
+                        string tabTitle = tabState.FilePath != null ? Path.GetFileName(tabState.FilePath) : "Neu";
+                        mainWindow._tabManager.AddNewTab(tabState.Content, tabTitle, tabState.FilePath);
+                    });
+                }
+            }
+            else
+            {
+                mainWindow.Dispatcher.Invoke(() =>
+                {
+                    mainWindow._tabManager.AddNewTab();
+                });
+            }
 
-            // Wenn Argumente übergeben (z.B. erste Instanz mit Datei)
             if (e.Args.Length > 0)
             {
                 foreach (var arg in e.Args)
@@ -67,12 +76,14 @@ namespace Skriptorium
                         {
                             mainWindow.Dispatcher.Invoke(() =>
                             {
-                                mainWindow.OpenFileInNewTab(content, path);
+                                mainWindow._tabManager.AddNewTab(content, Path.GetFileName(path), path);
                             });
                         });
                     }
                 }
             }
+
+            mainWindow.Show();
         }
 
         private void SendArgsToRunningInstance(string[] args)

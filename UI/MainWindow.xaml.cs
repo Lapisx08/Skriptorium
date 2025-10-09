@@ -8,6 +8,7 @@ using Skriptorium.UI.Views;
 using Skriptorium.UI.Views.Tools;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,7 +19,7 @@ namespace Skriptorium.UI
 {
     public partial class MainWindow : MetroWindow
     {
-        private readonly ScriptTabManager _tabManager;
+        internal readonly ScriptTabManager _tabManager;
         private readonly ShortcutManager _shortcutManager;
         private readonly EditMenuManager _editMenuManager;
         private readonly SearchManager _searchManager;
@@ -114,7 +115,8 @@ namespace Skriptorium.UI
 
         public void OpenFileInNewTab(string content, string path)
         {
-            _tabManager.AddNewTab(content, System.IO.Path.GetFileName(path), path);
+            string tabTitle = string.IsNullOrWhiteSpace(path) ? "Neu" : Path.GetFileName(path);
+            _tabManager.AddNewTab(content, tabTitle, path);
         }
 
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -152,6 +154,9 @@ namespace Skriptorium.UI
             }
 
             DataManager.SaveRecentFiles();
+            var editors = _tabManager.GetAllOpenEditors();
+            DataManager.SaveOpenTabs(editors);
+
             base.OnClosing(e);
         }
 
