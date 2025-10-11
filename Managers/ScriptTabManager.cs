@@ -16,7 +16,7 @@ namespace Skriptorium.Managers
     public class ScriptTabManager
     {
         private readonly DockingManager _dockingManager;
-        private readonly LayoutDocumentPane _defaultDocumentPane; // Ursprüngliche Pane als Fallback
+        private readonly LayoutDocumentPane _defaultDocumentPane;
         private int _newScriptCounter = 1;
 
         public ScriptTabManager(DockingManager dockingManager, LayoutDocumentPane documentPane)
@@ -25,9 +25,82 @@ namespace Skriptorium.Managers
             _defaultDocumentPane = documentPane;
         }
 
+        // Methode zum temporären Deaktivieren des DockingManager
+        public bool DisableDockingManager()
+        {
+            bool wasEnabled = _dockingManager.IsEnabled;
+            _dockingManager.IsEnabled = false;
+            return wasEnabled;
+        }
+
+        // Methode zum Wiederherstellen des DockingManager-Status
+        public void RestoreDockingManager(bool wasEnabled)
+        {
+            _dockingManager.IsEnabled = wasEnabled;
+        }
+
+        // Methode, um das "Neu"-Tab ans Ende zu verschieben und zu fokussieren
+        public void MoveNewTabToEnd()
+        {
+            var pane = GetActiveDocumentPane();
+            var children = pane.Children.ToList();
+            var newTab = children.FirstOrDefault(d => d.Title.StartsWith("Neu"));
+            if (newTab != null)
+            {
+                children.Remove(newTab);
+                children.Add(newTab); // Neu-Tab ans Ende verschieben
+                pane.Children.Clear();
+                foreach (var child in children)
+                    pane.Children.Add(child);
+
+                // Neu-Tab aktivieren und fokussieren
+                newTab.IsActive = true;
+                _dockingManager.ActiveContent = newTab;
+                Console.WriteLine($"Moved 'Neu' tab to end at index {pane.ChildrenCount - 1} and focused");
+
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (newTab.Content is ScriptEditor editor)
+                    {
+                        editor.Focus();
+                    }
+                    _dockingManager.Focus();
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
+            else
+            {
+                // Fallback: Fokussiere das letzte Tab, falls kein "Neu"-Tab existiert
+                var lastTab = children.LastOrDefault();
+                if (lastTab != null)
+                {
+                    lastTab.IsActive = true;
+                    _dockingManager.ActiveContent = lastTab;
+                    Console.WriteLine($"No 'Neu' tab found, focused last tab at index {pane.ChildrenCount - 1}");
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        if (lastTab.Content is ScriptEditor editor)
+                        {
+                            editor.Focus();
+                        }
+                        _dockingManager.Focus();
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
+                else
+                {
+                    Console.WriteLine("No tabs found to focus");
+                }
+            }
+        }
+
         private LayoutDocumentPane GetActiveDocumentPane()
         {
-            // 1. Versuche, die Pane des aktiven Dokuments zu finden
+            // Bevorzuge _defaultDocumentPane, wenn sie Dokumente enthält
+            if (_defaultDocumentPane.ChildrenCount > 0)
+            {
+                return _defaultDocumentPane;
+            }
+
+            // Falls _defaultDocumentPane leer ist, suche nach der aktiven Pane
             if (_dockingManager.ActiveContent is LayoutDocument activeDoc)
             {
                 var parentPane = activeDoc.Parent as LayoutDocumentPane;
@@ -35,18 +108,19 @@ namespace Skriptorium.Managers
                     return parentPane;
             }
 
-            // 2. Suche nach der ersten verfügbaren LayoutDocumentPane im Layout
+            // Suche nach der ersten verfügbaren LayoutDocumentPane mit Dokumenten
             var layoutRoot = _dockingManager.Layout;
             var documentPane = layoutRoot.Descendents()
                 .OfType<LayoutDocumentPane>()
-                .FirstOrDefault();
+                .FirstOrDefault(p => p.ChildrenCount > 0)
+                ?? layoutRoot.Descendents()
+                    .OfType<LayoutDocumentPane>()
+                    .FirstOrDefault();
 
-            // 3. Falls keine Pane gefunden wurde, erstelle eine neue
+            // Falls keine Pane gefunden wurde, erstelle eine neue
             if (documentPane == null)
             {
                 documentPane = new LayoutDocumentPane();
-
-                // Versuche, eine bestehende PaneGroup zu finden
                 var paneGroup = layoutRoot.Descendents()
                     .OfType<LayoutDocumentPaneGroup>()
                     .FirstOrDefault();
@@ -54,14 +128,12 @@ namespace Skriptorium.Managers
                 if (paneGroup == null)
                 {
                     paneGroup = new LayoutDocumentPaneGroup();
-
                     var root = (LayoutRoot)layoutRoot;
                     if (root.RootPanel == null)
                         root.RootPanel = new LayoutPanel();
 
-                    root.RootPanel.Children.Add(paneGroup); // statt InsertChildAt
-
-                    paneGroup.InsertChildAt(paneGroup.ChildrenCount, documentPane); // kann so bleiben
+                    root.RootPanel.Children.Add(paneGroup);
+                    paneGroup.InsertChildAt(paneGroup.ChildrenCount, documentPane);
                 }
                 else
                 {
@@ -69,11 +141,10 @@ namespace Skriptorium.Managers
                 }
             }
 
-            // Rückfall auf Default, falls doch noch null
             return documentPane ?? _defaultDocumentPane;
         }
 
-        public void AddNewTab(string content = "", string? tabTitle = null, string? filePath = null)
+        public void AddNewTab(string content = "", string? tabTitle = null, string? filePath = null, bool activate = false)
         {
             if (!string.IsNullOrWhiteSpace(filePath) && TryActivateTabByFilePath(filePath))
                 return;
@@ -94,7 +165,7 @@ namespace Skriptorium.Managers
             {
                 Title = baseTitle,
                 Content = scriptEditor,
-                IsActive = true
+                IsActive = false
             };
 
             scriptEditor.TextChanged += (s, e) =>
@@ -103,19 +174,10 @@ namespace Skriptorium.Managers
             };
 
             var targetPane = GetActiveDocumentPane();
-            targetPane.Children.Add(document);
-            _dockingManager.ActiveContent = document;
+            targetPane.Children.Add(document); // Am Ende hinzufügen (rechts)
+            Console.WriteLine($"Tab '{baseTitle}' added at index {targetPane.ChildrenCount - 1} in pane with {targetPane.ChildrenCount} tabs");
 
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                document.IsActive = true;
-                _dockingManager.ActiveContent = document;
-                if (document.Content is ScriptEditor editor)
-                {
-                    editor.Focus();
-                }
-                _dockingManager.Focus();
-            }), System.Windows.Threading.DispatcherPriority.Background);
+            // Keine Aktivierung hier, da MoveNewTabToEnd den Fokus setzt
         }
 
         public ScriptEditor? GetActiveScriptEditor()

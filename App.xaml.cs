@@ -45,26 +45,32 @@ namespace Skriptorium
             var mainWindow = new UI.MainWindow();
             StartPipeServer(mainWindow);
 
+            // Liste für Tab-Daten vorbereiten
+            var tabsToAdd = new List<(string Content, string Title, string FilePath)>();
+
+            // Vorherige Tabs laden und leere, nicht gespeicherte Tabs filtern
             var tabStates = DataManager.LoadOpenTabs();
-            if (tabStates.Count > 0)
+            foreach (var tabState in tabStates)
             {
-                foreach (var tabState in tabStates)
+                // Nur Tabs mit Inhalt oder Dateipfad hinzufügen
+                if (!string.IsNullOrWhiteSpace(tabState.Content) || !string.IsNullOrWhiteSpace(tabState.FilePath))
                 {
-                    mainWindow.Dispatcher.Invoke(() =>
-                    {
-                        string tabTitle = tabState.FilePath != null ? Path.GetFileName(tabState.FilePath) : "Neu";
-                        mainWindow._tabManager.AddNewTab(tabState.Content, tabTitle, tabState.FilePath);
-                    });
+                    string tabTitle = tabState.FilePath != null ? Path.GetFileName(tabState.FilePath) : "Neu";
+                    tabsToAdd.Add((tabState.Content, tabTitle, tabState.FilePath));
+                }
+                else
+                {
+                    Console.WriteLine($"Skipped empty unsaved tab: Content='{tabState.Content}', FilePath='{tabState.FilePath}'");
                 }
             }
-            else
+
+            // Neues Tab nur hinzufügen, wenn keine relevanten Tabs geladen wurden
+            if (tabsToAdd.Count == 0)
             {
-                mainWindow.Dispatcher.Invoke(() =>
-                {
-                    mainWindow._tabManager.AddNewTab();
-                });
+                tabsToAdd.Add((string.Empty, "Neu", null)); // Neues Tab am Ende
             }
 
+            // Kommandozeilenargumente verarbeiten
             if (e.Args.Length > 0)
             {
                 foreach (var arg in e.Args)
@@ -74,15 +80,43 @@ namespace Skriptorium
                     {
                         DataManager.OpenFile(filePath, (content, path) =>
                         {
-                            mainWindow.Dispatcher.Invoke(() =>
-                            {
-                                mainWindow._tabManager.AddNewTab(content, Path.GetFileName(path), path);
-                            });
+                            string tabTitle = Path.GetFileName(path);
+                            tabsToAdd.Add((content, tabTitle, path)); // Dateien am Ende hinzufügen
+                        }, (error) =>
+                        {
+                            Console.WriteLine($"Fehler beim Laden der Datei {filePath}: {error}");
                         });
                     }
                 }
             }
 
+            // Logging der Tab-Reihenfolge
+            Console.WriteLine("Tabs to add: " + string.Join(", ", tabsToAdd.Select(t => t.Title)));
+
+            // Alle Tabs auf einmal hinzufügen, ohne Aktivierung
+            mainWindow.Dispatcher.Invoke(() =>
+            {
+                // DockingManager deaktivieren
+                bool wasEnabled = mainWindow._tabManager.DisableDockingManager();
+                try
+                {
+                    for (int i = 0; i < tabsToAdd.Count; i++)
+                    {
+                        var (content, title, filePath) = tabsToAdd[i];
+                        mainWindow._tabManager.AddNewTab(content, title, filePath, activate: false);
+                    }
+
+                    // "Neu"-Tab ans Ende verschieben und fokussieren
+                    mainWindow._tabManager.MoveNewTabToEnd();
+                }
+                finally
+                {
+                    // DockingManager wiederherstellen
+                    mainWindow._tabManager.RestoreDockingManager(wasEnabled);
+                }
+            });
+
+            // Fenster anzeigen, nachdem alle Tabs geladen sind
             mainWindow.Show();
         }
 
