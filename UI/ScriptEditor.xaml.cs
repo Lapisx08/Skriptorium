@@ -17,7 +17,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using TestProgram.Analysis;
+using Skriptorium.Analysis;
 
 namespace Skriptorium.UI
 {
@@ -238,6 +238,14 @@ namespace Skriptorium.UI
                 int wordStart = avalonEditor.CaretOffset - prefix.Length;
                 _completionWindow.StartOffset = wordStart;
                 _completionWindow.EndOffset = avalonEditor.CaretOffset;
+
+                double maxWidth = suggestions.Max(s =>
+                {
+                    var textBlock = new TextBlock { Text = s, FontFamily = avalonEditor.FontFamily, FontSize = avalonEditor.FontSize };
+                    textBlock.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    return textBlock.DesiredSize.Width;
+                }) + 35;
+                _completionWindow.Width = Math.Max(150, maxWidth);
 
                 // Themenabhängige Anpassung der CompletionWindow
                 bool isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";

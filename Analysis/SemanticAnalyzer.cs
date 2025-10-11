@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Skriptorium.Parsing;
 
-namespace TestProgram.Analysis
+namespace Skriptorium.Analysis
 {
     public class SemanticAnalyzer
     {
