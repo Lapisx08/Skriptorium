@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Windows;
 
@@ -22,6 +23,34 @@ namespace Skriptorium.Managers
         );
 
         private static readonly List<string> recentFiles = new();
+        private static string? lastUsedDirectory = null;
+
+        // Liest Dateien: immer zuerst Latin1, Fallback UTF-8
+        private static string ReadFileAutoEncoding(string filePath)
+        {
+            byte[] bytes = File.ReadAllBytes(filePath);
+
+            // Versuch Latin1
+            try
+            {
+                var text = Encoding.Latin1.GetString(bytes);
+                if (!text.Contains('\uFFFD')) // Keine ungültigen Zeichen
+                    return text;
+            }
+            catch
+            {
+                // Ignorieren, Fallback auf UTF-8
+            }
+
+            // Fallback UTF-8
+            return Encoding.UTF8.GetString(bytes);
+        }
+
+        // Speichert immer Latin1
+        private static void WriteFileLatin1(string filePath, string content)
+        {
+            File.WriteAllText(filePath, content, Encoding.Latin1);
+        }
 
         public static void SaveOpenTabs(IEnumerable<ScriptEditor> editors)
         {
@@ -30,21 +59,19 @@ namespace Skriptorium.Managers
                 var tabStates = new List<TabState>();
                 foreach (var editor in editors)
                 {
-                    // Leere Skripte (nur Whitespaces oder leer) und nicht gespeicherte Skripte ignorieren
                     if (string.IsNullOrWhiteSpace(editor.Text) || string.IsNullOrWhiteSpace(editor.FilePath))
                         continue;
 
-                    var tabState = new TabState
+                    tabStates.Add(new TabState
                     {
                         FilePath = editor.FilePath,
                         Content = editor.Text
-                    };
-                    tabStates.Add(tabState);
+                    });
                 }
 
                 Directory.CreateDirectory(Path.GetDirectoryName(TabStateFilePath)!);
                 var json = JsonSerializer.Serialize(tabStates, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(TabStateFilePath, json);
+                WriteFileLatin1(TabStateFilePath, json);
             }
             catch (Exception ex)
             {
@@ -58,9 +85,8 @@ namespace Skriptorium.Managers
             {
                 if (File.Exists(TabStateFilePath))
                 {
-                    var json = File.ReadAllText(TabStateFilePath);
-                    var tabStates = JsonSerializer.Deserialize<List<TabState>>(json);
-                    return tabStates ?? new List<TabState>();
+                    var json = ReadFileAutoEncoding(TabStateFilePath);
+                    return JsonSerializer.Deserialize<List<TabState>>(json) ?? new List<TabState>();
                 }
             }
             catch (Exception ex)
@@ -81,18 +107,17 @@ namespace Skriptorium.Managers
             };
 
             if (dlg.ShowDialog() == true)
-            {
                 OpenFile(dlg.FileName, onFileLoaded);
-            }
         }
 
         public static void OpenFile(string filePath, Action<string, string> onFileLoaded, Action<string>? onError = null)
         {
             try
             {
-                var content = File.ReadAllText(filePath);
+                var content = ReadFileAutoEncoding(filePath);
                 onFileLoaded(content, filePath);
                 AddRecentFile(filePath);
+                lastUsedDirectory = Path.GetDirectoryName(filePath);
             }
             catch (Exception ex)
             {
@@ -105,13 +130,12 @@ namespace Skriptorium.Managers
             try
             {
                 if (tabManager != null && tabManager.TryActivateTabByFilePath(filePath))
-                {
                     return;
-                }
 
-                string content = File.ReadAllText(filePath);
+                var content = ReadFileAutoEncoding(filePath);
                 onFileLoaded?.Invoke(content, filePath);
                 AddRecentFile(filePath);
+                lastUsedDirectory = Path.GetDirectoryName(filePath);
             }
             catch (Exception ex)
             {
@@ -122,23 +146,20 @@ namespace Skriptorium.Managers
         public static bool SaveFile(ScriptEditor activeEditor)
         {
             if (activeEditor == null)
-            {
                 return false;
-            }
 
             if (string.IsNullOrWhiteSpace(activeEditor.FilePath))
-            {
                 return SaveFileAs(activeEditor);
-            }
 
             try
             {
-                File.WriteAllText(activeEditor.FilePath, activeEditor.Text);
+                WriteFileLatin1(activeEditor.FilePath, activeEditor.Text);
                 activeEditor.ResetModifiedFlag();
                 AddRecentFile(activeEditor.FilePath);
+                lastUsedDirectory = Path.GetDirectoryName(activeEditor.FilePath);
                 return true;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
@@ -147,9 +168,7 @@ namespace Skriptorium.Managers
         public static bool SaveFileAs(ScriptEditor activeEditor)
         {
             if (activeEditor == null)
-            {
                 return false;
-            }
 
             var dlg = new SaveFileDialog
             {
@@ -157,22 +176,21 @@ namespace Skriptorium.Managers
                 DefaultExt = ".d",
                 FilterIndex = 4,
                 InitialDirectory = GetInitialDirectory(),
-                FileName = string.IsNullOrWhiteSpace(activeEditor.FilePath)
-                    ? ""
-                    : Path.GetFileName(activeEditor.FilePath)
+                FileName = string.IsNullOrWhiteSpace(activeEditor.FilePath) ? "" : Path.GetFileName(activeEditor.FilePath)
             };
 
             if (dlg.ShowDialog() == true)
             {
                 try
                 {
-                    File.WriteAllText(dlg.FileName, activeEditor.Text);
+                    WriteFileLatin1(dlg.FileName, activeEditor.Text);
                     activeEditor.FilePath = dlg.FileName;
                     activeEditor.ResetModifiedFlag();
                     AddRecentFile(dlg.FileName);
+                    lastUsedDirectory = Path.GetDirectoryName(dlg.FileName);
                     return true;
                 }
-                catch (Exception)
+                catch
                 {
                     return false;
                 }
@@ -187,14 +205,8 @@ namespace Skriptorium.Managers
 
             foreach (var editor in tabManager.GetAllOpenEditors())
             {
-                if (editor.IsModified)
-                {
-                    bool saved = SaveFile(editor);
-                    if (!saved)
-                    {
-                        allSaved = false;
-                    }
-                }
+                if (editor.IsModified && !SaveFile(editor))
+                    allSaved = false;
             }
 
             return allSaved;
@@ -212,18 +224,24 @@ namespace Skriptorium.Managers
                 recentFiles.RemoveAt(recentFiles.Count - 1);
         }
 
-        public static List<string> GetRecentFiles()
-        {
-            return recentFiles.ToList();
-        }
+        public static List<string> GetRecentFiles() => recentFiles.ToList();
 
         public static void LoadRecentFiles()
         {
             if (File.Exists(RecentFilesPath))
             {
-                var lines = File.ReadAllLines(RecentFilesPath);
-                recentFiles.Clear();
-                recentFiles.AddRange(lines.Where(File.Exists));
+                try
+                {
+                    var lines = File.ReadAllLines(RecentFilesPath, Encoding.Latin1);
+                    recentFiles.Clear();
+                    recentFiles.AddRange(lines.Where(File.Exists));
+                }
+                catch
+                {
+                    var linesUtf8 = File.ReadAllLines(RecentFilesPath, Encoding.UTF8);
+                    recentFiles.Clear();
+                    recentFiles.AddRange(linesUtf8.Where(File.Exists));
+                }
             }
         }
 
@@ -232,7 +250,7 @@ namespace Skriptorium.Managers
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(RecentFilesPath)!);
-                File.WriteAllLines(RecentFilesPath, recentFiles);
+                File.WriteAllLines(RecentFilesPath, recentFiles, Encoding.Latin1);
             }
             catch
             {
@@ -242,10 +260,23 @@ namespace Skriptorium.Managers
 
         private static string GetInitialDirectory()
         {
-            string path = Properties.Settings.Default.ScriptSearchPath;
+            string basePath = Properties.Settings.Default.ScriptSearchPath;
 
-            if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path))
-                return path;
+            if (!string.IsNullOrWhiteSpace(lastUsedDirectory) && Directory.Exists(lastUsedDirectory))
+            {
+                try
+                {
+                    string fullLast = Path.GetFullPath(lastUsedDirectory);
+                    string fullBase = Path.GetFullPath(basePath);
+
+                    if (fullLast.StartsWith(fullBase, StringComparison.OrdinalIgnoreCase))
+                        return lastUsedDirectory;
+                }
+                catch { }
+            }
+
+            if (!string.IsNullOrWhiteSpace(basePath) && Directory.Exists(basePath))
+                return basePath;
 
             return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }

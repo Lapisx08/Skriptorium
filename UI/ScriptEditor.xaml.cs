@@ -824,6 +824,21 @@ namespace Skriptorium.UI
                 avalonEditor.CaretOffset = caretOffset + 1;
                 e.Handled = true;
             }
+            else if (e.Text == "\"")
+            {
+                if (caretOffset < avalonEditor.Document.TextLength &&
+                    avalonEditor.Document.GetCharAt(caretOffset) == '"')
+                {
+                    avalonEditor.CaretOffset = caretOffset + 1;
+                    e.Handled = true;
+                }
+                else
+                {
+                    avalonEditor.Document.Insert(caretOffset, "\"\"");
+                    avalonEditor.CaretOffset = caretOffset + 1;
+                    e.Handled = true;
+                }
+            }
             else if (e.Text == "}")
             {
                 if (caretOffset < avalonEditor.Document.TextLength &&
