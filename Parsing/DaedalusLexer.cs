@@ -244,7 +244,8 @@ namespace Skriptorium.Parsing
                         TokenType type = TokenType.Unknown;
 
                         // Präfix-Check
-                        if (val.Equals("Npc_Default", StringComparison.OrdinalIgnoreCase))
+                        if (val.Equals("Npc_Default", StringComparison.OrdinalIgnoreCase) ||
+                            val.Equals("c_npc", StringComparison.OrdinalIgnoreCase)) // Neue Ausnahme für c_npc
                         {
                             type = TokenType.Identifier;
                         }
@@ -265,7 +266,6 @@ namespace Skriptorium.Parsing
                         {
                             type = keywordType;
                         }
-
 
                         if (type == TokenType.Unknown)
                         {

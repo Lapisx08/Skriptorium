@@ -177,7 +177,18 @@ namespace Skriptorium.Managers
             targetPane.Children.Add(document); // Am Ende hinzufügen (rechts)
             Console.WriteLine($"Tab '{baseTitle}' added at index {targetPane.ChildrenCount - 1} in pane with {targetPane.ChildrenCount} tabs");
 
-            // Keine Aktivierung hier, da MoveNewTabToEnd den Fokus setzt
+            // Fokus auf den neu erstellten Tab setzen
+            document.IsActive = true;
+            _dockingManager.ActiveContent = document;
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (document.Content is ScriptEditor editor)
+                {
+                    editor.Focus();
+                }
+                _dockingManager.Focus();
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         public ScriptEditor? GetActiveScriptEditor()

@@ -45,29 +45,16 @@ namespace Skriptorium
             var mainWindow = new UI.MainWindow();
             StartPipeServer(mainWindow);
 
-            // Liste für Tab-Daten vorbereiten
-            var tabsToAdd = new List<(string Content, string Title, string FilePath)>();
-
-            // Vorherige Tabs laden und leere, nicht gespeicherte Tabs filtern
+            var tabsToAdd = new System.Collections.Generic.List<(string Content, string? Title, string? FilePath)>();
             var tabStates = DataManager.LoadOpenTabs();
+
             foreach (var tabState in tabStates)
             {
-                // Nur Tabs mit Inhalt oder Dateipfad hinzufügen
                 if (!string.IsNullOrWhiteSpace(tabState.Content) || !string.IsNullOrWhiteSpace(tabState.FilePath))
                 {
-                    string tabTitle = tabState.FilePath != null ? Path.GetFileName(tabState.FilePath) : "Neu";
+                    string tabTitle = tabState.FilePath != null ? Path.GetFileName(tabState.FilePath) : null;
                     tabsToAdd.Add((tabState.Content, tabTitle, tabState.FilePath));
                 }
-                else
-                {
-                    Console.WriteLine($"Skipped empty unsaved tab: Content='{tabState.Content}', FilePath='{tabState.FilePath}'");
-                }
-            }
-
-            // Neues Tab nur hinzufügen, wenn keine relevanten Tabs geladen wurden
-            if (tabsToAdd.Count == 0)
-            {
-                tabsToAdd.Add((string.Empty, "Neu", null)); // Neues Tab am Ende
             }
 
             // Kommandozeilenargumente verarbeiten
@@ -81,7 +68,7 @@ namespace Skriptorium
                         DataManager.OpenFile(filePath, (content, path) =>
                         {
                             string tabTitle = Path.GetFileName(path);
-                            tabsToAdd.Add((content, tabTitle, path)); // Dateien am Ende hinzufügen
+                            tabsToAdd.Add((content, tabTitle, path));
                         }, (error) =>
                         {
                             Console.WriteLine($"Fehler beim Laden der Datei {filePath}: {error}");
@@ -90,33 +77,47 @@ namespace Skriptorium
                 }
             }
 
-            // Logging der Tab-Reihenfolge
-            Console.WriteLine("Tabs to add: " + string.Join(", ", tabsToAdd.Select(t => t.Title)));
-
-            // Alle Tabs auf einmal hinzufügen, ohne Aktivierung
-            mainWindow.Dispatcher.Invoke(() =>
+            // ----- WICHTIGER, MINIMALER FIX -----
+            // Tabs erst nach dem Laden des MainWindow hinzufügen, damit MainWindow-eigene Initialisierung
+            // (z.B. ein Standard-Tab in Constructor/Loaded) zuerst ausgeführt wird.
+            // Registriere Loaded-Handler, füge danach Tabs hinzu. Handler entfernt sich selbst.
+            RoutedEventHandler? onLoaded = null;
+            onLoaded = (s, ev) =>
             {
-                // DockingManager deaktivieren
+                mainWindow.Loaded -= onLoaded; // nur einmal ausführen
+
                 bool wasEnabled = mainWindow._tabManager.DisableDockingManager();
                 try
                 {
-                    for (int i = 0; i < tabsToAdd.Count; i++)
+                    // Wenn keine Tabs aus TabState/Args vorhanden sind → EIN neues Tab erzeugen,
+                    // aber nur, wenn tatsächlich noch keine Editor-Tabs existieren (z.B. MainWindow hat nichts erzeugt).
+                    if (tabsToAdd.Count == 0 && e.Args.Length == 0)
                     {
-                        var (content, title, filePath) = tabsToAdd[i];
-                        mainWindow._tabManager.AddNewTab(content, title, filePath, activate: false);
+                        if (!mainWindow._tabManager.GetAllOpenEditors().Any())
+                        {
+                            // Übergib null als Title, damit ScriptTabManager "Neu{N}" korrekt und einmalig generiert.
+                            mainWindow._tabManager.AddNewTab(string.Empty, null, null, activate: true);
+                        }
                     }
-
-                    // "Neu"-Tab ans Ende verschieben und fokussieren
-                    mainWindow._tabManager.MoveNewTabToEnd();
+                    else
+                    {
+                        foreach (var (content, title, filePath) in tabsToAdd)
+                        {
+                            mainWindow._tabManager.AddNewTab(content, title, filePath, activate: false);
+                        }
+                        mainWindow._tabManager.MoveNewTabToEnd();
+                    }
                 }
                 finally
                 {
-                    // DockingManager wiederherstellen
                     mainWindow._tabManager.RestoreDockingManager(wasEnabled);
                 }
-            });
+            };
 
-            // Fenster anzeigen, nachdem alle Tabs geladen sind
+            // Handler registrieren _vor_ Show(), damit wir sicherstellen, dass er nach allen MainWindow-Loaded-Handlers ausgeführt wird.
+            mainWindow.Loaded += onLoaded;
+
+            // Fenster anzeigen — Loaded-Handler läuft unmittelbar danach.
             mainWindow.Show();
         }
 
@@ -126,9 +127,7 @@ namespace Skriptorium
             {
                 using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out))
                 {
-                    // 🔧 FIX: Erhöhe Timeout leicht, um stabilere Verbindung zu ermöglichen
-                    client.Connect(10000); // wartet bis zu 10 Sekunden auf Verbindung
-
+                    client.Connect(10000);
                     using (var writer = new StreamWriter(client, Encoding.UTF8) { AutoFlush = true })
                     {
                         foreach (var arg in args)
@@ -158,7 +157,6 @@ namespace Skriptorium
                 {
                     try
                     {
-                        // PipeTransmissionMode.Message sorgt dafür, dass Nachrichten klar getrennt sind
                         using (var server = new NamedPipeServerStream(
                             PipeName,
                             PipeDirection.In,
@@ -167,7 +165,6 @@ namespace Skriptorium
                             PipeOptions.Asynchronous))
                         {
                             server.WaitForConnection();
-
                             using (var reader = new StreamReader(server, Encoding.UTF8))
                             {
                                 string filePath;
@@ -175,8 +172,6 @@ namespace Skriptorium
                                 {
                                     if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
                                     {
-                                        Console.WriteLine($"[PipeServer] Datei empfangen: {filePath}");
-
                                         DataManager.OpenFile(filePath, (content, path) =>
                                         {
                                             mainWindow.Dispatcher.Invoke(() =>
@@ -185,10 +180,6 @@ namespace Skriptorium
                                             });
                                         });
                                     }
-                                    else
-                                    {
-                                        Console.WriteLine($"[PipeServer] Ungültiger Pfad empfangen: {filePath}");
-                                    }
                                 }
                             }
                         }
@@ -196,7 +187,7 @@ namespace Skriptorium
                     catch (Exception ex)
                     {
                         Console.WriteLine($"[PipeServer] Fehler: {ex.Message}");
-                        Thread.Sleep(1000); // kurze Pause, damit Schleife bei Fehler nicht rotiert
+                        Thread.Sleep(1000);
                     }
                 }
             });
@@ -207,9 +198,7 @@ namespace Skriptorium
 
         private void ApplyAvalonDockThemeFromMahApps()
         {
-            // Aktuelles MahApps-Theme ermitteln
             var currentTheme = ThemeManager.Current.DetectTheme(this);
-
             if (currentTheme == null)
             {
                 MessageBox.Show("Konnte aktuelles MahApps-Theme nicht ermitteln. Fallback auf Light.",
@@ -217,21 +206,17 @@ namespace Skriptorium
                 ApplyAvalonDockTheme("Light");
                 return;
             }
-
-            // BaseColorScheme von MahApps ist "Light" oder "Dark"
             ApplyAvalonDockTheme(currentTheme.BaseColorScheme);
         }
 
         private void ApplyAvalonDockTheme(string baseTheme)
         {
-            // Vorhandenes AvalonDock-Theme entfernen
             var themeDictionary = Current.Resources.MergedDictionaries
                 .FirstOrDefault(d => d.Source?.ToString().Contains("Theme.xaml") == true);
 
             if (themeDictionary != null)
                 Current.Resources.MergedDictionaries.Remove(themeDictionary);
 
-            // Validiere baseTheme
             if (baseTheme != "Light" && baseTheme != "Dark")
             {
                 MessageBox.Show($"Ungültiges Theme: {baseTheme}. Fallback auf Light.",
