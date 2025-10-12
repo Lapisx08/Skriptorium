@@ -97,6 +97,8 @@ namespace Skriptorium.UI
                                       () => SyntaxCheckButton_Click(null, null));
             _shortcutManager.Register(Key.E, ModifierKeys.Control | ModifierKeys.Shift,
                                       () => MenuToolsFileExplorer_Click(null, null));
+            _shortcutManager.Register(Key.F, ModifierKeys.Control | ModifierKeys.Shift,
+                          () => MenuToolsSearchExplorer_Click(null, null));
             _shortcutManager.Register(Key.C, ModifierKeys.Control | ModifierKeys.Shift,
                                       () => MenuToolsCodeStructure_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
@@ -575,7 +577,7 @@ namespace Skriptorium.UI
             var pane = anchorable.FindParent<LayoutAnchorablePane>();
             if (pane != null)
             {
-                pane.DockWidth = new GridLength(150, GridUnitType.Pixel);
+                pane.DockWidth = new GridLength(200, GridUnitType.Pixel);
             }
 
             anchorable.IsVisible = true;
@@ -617,13 +619,59 @@ namespace Skriptorium.UI
             var pane = anchorable.FindParent<LayoutAnchorablePane>();
             if (pane != null)
             {
-                pane.DockWidth = new GridLength(250, GridUnitType.Pixel);
+                pane.DockWidth = new GridLength(200, GridUnitType.Pixel);
             }
 
             anchorable.IsVisible = true;
             anchorable.IsActive = true;
         }
         #endregion
+
+        private void MenuToolsSearchExplorer_Click(object sender, RoutedEventArgs e)
+        {
+            const string contentId = "ExplorerSearch";
+
+            // Prüfen, ob die Suche bereits existiert
+            var existing = dockingManager.Layout.Descendents()
+                .OfType<LayoutAnchorable>()
+                .FirstOrDefault(a => a.ContentId == contentId);
+
+            if (existing != null)
+            {
+                // Schon vorhanden → sichtbar machen und aktivieren
+                existing.IsVisible = true;
+                existing.IsActive = true;
+                return;
+            }
+
+            // Neues UserControl erstellen
+            var searchExplorer = new SearchReplaceExplorer(_tabManager);
+
+            var anchorable = new LayoutAnchorable
+            {
+                Title = "Explorer Suche",
+                Content = searchExplorer,
+                CanClose = true,
+                CanFloat = true,
+                CanHide = false,
+                ContentId = contentId
+            };
+
+            // Füge es links neben dem Datei Explorer hinzu
+            anchorable.AddToLayout(dockingManager, AnchorableShowStrategy.Left);
+
+            // Optional: Breite setzen
+            var pane = anchorable.FindParent<LayoutAnchorablePane>();
+            if (pane != null)
+            {
+                pane.DockWidth = new GridLength(200, GridUnitType.Pixel);
+            }
+
+            // Sichtbar und aktiv machen
+            anchorable.IsVisible = true;
+            anchorable.IsActive = true;
+        }
+
 
         private void ScriptEditor_TextChanged(object sender, EventArgs e)
         {

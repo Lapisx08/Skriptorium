@@ -27,11 +27,23 @@ namespace Skriptorium
                 ? DefaultTheme
                 : Settings.Default.Theme;
 
+            // MahApps Theme setzen
             ThemeManager.Current.ChangeTheme(this, themeName);
-            ApplyAvalonDockThemeFromMahApps();
-            ThemeManager.Current.ThemeChanged += (_, __) =>
-                ApplyAvalonDockThemeFromMahApps();
 
+            // AvalonDock Theme anpassen
+            ApplyAvalonDockThemeFromMahApps();
+
+            // ToggleButton ActiveBackground an Theme anpassen
+            UpdateToggleButtonBackgroundForTheme();
+
+            // Theme-Wechsel Event abonnieren
+            ThemeManager.Current.ThemeChanged += (_, __) =>
+            {
+                ApplyAvalonDockThemeFromMahApps();
+                UpdateToggleButtonBackgroundForTheme();
+            };
+
+            // Single-Instance-Check
             bool isNewInstance = false;
             _mutex = new Mutex(true, MutexName, out isNewInstance);
 
@@ -57,7 +69,6 @@ namespace Skriptorium
                 }
             }
 
-            // Kommandozeilenargumente verarbeiten
             if (e.Args.Length > 0)
             {
                 foreach (var arg in e.Args)
@@ -77,25 +88,17 @@ namespace Skriptorium
                 }
             }
 
-            // ----- WICHTIGER, MINIMALER FIX -----
-            // Tabs erst nach dem Laden des MainWindow hinzufügen, damit MainWindow-eigene Initialisierung
-            // (z.B. ein Standard-Tab in Constructor/Loaded) zuerst ausgeführt wird.
-            // Registriere Loaded-Handler, füge danach Tabs hinzu. Handler entfernt sich selbst.
             RoutedEventHandler? onLoaded = null;
             onLoaded = (s, ev) =>
             {
-                mainWindow.Loaded -= onLoaded; // nur einmal ausführen
-
+                mainWindow.Loaded -= onLoaded;
                 bool wasEnabled = mainWindow._tabManager.DisableDockingManager();
                 try
                 {
-                    // Wenn keine Tabs aus TabState/Args vorhanden sind → EIN neues Tab erzeugen,
-                    // aber nur, wenn tatsächlich noch keine Editor-Tabs existieren (z.B. MainWindow hat nichts erzeugt).
                     if (tabsToAdd.Count == 0 && e.Args.Length == 0)
                     {
                         if (!mainWindow._tabManager.GetAllOpenEditors().Any())
                         {
-                            // Übergib null als Title, damit ScriptTabManager "Neu{N}" korrekt und einmalig generiert.
                             mainWindow._tabManager.AddNewTab(string.Empty, null, null, activate: true);
                         }
                     }
@@ -114,11 +117,20 @@ namespace Skriptorium
                 }
             };
 
-            // Handler registrieren _vor_ Show(), damit wir sicherstellen, dass er nach allen MainWindow-Loaded-Handlers ausgeführt wird.
             mainWindow.Loaded += onLoaded;
-
-            // Fenster anzeigen — Loaded-Handler läuft unmittelbar danach.
             mainWindow.Show();
+        }
+
+        // --- Neue Methode für ToggleButton Hintergrund ---
+        private void UpdateToggleButtonBackgroundForTheme()
+        {
+            var currentTheme = ThemeManager.Current.DetectTheme(this);
+            bool isDark = currentTheme?.BaseColorScheme == "Dark";
+
+            Application.Current.Resources["ToggleButtonActiveBackground"] =
+                isDark ?
+                    Application.Current.Resources["ToggleButtonActiveBackgroundDark"] :
+                    Application.Current.Resources["ToggleButtonActiveBackgroundLight"];
         }
 
         private void SendArgsToRunningInstance(string[] args)
@@ -131,9 +143,7 @@ namespace Skriptorium
                     using (var writer = new StreamWriter(client, Encoding.UTF8) { AutoFlush = true })
                     {
                         foreach (var arg in args)
-                        {
                             writer.WriteLine(arg);
-                        }
                     }
                 }
             }

@@ -7,22 +7,54 @@
         <!-- Toolbar -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5">
             <!-- Datei -->
-            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnCreateFile_Click" ToolTip="Neue Datei">
+            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent"
+        Click="BtnCreateFile_Click" ToolTip="Neue Datei">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7C3;" FontSize="12"/>
             </Button>
 
             <!-- Ordner -->
-            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnCreateFolder_Click" ToolTip="Neuer Ordner">
+            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent"
+        Click="BtnCreateFolder_Click" ToolTip="Neuer Ordner">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED25;" FontSize="12"/>
             </Button>
 
             <!-- Einklappen -->
-            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnCollapse_Click" ToolTip="Alle Ordner einklappen">
+            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent"
+        Click="BtnCollapse_Click" ToolTip="Alles einklappen">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF165;" FontSize="12"/>
             </Button>
 
             <!-- Refresh -->
-            <Button Width="26" Height="26" Padding="0" Margin="1" Background="Transparent" BorderBrush="Transparent" Click="BtnRefresh_Click" ToolTip="Datei Explorer aktualisieren">
+            <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent"
+        Click="BtnRefresh_Click" ToolTip="Datei Explorer aktualisieren">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEDAB;" FontSize="12"/>
             </Button>
         </StackPanel>

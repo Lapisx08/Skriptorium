@@ -142,13 +142,10 @@ namespace Skriptorium.UI.Views
                 if (!string.IsNullOrWhiteSpace(input))
                 {
                     string newFileName = input;
-                    // Prüfen, ob die Datei eine .d-Datei ist und die Eingabe keine Erweiterung enthält
                     if (!node.IsDirectory && Path.GetExtension(node.FullPath).Equals(".d", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!Path.HasExtension(input))
-                        {
-                            newFileName = input + ".d"; // .d-Erweiterung hinzufügen
-                        }
+                            newFileName = input + ".d";
                     }
 
                     string newPath = Path.Combine(Path.GetDirectoryName(node.FullPath), newFileName);
@@ -222,7 +219,7 @@ namespace Skriptorium.UI.Views
             {
                 var data = new DataObject(typeof(FileNode), _dragSource);
                 DragDrop.DoDragDrop((DependencyObject)sender, data, DragDropEffects.Move);
-                _dragSource = null; // Reset nach Drag
+                _dragSource = null;
             }
         }
 
@@ -235,15 +232,10 @@ namespace Skriptorium.UI.Views
 
                 if (sourceNode != null && target != null && target.IsDirectory && !sourceNode.IsDummy)
                 {
-                    // Verhindern, dass ein Ordner in sich selbst oder einen Unterordner verschoben wird
                     if (sourceNode.IsDirectory && IsParentOrSelf(sourceNode, target))
-                    {
                         e.Effects = DragDropEffects.None;
-                    }
                     else
-                    {
                         e.Effects = DragDropEffects.Move;
-                    }
                 }
                 else
                 {
@@ -266,17 +258,12 @@ namespace Skriptorium.UI.Views
 
                 if (sourceNode != null && targetNode != null && targetNode.IsDirectory && !sourceNode.IsDummy)
                 {
-                    // Verhindern, dass ein Ordner in sich selbst oder einen Unterordner verschoben wird
                     if (sourceNode.IsDirectory && IsParentOrSelf(sourceNode, targetNode))
-                    {
                         return;
-                    }
 
                     try
                     {
                         string newPath = Path.Combine(targetNode.FullPath, sourceNode.Name);
-
-                        // Prüfen, ob das Ziel bereits existiert
                         int i = 1;
                         string baseName = Path.GetFileNameWithoutExtension(sourceNode.Name);
                         string extension = sourceNode.IsDirectory ? "" : Path.GetExtension(sourceNode.Name);
@@ -285,13 +272,11 @@ namespace Skriptorium.UI.Views
                             newPath = Path.Combine(targetNode.FullPath, $"{baseName} ({i++}){extension}");
                         }
 
-                        // Verschieben der Datei oder des Ordners
                         if (sourceNode.IsDirectory)
                             Directory.Move(sourceNode.FullPath, newPath);
                         else
                             File.Move(sourceNode.FullPath, newPath);
 
-                        // Aktualisieren der Baumansicht
                         if (sourceNode.Parent != null)
                             sourceNode.Parent.Refresh();
                         else
@@ -337,34 +322,31 @@ namespace Skriptorium.UI.Views
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                 return;
 
-            // Root-Node finden (angenommen, es gibt nur einen Root)
             var currentNode = RootDirectories.FirstOrDefault();
             if (currentNode == null) return;
 
-            // Pfad in Segmente aufteilen (Ordner und Datei)
-            var segments = filePath.Replace(currentNode.FullPath, "").TrimStart(Path.DirectorySeparatorChar).Split(Path.DirectorySeparatorChar);
+            var segments = filePath.Replace(currentNode.FullPath, "").TrimStart(Path.DirectorySeparatorChar)
+                                   .Split(Path.DirectorySeparatorChar);
             var treeItem = FileTree.ItemContainerGenerator.ContainerFromItem(currentNode) as TreeViewItem;
 
             foreach (var segment in segments)
             {
                 if (currentNode == null) return;
 
-                // Kinder laden und erweitern
                 currentNode.LoadChildren();
-                currentNode = currentNode.Children.FirstOrDefault(child => string.Equals(child.Name, segment, StringComparison.OrdinalIgnoreCase));
+                currentNode = currentNode.Children.FirstOrDefault(child =>
+                    string.Equals(child.Name, segment, StringComparison.OrdinalIgnoreCase));
 
-                if (currentNode == null) return; // Pfad nicht gefunden
+                if (currentNode == null) return;
 
-                // TreeViewItem finden und erweitern
                 if (treeItem != null)
                 {
                     treeItem.IsExpanded = true;
-                    treeItem.UpdateLayout(); // Layout aktualisieren, um Kinder zu generieren
+                    treeItem.UpdateLayout();
                     treeItem = treeItem.ItemContainerGenerator.ContainerFromItem(currentNode) as TreeViewItem;
                 }
             }
 
-            // Datei-Node auswählen und scrollen
             if (treeItem != null)
             {
                 treeItem.IsSelected = true;
@@ -427,25 +409,29 @@ namespace Skriptorium.UI.Views
         {
             if (_isLoaded || !IsDirectory || IsDummy) return;
 
-            Children.Clear();
-
-            try
+            // Änderungen über Dispatcher ausführen, um InvalidOperationException zu vermeiden
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                foreach (var dir in Directory.GetDirectories(FullPath))
-                    Children.Add(new FileNode(dir, parent: this));
+                Children.Clear();
 
-                var patterns = new[] { "*.d", "*.txt", "*.src" };
-                foreach (var pattern in patterns)
+                try
                 {
-                    foreach (var file in Directory.GetFiles(FullPath, pattern))
-                        Children.Add(new FileNode(file, parent: this));
-                }
-            }
-            catch (UnauthorizedAccessException) { }
-            catch (DirectoryNotFoundException) { }
-            catch (IOException) { }
+                    foreach (var dir in Directory.GetDirectories(FullPath))
+                        Children.Add(new FileNode(dir, parent: this));
 
-            _isLoaded = true;
+                    var patterns = new[] { "*.d", "*.txt", "*.src" };
+                    foreach (var pattern in patterns)
+                    {
+                        foreach (var file in Directory.GetFiles(FullPath, pattern))
+                            Children.Add(new FileNode(file, parent: this));
+                    }
+                }
+                catch (UnauthorizedAccessException) { }
+                catch (DirectoryNotFoundException) { }
+                catch (IOException) { }
+
+                _isLoaded = true;
+            }));
         }
 
         public void Refresh()

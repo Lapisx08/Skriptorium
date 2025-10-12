@@ -180,6 +180,11 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Header="Explorer Suche" InputGestureText="Strg + Shift + F" Click="MenuToolsSearchExplorer_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF8A5;" FontSize="15"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="Code Struktur" InputGestureText="Strg + Shift + C" Click="MenuToolsCodeStructure_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="14"/>
@@ -243,6 +248,9 @@
             <Separator />
             <Button ToolTip="Datei Explorer" Click="MenuToolsFileExplorer_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Explorer Suche" Click="MenuToolsSearchExplorer_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF8A5;" FontSize="12"/>
             </Button>
             <Button ToolTip="Code Struktur" Click="MenuToolsCodeStructure_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="12"/>

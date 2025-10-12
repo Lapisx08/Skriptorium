@@ -12,7 +12,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
 
-                <!-- AvalonDock VS2013 Dark Theme -->
+                <!-- AvalonDock VS2013 Dark Theme als Default -->
                 <ResourceDictionary Source="/AvalonDock.Themes.VS2013;component/DarkTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
@@ -23,6 +23,13 @@
             <SolidColorBrush 
                 x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabSelectedActiveText}" 
                 Color="GhostWhite"/>
+
+            <!-- ToggleButton Active Background Brushes -->
+            <SolidColorBrush x:Key="ToggleButtonActiveBackgroundLight" Color="LightGray"/>
+            <SolidColorBrush x:Key="ToggleButtonActiveBackgroundDark" Color="#FF444444"/>
+
+            <!-- Dynamische Ressource für ToggleButton -->
+            <SolidColorBrush x:Key="ToggleButtonActiveBackground" Color="{Binding Color, Source={StaticResource ToggleButtonActiveBackgroundDark}}"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

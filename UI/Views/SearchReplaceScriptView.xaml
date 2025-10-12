@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Title="Suchen" TitleCharacterCasing="Normal"
-        Height="420" Width="600"
+        Height="325" Width="500"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Loaded="Window_Loaded"
@@ -69,7 +69,7 @@
                 <TextBlock Text="Ersetzen"/>
             </Button>
             <Button x:Name="BtnReplaceAll" Width="100" Margin="10,0,0,0" Click="BtnReplaceAll_Click">
-                <TextBlock Text="Alle Ersetzen"/>
+                <TextBlock Text="Alles Ersetzen"/>
             </Button>
         </StackPanel>
 
