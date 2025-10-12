@@ -1,5 +1,7 @@
 ﻿using Skriptorium.Managers;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -43,13 +45,45 @@ namespace Skriptorium.UI.Views
         private void NavigateToMatch(SearchMatch match)
         {
             var node = match.Parent;
-            _tabManager.AddNewTab(node.Text, System.IO.Path.GetFileName(node.FullPath), node.FullPath);
+            string content;
+            try
+            {
+                content = ReadFileAutoEncoding(node.FullPath); // Datei mit korrekter Kodierung laden
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Laden der Datei {node.FullPath}:\n{ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            _tabManager.AddNewTab(content, Path.GetFileName(node.FullPath), node.FullPath);
             var activeEditor = _tabManager.GetActiveScriptEditor();
             if (activeEditor != null)
             {
                 activeEditor.Avalon.Select(match.Offset, match.Length);
                 activeEditor.Avalon.ScrollToLine(activeEditor.Avalon.Document.GetLineByOffset(match.Offset).LineNumber);
                 activeEditor.Avalon.Focus();
+            }
+        }
+
+        private static string ReadFileAutoEncoding(string filePath)
+        {
+            try
+            {
+                string text = File.ReadAllText(filePath, Encoding.Latin1);
+                if (!text.Contains('\uFFFD')) // Prüfen, ob kein Ersatzzeichen (�) vorhanden ist
+                {
+                    System.Diagnostics.Debug.WriteLine($"Datei {filePath} erfolgreich mit Latin1 geladen.");
+                    return text;
+                }
+                text = File.ReadAllText(filePath, Encoding.UTF8);
+                System.Diagnostics.Debug.WriteLine($"Datei {filePath} erfolgreich mit UTF-8 geladen.");
+                return text;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Fehler beim Lesen der Datei {filePath}: {ex.Message}");
+                throw; // Exception weiterwerfen, damit sie in NavigateToMatch behandelt wird
             }
         }
     }
