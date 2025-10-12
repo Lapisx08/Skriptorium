@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Linq;
-using Skriptorium.Common; // Neue using-Direktive für IconCache
+using Skriptorium.Common;
 
 namespace Skriptorium.UI.Views
 {
