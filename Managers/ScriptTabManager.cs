@@ -342,6 +342,17 @@ namespace Skriptorium.Managers
                 WrapTabPanelsInScrollViewer();
                 RegisterMouseWheelHandlers();
             };
+
+            // WICHTIG: Nach Layout-Änderungen neu anwenden
+            _dockingManager.LayoutUpdated += (s, e) =>
+            {
+                WrapTabPanelsInScrollViewer();
+            };
+
+            _dockingManager.ActiveContentChanged += (s, e) =>
+            {
+                WrapTabPanelsInScrollViewer();
+            };
         }
 
         private void WrapTabPanelsInScrollViewer()
