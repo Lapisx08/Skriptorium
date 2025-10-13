@@ -50,6 +50,22 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
+            <!-- Tab für Konstanten -->
+            <TabItem Header="Konstanten">
+                <TabItem.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="14" />
+                    </DataTemplate>
+                </TabItem.HeaderTemplate>
+                <DataGrid x:Name="ConstantsGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="ConstantsGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Typ" Binding="{Binding TypeName}" Width="*"/>
+                        <DataGridTextColumn Header="Wert" Binding="{Binding Value}" Width="*"/>
+                        <DataGridTextColumn Header="Zeile" Binding="{Binding Line}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
         </TabControl>
     </Grid>
 </UserControl>

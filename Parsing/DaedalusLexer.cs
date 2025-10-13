@@ -86,7 +86,7 @@ namespace Skriptorium.Parsing
 
         private static readonly HashSet<string> multiCharOperators = new()
         {
-            "==", "!=", "<=", ">=", "&&", "||"
+            "==", "!=", "<=", ">=", "&&", "||", "<<" , ">>"
         };
 
         private static readonly Regex identifier = new(@"^[A-Za-z_][A-Za-z0-9_]*", RegexOptions.Compiled | RegexOptions.CultureInvariant);
