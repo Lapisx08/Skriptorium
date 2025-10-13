@@ -30,6 +30,12 @@ namespace Skriptorium.Parsing
     {
         public string TypeName { get; set; }
         public string Name { get; set; }
+        public string ArraySize { get; set; } // Null, wenn kein Array; sonst IntegerLiteral oder Konstante
+    }
+
+    public class MultiVarDeclaration : Declaration
+    {
+        public List<VarDeclaration> Declarations { get; set; } = new List<VarDeclaration>();
     }
 
     public class ClassDeclaration : Declaration
@@ -63,6 +69,11 @@ namespace Skriptorium.Parsing
     public class VarDeclarationStatement : Statement
     {
         public VarDeclaration Declaration { get; set; }
+    }
+
+    public class MultiVarDeclarationStatement : Statement
+    {
+        public List<VarDeclarationStatement> Declarations { get; set; } = new List<VarDeclarationStatement>();
     }
 
     public class IfStatement : Statement
@@ -135,7 +146,7 @@ namespace Skriptorium.Parsing
             : base($"Syntax-Fehler: Zeile {token.Line}, Spalte {token.Column}. Erwartet: {expected ?? "<beliebig>"}, Gefunden: '{token?.Value}'")
         {
             Line = token?.Line ?? -1;
-            Column = token?.Column ?? -1;
+            Column = token?.Line ?? -1;
             Expected = expected;
             Found = token?.Value ?? "<null>";
         }
@@ -160,7 +171,17 @@ namespace Skriptorium.Parsing
             {
                 var decl = ParseDeclaration();
                 if (decl != null)
-                    declarations.Add(decl);
+                {
+                    if (decl is InstanceDeclaration)
+                    {
+                        var instanceDecls = ParseInstanceDeclaration();
+                        declarations.AddRange(instanceDecls);
+                    }
+                    else
+                    {
+                        declarations.Add(decl);
+                    }
+                }
                 else
                     Advance();
             }
@@ -169,7 +190,7 @@ namespace Skriptorium.Parsing
 
         private Declaration ParseDeclaration()
         {
-            if (Match(TokenType.InstanceKeyword)) return ParseInstance();
+            if (Match(TokenType.InstanceKeyword)) return new InstanceDeclaration(); // Platzhalter, wird in ParseInstanceDeclaration verarbeitet
             if (Match(TokenType.FuncKeyword)) return ParseFunction();
             if (Match(TokenType.VarKeyword)) return ParseVarDeclaration();
             if (Match(TokenType.ClassKeyword) && Peek(1).Type == TokenType.Identifier) return ParseClass();
@@ -177,11 +198,99 @@ namespace Skriptorium.Parsing
             return null;
         }
 
+        private List<InstanceDeclaration> ParseInstanceDeclaration()
+        {
+            var startToken = Current();
+            Advance(); // 'instance'
+
+            var instanceDecls = new List<InstanceDeclaration>();
+            var names = new List<(string Name, int Line, int Column)>();
+
+            // Sammle alle Namen
+            while (true)
+            {
+                var nameToken = Current();
+                if (!(Match(TokenType.InstanceName) || Match(TokenType.SelfKeyword) ||
+                      Match(TokenType.OtherKeyword) || Match(TokenType.SlfKeyword)))
+                {
+                    throw new ParseException("Instanzname oder spezielles Schlüsselwort (self, other, hero, slf) erwartet", nameToken, "instance name");
+                }
+                names.Add((nameToken.Value, nameToken.Line, nameToken.Column));
+                Advance();
+
+                if (!Match(TokenType.Comma))
+                    break;
+                Advance(); // ',' konsumieren
+            }
+
+            // Parse Basisklasse
+            Consume(TokenType.OpenParenthesis, "'(' erwartet");
+            var baseToken = Consume(TokenType.Identifier, "Basisklasse erwartet");
+            string baseClass = baseToken.Value;
+            Consume(TokenType.CloseParenthesis, "')' erwartet");
+
+            // Parse optionalen Body
+            var body = new List<Statement>();
+            if (Match(TokenType.OpenBracket))
+            {
+                Advance(); // '{' konsumieren
+                while (!Check(TokenType.CloseBracket) && !IsAtEnd())
+                {
+                    try
+                    {
+                        var stmt = ParseStatement();
+                        if (stmt != null)
+                            body.Add(stmt);
+                        else
+                            Advance();
+                    }
+                    catch (ParseException ex)
+                    {
+                        if (Current().Type == TokenType.Semicolon)
+                        {
+                            throw new ParseException("'}' vor ';' erwartet", Current(), "'}'");
+                        }
+                        else if (Current().Type == TokenType.EOF)
+                        {
+                            throw new ParseException("Unerwartetes Dateiende. '}' zum Schließen des Instanzblocks erwartet.", Current(), "'}'");
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+                Consume(TokenType.CloseBracket, "'}' erwartet");
+            }
+
+            if (Match(TokenType.Semicolon)) Advance();
+
+            // Erstelle InstanceDeclaration für jeden Namen
+            foreach (var (name, line, column) in names)
+            {
+                instanceDecls.Add(new InstanceDeclaration
+                {
+                    Name = name,
+                    BaseClass = baseClass,
+                    Body = new List<Statement>(body), // Kopie des Bodys
+                    Line = startToken.Line,
+                    Column = startToken.Column
+                });
+            }
+
+            return instanceDecls;
+        }
+
         private InstanceDeclaration ParseInstance()
         {
             var startToken = Current();
             Advance(); // 'instance'
-            var nameToken = Consume(TokenType.InstanceName, "Instanzname erwartet");
+            var nameToken = Current();
+            if (!(Match(TokenType.InstanceName) || Match(TokenType.SelfKeyword) ||
+                  Match(TokenType.OtherKeyword) || Match(TokenType.SlfKeyword)))
+            {
+                throw new ParseException("Instanzname oder spezielles Schlüsselwort (self, other, hero, slf) erwartet", nameToken, "instance name");
+            }
 
             var instance = new InstanceDeclaration
             {
@@ -189,41 +298,46 @@ namespace Skriptorium.Parsing
                 Line = startToken.Line,
                 Column = startToken.Column
             };
+            Advance();
 
             Consume(TokenType.OpenParenthesis, "'(' erwartet");
             var baseToken = Consume(TokenType.Identifier, "Basisklasse erwartet");
             instance.BaseClass = baseToken.Value;
             Consume(TokenType.CloseParenthesis, "')' erwartet");
-            Consume(TokenType.OpenBracket, "'{' erwartet");
 
-            while (!Check(TokenType.CloseBracket) && !IsAtEnd())
+            // Parse optionalen Body
+            if (Match(TokenType.OpenBracket))
             {
-                try
+                Advance(); // '{' konsumieren
+                while (!Check(TokenType.CloseBracket) && !IsAtEnd())
                 {
-                    var stmt = ParseStatement();
-                    if (stmt != null)
-                        instance.Body.Add(stmt);
-                    else
-                        Advance();
+                    try
+                    {
+                        var stmt = ParseStatement();
+                        if (stmt != null)
+                            instance.Body.Add(stmt);
+                        else
+                            Advance();
+                    }
+                    catch (ParseException ex)
+                    {
+                        if (Current().Type == TokenType.Semicolon)
+                        {
+                            throw new ParseException("'}' vor ';' erwartet", Current(), "'}'");
+                        }
+                        else if (Current().Type == TokenType.EOF)
+                        {
+                            throw new ParseException("Unerwartetes Dateiende. '}' zum Schließen des Instanzblocks erwartet.", Current(), "'}'");
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
                 }
-                catch (ParseException ex)
-                {
-                    if (Current().Type == TokenType.Semicolon)
-                    {
-                        throw new ParseException("'}' vor ';' erwartet", Current(), "'}'");
-                    }
-                    else if (Current().Type == TokenType.EOF)
-                    {
-                        throw new ParseException("Unerwartetes Dateiende. '}' zum Schließen des Instanzblocks erwartet.", Current(), "'}'");
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                Consume(TokenType.CloseBracket, "'}' erwartet");
             }
 
-            Consume(TokenType.CloseBracket, "'}' erwartet");
             if (Match(TokenType.Semicolon)) Advance();
 
             return instance;
@@ -334,20 +448,77 @@ namespace Skriptorium.Parsing
             return tok;
         }
 
-        private VarDeclaration ParseVarDeclaration()
+        private Declaration ParseVarDeclaration()
         {
             var startToken = Current();
             Advance(); // 'var'
             var typeToken = Consume(TokenType.TypeKeyword, "Typname erwartet");
-            var nameToken = Consume(TokenType.FunctionName, "Variablenname erwartet");
-            Consume(TokenType.Semicolon, "';' nach Variablendeklaration erwartet");
-            return new VarDeclaration
+
+            var multiVar = new MultiVarDeclaration
             {
-                TypeName = typeToken.Value,
-                Name = nameToken.Value,
                 Line = startToken.Line,
                 Column = startToken.Column
             };
+
+            while (true)
+            {
+                var nameToken = Consume(TokenType.Identifier, "Variablenname erwartet");
+                string arraySize = null;
+
+                if (Match(TokenType.OpenSquareBracket))
+                {
+                    Advance(); // '[' konsumieren
+                    var sizeToken = Current();
+                    if (sizeToken.Type == TokenType.IntegerLiteral ||
+                        sizeToken.Type == TokenType.ATRConstant ||
+                        sizeToken.Type == TokenType.GuildConstant ||
+                        sizeToken.Type == TokenType.NPC_Constant ||
+                        sizeToken.Type == TokenType.AIVConstant ||
+                        sizeToken.Type == TokenType.FAIConstant ||
+                        sizeToken.Type == TokenType.CRIMEConstant ||
+                        sizeToken.Type == TokenType.LOCConstant ||
+                        sizeToken.Type == TokenType.PETZCOUNTERConstant ||
+                        sizeToken.Type == TokenType.LOGConstant ||
+                        sizeToken.Type == TokenType.FONTConstant ||
+                        sizeToken.Type == TokenType.REALConstant ||
+                        sizeToken.Type == TokenType.ARConstant ||
+                        sizeToken.Type == TokenType.PLAYERConstant ||
+                        sizeToken.Type == TokenType.ZENConstant ||
+                        sizeToken.Type == TokenType.SexConstant ||
+                        sizeToken.Type == TokenType.MAXConstant ||
+                        sizeToken.Type == TokenType.PROTConstant ||
+                        sizeToken.Type == TokenType.DAMConstant ||
+                        sizeToken.Type == TokenType.ITMConstant)
+                    {
+                        arraySize = sizeToken.Value;
+                        Advance();
+                    }
+                    else
+                    {
+                        throw new ParseException("Array-Größe (Integer oder Konstante) erwartet", sizeToken);
+                    }
+                    Consume(TokenType.CloseSquareBracket, "']' nach Array-Größe erwartet");
+                }
+
+                multiVar.Declarations.Add(new VarDeclaration
+                {
+                    TypeName = typeToken.Value,
+                    Name = nameToken.Value,
+                    ArraySize = arraySize,
+                    Line = nameToken.Line,
+                    Column = nameToken.Column
+                });
+
+                if (Match(TokenType.Comma))
+                {
+                    Advance(); // ',' konsumieren
+                    continue;
+                }
+                break;
+            }
+
+            Consume(TokenType.Semicolon, "';' nach Variablendeklaration erwartet");
+            return multiVar;
         }
 
         private Statement ParseStatement()
@@ -403,44 +574,107 @@ namespace Skriptorium.Parsing
             var startToken = Current();
             Advance(); // 'var'
             var typeToken = Consume(TokenType.TypeKeyword, "Typname erwartet");
-            var nameToken = Consume(TokenType.FunctionName, "Variablenname erwartet");
-            Consume(TokenType.Semicolon, "';' nach Variablendeklaration erwartet");
 
-            var varDeclaration = new VarDeclaration
+            var multiVarStmt = new MultiVarDeclarationStatement
             {
-                TypeName = typeToken.Value,
-                Name = nameToken.Value,
                 Line = startToken.Line,
                 Column = startToken.Column
             };
 
-            // Prüfe, ob eine Zuweisung folgt
-            if (Match(TokenType.Identifier) || Match(TokenType.FunctionName))
+            while (true)
             {
-                var lhs = ParseExpression();
+                var nameToken = Consume(TokenType.Identifier, "Variablenname erwartet");
+                string arraySize = null;
+
+                if (Match(TokenType.OpenSquareBracket))
+                {
+                    Advance(); // '[' konsumieren
+                    var sizeToken = Current();
+                    if (sizeToken.Type == TokenType.IntegerLiteral ||
+                        sizeToken.Type == TokenType.ATRConstant ||
+                        sizeToken.Type == TokenType.GuildConstant ||
+                        sizeToken.Type == TokenType.NPC_Constant ||
+                        sizeToken.Type == TokenType.AIVConstant ||
+                        sizeToken.Type == TokenType.FAIConstant ||
+                        sizeToken.Type == TokenType.CRIMEConstant ||
+                        sizeToken.Type == TokenType.LOCConstant ||
+                        sizeToken.Type == TokenType.PETZCOUNTERConstant ||
+                        sizeToken.Type == TokenType.LOGConstant ||
+                        sizeToken.Type == TokenType.FONTConstant ||
+                        sizeToken.Type == TokenType.REALConstant ||
+                        sizeToken.Type == TokenType.ARConstant ||
+                        sizeToken.Type == TokenType.PLAYERConstant ||
+                        sizeToken.Type == TokenType.ZENConstant ||
+                        sizeToken.Type == TokenType.SexConstant ||
+                        sizeToken.Type == TokenType.MAXConstant ||
+                        sizeToken.Type == TokenType.PROTConstant ||
+                        sizeToken.Type == TokenType.DAMConstant ||
+                        sizeToken.Type == TokenType.ITMConstant)
+                    {
+                        arraySize = sizeToken.Value;
+                        Advance();
+                    }
+                    else
+                    {
+                        throw new ParseException("Array-Größe (Integer oder Konstante) erwartet", sizeToken);
+                    }
+                    Consume(TokenType.CloseSquareBracket, "']' nach Array-Größe erwartet");
+                }
+
+                var varDeclaration = new VarDeclaration
+                {
+                    TypeName = typeToken.Value,
+                    Name = nameToken.Value,
+                    ArraySize = arraySize,
+                    Line = nameToken.Line,
+                    Column = nameToken.Column
+                };
+
                 if (Match(TokenType.Assignment))
                 {
                     var assignToken = Current();
-                    Advance(); // '='
+                    Advance(); // '=' konsumieren
                     var rhs = ParseExpression();
                     Consume(TokenType.Semicolon, "';' nach Zuweisung erwartet");
 
+                    multiVarStmt.Declarations.Add(new VarDeclarationStatement
+                    {
+                        Declaration = varDeclaration,
+                        Line = startToken.Line,
+                        Column = startToken.Column
+                    });
+
                     return new Assignment
                     {
-                        Left = lhs,
+                        Left = new VariableExpression
+                        {
+                            Name = nameToken.Value,
+                            Line = nameToken.Line,
+                            Column = nameToken.Column
+                        },
                         Right = rhs,
                         Line = assignToken.Line,
                         Column = assignToken.Column
                     };
                 }
+
+                multiVarStmt.Declarations.Add(new VarDeclarationStatement
+                {
+                    Declaration = varDeclaration,
+                    Line = nameToken.Line,
+                    Column = nameToken.Column
+                });
+
+                if (Match(TokenType.Comma))
+                {
+                    Advance(); // ',' konsumieren
+                    continue;
+                }
+                break;
             }
 
-            return new VarDeclarationStatement
-            {
-                Declaration = varDeclaration,
-                Line = startToken.Line,
-                Column = startToken.Column
-            };
+            Consume(TokenType.Semicolon, "';' nach Variablendeklaration erwartet");
+            return multiVarStmt;
         }
 
         private ReturnStatement ParseReturnStatement()
@@ -471,7 +705,6 @@ namespace Skriptorium.Parsing
                 condition = ParseExpression();
                 Consume(TokenType.CloseParenthesis, "')' nach Bedingung erwartet");
 
-                // Prüfe auf logische Operatoren (&& oder ||) mit geklammerten Bedingungen
                 while (Match(TokenType.Operator) && (Current().Value == "&&" || Current().Value == "||"))
                 {
                     var opToken = Current();
@@ -492,10 +725,8 @@ namespace Skriptorium.Parsing
             }
             else
             {
-                // Bedingung ohne Klammern parsen
                 condition = ParseExpression();
 
-                // Prüfe auf logische Operatoren (&& oder ||) ohne Klammern
                 while (Match(TokenType.Operator) && (Current().Value == "&&" || Current().Value == "||"))
                 {
                     var opToken = Current();
@@ -584,26 +815,23 @@ namespace Skriptorium.Parsing
         {
             DaedalusToken tok = Current();
 
-            // Behandlung von unären Operatoren (z. B. ! oder - vor numerischen Literalen)
             if (Match(TokenType.Operator) && (Current().Value == "!" || Current().Value == "-"))
             {
-                Advance(); // '!' oder '-' konsumieren
+                Advance();
                 if (tok.Value == "-" && (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral)))
                 {
-                    // Behandlung von negativen numerischen Literalen (z. B. -1)
                     var literalToken = Current();
-                    Advance(); // Literal konsumieren
+                    Advance();
                     return new LiteralExpression
                     {
-                        Value = "-" + literalToken.Value, // Kombiniere - mit dem Literal
+                        Value = "-" + literalToken.Value,
                         Line = tok.Line,
                         Column = tok.Column
                     };
                 }
                 else if (tok.Value == "!")
                 {
-                    // Behandlung von logischer Negation
-                    var operand = ParsePrimary(); // Rekursiv den Operanden parsen
+                    var operand = ParsePrimary();
                     return new UnaryExpression
                     {
                         Operator = tok.Value,
@@ -615,16 +843,14 @@ namespace Skriptorium.Parsing
                 throw new ParseException($"Unerwarteter Operanden nach unärem Operator '{tok.Value}'", Current());
             }
 
-            // Behandlung von geklammerten Ausdrücken
             if (Match(TokenType.OpenParenthesis))
             {
-                Advance(); // '(' konsumieren
+                Advance();
                 var expr = ParseExpression();
                 Consume(TokenType.CloseParenthesis, "')' nach geklammertem Ausdruck erwartet");
                 return expr;
             }
 
-            // Behandlung von Literals und Konstanten
             if (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral) ||
                 Match(TokenType.StringLiteral) || Match(TokenType.BoolLiteral) ||
                 Match(TokenType.GuildConstant) || Match(TokenType.NPC_Constant) ||
@@ -634,7 +860,11 @@ namespace Skriptorium.Parsing
                 Match(TokenType.FONTConstant) || Match(TokenType.REALConstant) ||
                 Match(TokenType.ATRConstant) || Match(TokenType.ARConstant) ||
                 Match(TokenType.PLAYERConstant) || Match(TokenType.ZENConstant) ||
-                Match(TokenType.SexConstant))
+                Match(TokenType.SexConstant) ||
+                Match(TokenType.MAXConstant) ||
+                Match(TokenType.PROTConstant) ||
+                Match(TokenType.DAMConstant) ||
+                Match(TokenType.ITMConstant))
             {
                 Advance();
                 return new LiteralExpression
@@ -645,7 +875,6 @@ namespace Skriptorium.Parsing
                 };
             }
 
-            // Behandlung von Variablen, aivar, speziellen Schlüsselwörtern und Funktionen
             if (Match(TokenType.Identifier) || Match(TokenType.AiVariable) ||
                 Match(TokenType.SelfKeyword) || Match(TokenType.OtherKeyword) ||
                 Match(TokenType.SlfKeyword) || Match(TokenType.BuiltInFunction) ||
@@ -664,10 +893,9 @@ namespace Skriptorium.Parsing
                     Column = tok.Column
                 };
 
-                // Member-Zugriff (z. B. self.aivar)
                 while (Match(TokenType.Dot))
                 {
-                    Advance(); // '.' konsumieren
+                    Advance();
                     if (!(Match(TokenType.Identifier) || Match(TokenType.AiVariable)))
                     {
                         throw new ParseException("Membername (Identifier oder AiVariable) nach '.' erwartet", Current());
@@ -682,10 +910,9 @@ namespace Skriptorium.Parsing
                     };
                 }
 
-                // Funktionsaufruf
                 if (Match(TokenType.OpenParenthesis))
                 {
-                    Advance(); // '(' konsumieren
+                    Advance();
                     var args = new List<Expression>();
 
                     if (!Check(TokenType.CloseParenthesis))
@@ -723,7 +950,6 @@ namespace Skriptorium.Parsing
                     }
                 }
 
-                // Array-Zugriff
                 while (Match(TokenType.OpenSquareBracket))
                 {
                     Advance();

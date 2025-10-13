@@ -24,7 +24,7 @@ namespace Skriptorium.Analysis
             "TRUE", "FALSE",
 
             // Bezeichner
-            "self", "slf", "other", "hero", "c_npc",
+            "self", "slf", "other", "hero",
     
             // Membervariablen
             "aivar", "attribute", "condition", "daily_routine", "description", "fight_tactic", "flags",

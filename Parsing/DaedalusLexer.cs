@@ -22,12 +22,10 @@ namespace Skriptorium.Parsing
             ["float"] = TokenType.TypeKeyword,
             ["void"] = TokenType.TypeKeyword,
             ["string"] = TokenType.TypeKeyword,
-            ["c_npc"] = TokenType.TypeKeyword,
             ["true"] = TokenType.BoolLiteral,
             ["false"] = TokenType.BoolLiteral,
         };
 
-        // Präfixe für spezielle Konstanten und Funktionen
         private static readonly Dictionary<string, TokenType> prefixTokenTypes = new()
         {
             ["GIL_"] = TokenType.GuildConstant,
@@ -43,6 +41,10 @@ namespace Skriptorium.Parsing
             ["ATR_"] = TokenType.ATRConstant,
             ["AR_"] = TokenType.ARConstant,
             ["PLAYER_"] = TokenType.PLAYERConstant,
+            ["MAX_"] = TokenType.MAXConstant,
+            ["PROT_"] = TokenType.PROTConstant,
+            ["DAM_"] = TokenType.DAMConstant,
+            ["ITM_"] = TokenType.ITMConstant,
             ["B_"] = TokenType.BuiltInFunction,
             ["Mdl_"] = TokenType.MdlFunction,
             ["AI_"] = TokenType.AIFunction,
@@ -64,7 +66,6 @@ namespace Skriptorium.Parsing
             ["slf"] = TokenType.SlfKeyword,
         };
 
-        // Trennzeichen
         private static readonly Dictionary<char, TokenType> singleCharTokenMap = new()
         {
             { '{', TokenType.OpenBracket },
@@ -78,19 +79,16 @@ namespace Skriptorium.Parsing
             { ';', TokenType.Semicolon },
         };
 
-        // Single‑Char Operatoren (ohne '=')
         private static readonly HashSet<char> singleCharOperators = new()
         {
             '+', '-', '*', '/', '%', '<', '>', '!'
         };
 
-        // Multi‑Char Operatoren
         private static readonly HashSet<string> multiCharOperators = new()
         {
             "==", "!=", "<=", ">=", "&&", "||"
         };
 
-        // Regex für verschiedene Token‑Klassen
         private static readonly Regex identifier = new(@"^[A-Za-z_][A-Za-z0-9_]*", RegexOptions.Compiled | RegexOptions.CultureInvariant);
         private static readonly Regex floatLiteral = new(@"^\d+\.\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
         private static readonly Regex intLiteral = new(@"^\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
@@ -141,7 +139,6 @@ namespace Skriptorium.Parsing
 
                     string remaining = text.Substring(column);
 
-                    // Zeilenkommentar
                     if (lineComment.IsMatch(remaining))
                     {
                         tokens.Add(new DaedalusToken(TokenType.Comment,
@@ -149,16 +146,15 @@ namespace Skriptorium.Parsing
                         break;
                     }
 
-                    // Blockkommentar
                     if (blockCommentStart.IsMatch(remaining))
                     {
-                        int endIdx = remaining.IndexOf("*/", StringComparison.Ordinal);
+                        int endIdx = text.IndexOf("*/", column, StringComparison.Ordinal);
                         if (endIdx >= 0)
                         {
                             tokens.Add(new DaedalusToken(TokenType.CommentBlock,
-                                remaining.Substring(0, endIdx + 2),
+                                remaining.Substring(0, endIdx + 2 - column),
                                 line + 1, column + 1));
-                            column += endIdx + 2;
+                            column = endIdx + 2;
                         }
                         else
                         {
@@ -170,7 +166,6 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // String‑Literal
                     if (strLiteral.IsMatch(remaining))
                     {
                         var match = strLiteral.Match(remaining);
@@ -180,7 +175,6 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Float‑Literal
                     if (floatLiteral.IsMatch(remaining))
                     {
                         var match = floatLiteral.Match(remaining);
@@ -190,7 +184,6 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Integer‑Literal
                     if (intLiteral.IsMatch(remaining))
                     {
                         var match = intLiteral.Match(remaining);
@@ -207,7 +200,6 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Multi-Char Operator (2 Zeichen)
                     if (column + 1 < text.Length)
                     {
                         string twoChars = text.Substring(column, 2);
@@ -219,7 +211,6 @@ namespace Skriptorium.Parsing
                         }
                     }
 
-                    // Einzelnes '=' als Assignment-Operator
                     if (current == '=')
                     {
                         tokens.Add(new DaedalusToken(TokenType.Assignment, "=", line + 1, column + 1));
@@ -227,7 +218,6 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Single‑Char Operator
                     if (singleCharOperators.Contains(current))
                     {
                         tokens.Add(new DaedalusToken(TokenType.Operator,
@@ -236,22 +226,18 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Identifiers, Keywords, Bool- und AIV-Literals usw.
                     if (identifier.IsMatch(remaining))
                     {
                         var match = identifier.Match(remaining);
                         var val = match.Value;
                         TokenType type = TokenType.Unknown;
 
-                        // Präfix-Check
-                        if (val.Equals("Npc_Default", StringComparison.OrdinalIgnoreCase) ||
-                            val.Equals("c_npc", StringComparison.OrdinalIgnoreCase)) // Neue Ausnahme für c_npc
+                        if (val.Equals("Npc_Default", StringComparison.OrdinalIgnoreCase))
                         {
                             type = TokenType.Identifier;
                         }
                         else
                         {
-                            // Präfix-Check
                             foreach (var prefix in prefixTokenTypes)
                             {
                                 if (val.StartsWith(prefix.Key, StringComparison.Ordinal))
@@ -269,8 +255,14 @@ namespace Skriptorium.Parsing
 
                         if (type == TokenType.Unknown)
                         {
-                            // Weitere Checks nur, wenn nicht schon erkannt
-                            if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
+                            if (val.Equals("C_NPC", StringComparison.OrdinalIgnoreCase) &&
+                                tokens.Count > 0 &&
+                                (tokens[tokens.Count - 1].Value.Equals("var", StringComparison.OrdinalIgnoreCase) ||
+                                 tokens[tokens.Count - 1].Value.Equals("int", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                type = TokenType.TypeKeyword;
+                            }
+                            else if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
                                 type = TokenType.AiVariable;
                             else if (val.Equals("MALE", StringComparison.Ordinal) || val.Equals("FEMALE", StringComparison.Ordinal))
                                 type = TokenType.SexConstant;
@@ -307,7 +299,6 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Trennzeichen
                     if (singleCharTokenMap.TryGetValue(current, out var tokenType))
                     {
                         tokens.Add(new DaedalusToken(tokenType, current.ToString(), line + 1, column + 1));
@@ -315,26 +306,57 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    // Unbekanntes Zeichen
                     tokens.Add(new DaedalusToken(TokenType.Unknown,
                         current.ToString(), line + 1, column + 1));
                     column++;
                 }
             }
 
-            // EOF‑Markierung
             tokens.Add(new DaedalusToken(TokenType.EOF, "", lines.Length, 0));
 
-            for (int i = 0; i < tokens.Count - 1; i++)
+            // Nachbearbeitung: Korrigiere Token-Typen basierend auf Kontext
+            for (int i = 1; i < tokens.Count - 1; i++)
             {
-                if (tokens[i].Type == TokenType.TypeKeyword &&
-                    (string.Equals(tokens[i].Value, "void", StringComparison.OrdinalIgnoreCase) ||
-                     string.Equals(tokens[i].Value, "int", StringComparison.OrdinalIgnoreCase))) // auch "int"
+                if (tokens[i].Type == TokenType.FuncKeyword && tokens[i].Value.Equals("func", StringComparison.OrdinalIgnoreCase))
                 {
+                    var prev = tokens[i - 1];
                     var next = tokens[i + 1];
-                    if (next.Type == TokenType.Identifier)
+                    if (prev.Type == TokenType.VarKeyword)
                     {
-                        next.Type = TokenType.FunctionName;
+                        // Nach 'VAR', z. B. 'VAR FUNC mission', wird 'func' zu TypeKeyword
+                        tokens[i].Type = TokenType.TypeKeyword;
+                        if (next.Type == TokenType.Identifier || next.Type == TokenType.BuiltInFunction)
+                        {
+                            next.Type = TokenType.Identifier; // Nächster Token ist Variablenname
+                        }
+                    }
+                    else if (prev.Type == TokenType.FuncKeyword)
+                    {
+                        // Nach 'FUNC', z. B. 'FUNC FUNC myFunc', bleibt 'func' FuncKeyword
+                        if (next.Type == TokenType.Identifier || next.Type == TokenType.BuiltInFunction)
+                        {
+                            next.Type = TokenType.FunctionName; // Nächster Token ist Funktionsname
+                        }
+                    }
+                }
+                else if (tokens[i].Type == TokenType.TypeKeyword)
+                {
+                    var prev = tokens[i - 1];
+                    var next = tokens[i + 1];
+                    if (prev.Type == TokenType.VarKeyword || prev.Type == TokenType.ConstKeyword)
+                    {
+                        // Nach 'VAR TypeKeyword' oder 'CONST TypeKeyword', z. B. 'VAR INT aivar' oder 'CONST INT aivar'
+                        if (identifier.IsMatch(next.Value))
+                        {
+                            next.Type = TokenType.Identifier; // Nächster Token ist Variablenname, unabhängig vom ursprünglichen Typ
+                        }
+                    }
+                    else if (prev.Type == TokenType.FuncKeyword)
+                    {
+                        if (next.Type == TokenType.Identifier || next.Type == TokenType.BuiltInFunction)
+                        {
+                            next.Type = TokenType.FunctionName; // Nächster Token ist Funktionsname
+                        }
                     }
                 }
             }

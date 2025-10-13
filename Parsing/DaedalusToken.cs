@@ -43,6 +43,10 @@ namespace Skriptorium.Parsing
         REALConstant,           // z. B. REAL_TALENT_2H
         ZS_TalkConstant,        // ZS_Talk
         ATRConstant,            // z. B. ATR_DEXTERITY
+        MAXConstant,            // z. B. MAX_HITCHANCE
+        PROTConstant,           // z. B. PROT_INDEX_MAX
+        DAMConstant,            // z. B. DAM_INDEX_MAX
+        ITMConstant,            // z. B. ITM_SOMEITEM
         ARConstant,             // z. B. AR_THEFT
         PLAYERConstant,         // z. B. PLAYER_TALENT_ALCHEMY
         BuiltInFunction,        // z. B. B_SetNpcVisual
