@@ -10,6 +10,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
+using System.Windows.Controls.Primitives;
 
 namespace Skriptorium.Managers
 {
@@ -23,6 +25,7 @@ namespace Skriptorium.Managers
         {
             _dockingManager = dockingManager;
             _defaultDocumentPane = documentPane;
+            InitializeTabScrolling(); // Initialisiert Tab-Scrolling
         }
 
         // Methode zum temporären Deaktivieren des DockingManager
@@ -65,7 +68,7 @@ namespace Skriptorium.Managers
                         editor.Focus();
                     }
                     _dockingManager.Focus();
-                }), System.Windows.Threading.DispatcherPriority.Background);
+                }), DispatcherPriority.Background);
             }
             else
             {
@@ -83,7 +86,7 @@ namespace Skriptorium.Managers
                             editor.Focus();
                         }
                         _dockingManager.Focus();
-                    }), System.Windows.Threading.DispatcherPriority.Background);
+                    }), DispatcherPriority.Background);
                 }
                 else
                 {
@@ -177,6 +180,21 @@ namespace Skriptorium.Managers
             targetPane.Children.Add(document); // Am Ende hinzufügen (rechts)
             Console.WriteLine($"Tab '{baseTitle}' added at index {targetPane.ChildrenCount - 1} in pane with {targetPane.ChildrenCount} tabs");
 
+            // Neuen TabControl für MouseWheel-Ereignis registrieren (vermeidet Duplikate)
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var tabControl = FindVisualChildren<TabControl>(_dockingManager)
+                    .FirstOrDefault(tc => tc.Items.SourceCollection == targetPane.Children);
+                if (tabControl != null)
+                {
+                    tabControl.PreviewMouseWheel -= TabControl_PreviewMouseWheel; // Entferne alte Handler
+                    tabControl.PreviewMouseWheel += TabControl_PreviewMouseWheel;
+                }
+
+                // Wrap nach jedem Add, falls neu
+                WrapTabPanelsInScrollViewer();
+            }), DispatcherPriority.Background);
+
             // Fokus auf den neu erstellten Tab setzen
             document.IsActive = true;
             _dockingManager.ActiveContent = document;
@@ -188,7 +206,7 @@ namespace Skriptorium.Managers
                     editor.Focus();
                 }
                 _dockingManager.Focus();
-            }), System.Windows.Threading.DispatcherPriority.Background);
+            }), DispatcherPriority.Background);
         }
 
         public ScriptEditor? GetActiveScriptEditor()
@@ -315,6 +333,194 @@ namespace Skriptorium.Managers
                 .OfType<LayoutDocument>()
                 .FirstOrDefault(d => d.Content == editor);
         }
+
+        #region Tab-Scrolling (Verbessert)
+        private void InitializeTabScrolling()
+        {
+            _dockingManager.Loaded += (s, e) =>
+            {
+                WrapTabPanelsInScrollViewer();
+                RegisterMouseWheelHandlers();
+            };
+        }
+
+        private void WrapTabPanelsInScrollViewer()
+        {
+            var tabPanels = FindVisualChildren<DocumentPaneTabPanel>(_dockingManager);
+            foreach (var tabPanel in tabPanels)
+            {
+                if (tabPanel.Parent is ScrollViewer) continue; // Bereits gewrappt
+
+                if (tabPanel.Parent is Panel parentPanel)
+                {
+                    int index = parentPanel.Children.IndexOf(tabPanel);
+                    if (index == -1) continue;
+
+                    parentPanel.Children.RemoveAt(index);
+
+                    var scrollViewer = CreateCustomScrollViewer();
+                    scrollViewer.Content = tabPanel;
+
+                    parentPanel.Children.Insert(index, scrollViewer);
+                }
+                else if (tabPanel.Parent is Decorator parentDecorator) // Für Border oder ähnliche
+                {
+                    var oldContent = parentDecorator.Child;
+                    if (oldContent != tabPanel) continue;
+
+                    var scrollViewer = CreateCustomScrollViewer();
+                    scrollViewer.Content = tabPanel;
+                    parentDecorator.Child = scrollViewer;
+                }
+                // Erweitere bei Bedarf für andere Parent-Typen (z.B. ContentControl)
+            }
+        }
+
+        private ScrollViewer CreateCustomScrollViewer()
+        {
+            var scrollViewer = new ScrollViewer
+            {
+                CanContentScroll = false,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled
+            };
+
+            // Style nur für horizontale ScrollBars
+            var horizontalStyle = new Style(typeof(System.Windows.Controls.Primitives.ScrollBar));
+            horizontalStyle.Setters.Add(new Setter(ScrollBar.OrientationProperty, Orientation.Horizontal));
+            horizontalStyle.Setters.Add(new Setter(Control.TemplateProperty, CreateHorizontalScrollBarTemplate()));
+
+            scrollViewer.Resources.Add(typeof(System.Windows.Controls.Primitives.ScrollBar), horizontalStyle);
+
+            return scrollViewer;
+        }
+
+        private ControlTemplate CreateHorizontalScrollBarTemplate()
+        {
+            string xamlTemplate = @"
+        <ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='ScrollBar'>
+            <Grid Background='Transparent' Height='0'>
+                <Track Name='PART_Track'>
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Command='ScrollBar.LineLeftCommand' Opacity='0' IsTabStop='False'/>
+                    </Track.DecreaseRepeatButton>
+                        <Track.Thumb>
+                            <Thumb Height='0'>
+                                <Thumb.Template>
+                                    <ControlTemplate TargetType='Thumb'>
+                                        <Border Background='Transparent' CornerRadius='2'/>
+                                    </ControlTemplate>
+                                </Thumb.Template>
+                            </Thumb>
+                        </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Command='ScrollBar.LineRightCommand' Opacity='0' IsTabStop='False'/>
+                    </Track.IncreaseRepeatButton>
+                </Track>
+            </Grid>
+        </ControlTemplate>";
+
+            return (ControlTemplate)System.Windows.Markup.XamlReader.Parse(xamlTemplate);
+        }
+
+        private void RegisterMouseWheelHandlers()
+        {
+            var tabControls = FindVisualChildren<TabControl>(_dockingManager);
+            foreach (var tabControl in tabControls)
+            {
+                tabControl.PreviewMouseWheel -= TabControl_PreviewMouseWheel; // Vermeide Duplikate
+                tabControl.PreviewMouseWheel += TabControl_PreviewMouseWheel;
+            }
+        }
+
+        private IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child != null && child is T tChild)
+                    {
+                        yield return tChild;
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
+        }
+
+        private T? GetAncestor<T>(DependencyObject? start) where T : DependencyObject
+        {
+            var current = start;
+            while (current != null)
+            {
+                if (current is T t) return t;
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return null;
+        }
+
+        private bool IsOverTabHeader(DependencyObject hit)
+        {
+            // Akzeptiere sowohl TabItem als auch das spezielle DocumentPaneTabPanel
+            while (hit != null)
+            {
+                if (hit is TabItem || hit is DocumentPaneTabPanel)
+                    return true;
+                hit = VisualTreeHelper.GetParent(hit);
+            }
+            return false;
+        }
+
+        private void TabControl_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (sender is TabControl tabControl)
+            {
+                // Verwende OriginalSource und Suche nach Vorfahren um zuverlässiger Header-Region zu erkennen
+                var original = e.OriginalSource as DependencyObject;
+                if (original == null) return;
+
+                // Wenn die Maus nicht über einem Tab-Header (TabItem / DocumentPaneTabPanel) ist, nichts tun
+                if (!IsOverTabHeader(original))
+                    return;
+
+                // Versuche das zugehörige DocumentPaneTabPanel zu bestimmen
+                var tabPanel = GetAncestor<DocumentPaneTabPanel>(original) ?? FindVisualChildren<DocumentPaneTabPanel>(tabControl).FirstOrDefault();
+
+                // Finde den ScrollViewer, der das TabPanel umschließt (entweder ein Vorfahre oder ein direktes Elternteil)
+                ScrollViewer? scrollViewer = null;
+                if (tabPanel != null)
+                {
+                    scrollViewer = GetAncestor<ScrollViewer>(tabPanel);
+                    if (scrollViewer == null)
+                    {
+                        // Falls Wrap noch nicht angewendet wurde, nehme den ersten ScrollViewer im TabControl (Fallback)
+                        scrollViewer = FindVisualChildren<ScrollViewer>(tabControl).FirstOrDefault();
+                    }
+                }
+                else
+                {
+                    // Fallback: erster ScrollViewer innerhalb des TabControls
+                    scrollViewer = FindVisualChildren<ScrollViewer>(tabControl).FirstOrDefault();
+                }
+
+                if (scrollViewer != null && scrollViewer.ScrollableWidth > 0)
+                {
+                    // Horizontales Scrolling per Mausrad, Richtung angepasst für natürliche Navigation
+                    double step = e.Delta / 120.0 * 100; // Positiv für Wheel up
+                    double offset = scrollViewer.HorizontalOffset - step; // Inverted für left-scroll on up
+                    scrollViewer.ScrollToHorizontalOffset(offset);
+
+                    // Sehr wichtig: Das Event als handled markieren, damit das Editor-Scrollen nicht ausgeführt wird
+                    e.Handled = true;
+                }
+            }
+        }
+        #endregion
     }
 
     public class RelayCommand : ICommand
