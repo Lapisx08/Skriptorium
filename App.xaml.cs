@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using System.Windows.Media;
+using AvalonDock.Themes.VS2013.Themes;
 
 namespace Skriptorium
 {
@@ -121,7 +123,6 @@ namespace Skriptorium
             mainWindow.Show();
         }
 
-        // --- Neue Methode für ToggleButton Hintergrund ---
         private void UpdateToggleButtonBackgroundForTheme()
         {
             var currentTheme = ThemeManager.Current.DetectTheme(this);
@@ -236,10 +237,75 @@ namespace Skriptorium
 
             try
             {
+                // Lade das AvalonDock-Theme
                 Current.Resources.MergedDictionaries.Add(new ResourceDictionary
                 {
                     Source = new Uri(string.Format(ThemePathTemplate, baseTheme), UriKind.Relative)
                 });
+
+                // Wähle das passende ResourceDictionary für die Brushes
+                var resources = Application.Current.Resources;
+                var themeBrushes = baseTheme == "Dark"
+                    ? (ResourceDictionary)resources["DarkThemeBrushes"]
+                    : (ResourceDictionary)resources["LightThemeBrushes"];
+
+                // Setze die Brushes in die Anwendungsressourcen
+                resources[ResourceKeys.DocumentWellTabSelectedActiveBackground] =
+                    themeBrushes[ResourceKeys.DocumentWellTabSelectedActiveBackground];
+                resources[ResourceKeys.DocumentWellTabSelectedActiveText] =
+                    themeBrushes[ResourceKeys.DocumentWellTabSelectedActiveText];
+                resources[ResourceKeys.DocumentWellTabButtonSelectedActiveGlyph] =
+                    themeBrushes[ResourceKeys.DocumentWellTabButtonSelectedActiveGlyph];
+                resources[ResourceKeys.DocumentWellTabButtonSelectedActiveHoveredBackground] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonSelectedActiveHoveredBackground];
+                resources[ResourceKeys.DocumentWellTabButtonSelectedActiveHoveredBorder] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonSelectedActiveHoveredBorder];
+                resources[ResourceKeys.DocumentWellTabButtonSelectedActivePressedBackground] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonSelectedActivePressedBackground];
+                resources[ResourceKeys.DocumentWellTabButtonSelectedActivePressedBorder] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonSelectedActivePressedBorder];
+
+                resources[ResourceKeys.DocumentWellTabUnselectedHoveredBackground] =
+                   themeBrushes[ResourceKeys.DocumentWellTabUnselectedHoveredBackground];
+                resources[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBackground] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBackground];
+                resources[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBorder] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBorder];
+                resources[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredGlyph] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredGlyph];
+                resources[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBackground] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBackground];
+                resources[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBorder] =
+                   themeBrushes[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBorder];
+
+                resources[ResourceKeys.ToolWindowCaptionActiveBackground] =
+                   themeBrushes[ResourceKeys.ToolWindowCaptionActiveBackground];
+                resources[ResourceKeys.ToolWindowCaptionActiveGrip] =
+                   themeBrushes[ResourceKeys.ToolWindowCaptionActiveGrip];
+                resources[ResourceKeys.ToolWindowCaptionButtonActiveHoveredBackground] =
+                   themeBrushes[ResourceKeys.ToolWindowCaptionButtonActiveHoveredBackground];
+                resources[ResourceKeys.ToolWindowCaptionButtonActiveHoveredBorder] =
+                   themeBrushes[ResourceKeys.ToolWindowCaptionButtonActiveHoveredBorder];
+                resources[ResourceKeys.ToolWindowCaptionButtonActivePressedBackground] =
+                   themeBrushes[ResourceKeys.ToolWindowCaptionButtonActivePressedBackground];
+                resources[ResourceKeys.ToolWindowCaptionButtonActivePressedBorder] =
+                   themeBrushes[ResourceKeys.ToolWindowCaptionButtonActivePressedBorder];
+
+                resources[ResourceKeys.ToolWindowTabSelectedActiveBackground] =
+                   themeBrushes[ResourceKeys.ToolWindowTabSelectedActiveBackground];
+                resources[ResourceKeys.ToolWindowTabSelectedActiveText] =
+                   themeBrushes[ResourceKeys.ToolWindowTabSelectedActiveText];
+                resources[ResourceKeys.ToolWindowTabSelectedInactiveText] =
+                   themeBrushes[ResourceKeys.ToolWindowTabSelectedInactiveText];
+                resources[ResourceKeys.ToolWindowTabUnselectedHoveredText] =
+                   themeBrushes[ResourceKeys.ToolWindowTabUnselectedHoveredText];
+
+                resources[ResourceKeys.DockingButtonForegroundBrushKey] =
+                  themeBrushes[ResourceKeys.DockingButtonForegroundBrushKey];
+                resources[ResourceKeys.PreviewBoxBackgroundBrushKey] =
+                   themeBrushes[ResourceKeys.PreviewBoxBackgroundBrushKey];
+                resources[ResourceKeys.PreviewBoxBorderBrushKey] =
+                   themeBrushes[ResourceKeys.PreviewBoxBorderBrushKey];
             }
             catch (Exception ex)
             {

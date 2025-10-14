@@ -7,22 +7,83 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-
                 <!-- MahApps -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
 
-                <!-- AvalonDock VS2013 Dark Theme als Default -->
+                <!-- AvalonDock VS2013 Dark Theme als Default (wird dynamisch gewechselt) -->
                 <ResourceDictionary Source="/AvalonDock.Themes.VS2013;component/DarkTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Überschreiben der aktiven Tab-Farbe und Textfarbe -->
-            <SolidColorBrush 
-                x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabSelectedActiveBackground}" 
-                Color="#FF576573"/>
-            <SolidColorBrush 
-                x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabSelectedActiveText}" 
-                Color="GhostWhite"/>
+            <!-- Light Theme Brushes -->
+            <ResourceDictionary x:Key="LightThemeBrushes">
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabSelectedActiveBackground}" Color="#8D9BA9" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabSelectedActiveText}" Color="GhostWhite" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActiveGlyph}" Color="GhostWhite" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActiveHoveredBackground}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActiveHoveredBorder}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActivePressedBackground}" Color="#C9D7E5" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActivePressedBorder}" Color="#C9D7E5" />
+                
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabUnselectedHoveredBackground}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBackground}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBorder}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredGlyph}" Color="GhostWhite" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBackground}" Color="#C9D7E5" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBorder}" Color="#C9D7E5" />
+
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionActiveBackground}" Color="#8D9BA9" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionActiveGrip}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionButtonActiveHoveredBackground}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionButtonActiveHoveredBorder}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionButtonActivePressedBackground}" Color="#C9D7E5" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionButtonActivePressedBorder}" Color="#C9D7E5" />
+
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabSelectedActiveBackground}" Color="#8D9BA9" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabSelectedActiveText}" Color="GhostWhite" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabUnselectedHoveredBackground}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabSelectedInactiveText}" Color="#444444" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabUnselectedHoveredText}" Color="GhostWhite" />
+
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DockingButtonForegroundBrushKey}" Color="#8D9BA9" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.PreviewBoxBackgroundBrushKey}" Color="#ABB9C7" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.PreviewBoxBorderBrushKey}" Color="Gray" />
+               
+            </ResourceDictionary>
+                
+                <!-- Dark Theme Brushes -->
+            <ResourceDictionary x:Key="DarkThemeBrushes">
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabSelectedActiveBackground}" Color="#576573" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabSelectedActiveText}" Color="GhostWhite" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActiveGlyph}" Color="GhostWhite" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActiveHoveredBackground}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActiveHoveredBorder}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActivePressedBackground}" Color="#93A1AF" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonSelectedActivePressedBorder}" Color="#93A1AF" />
+
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabUnselectedHoveredBackground}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBackground}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBorder}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredGlyph}" Color="GhostWhite" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBackground}" Color="#93A1AF" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBorder}" Color="#93A1AF" />
+
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionActiveBackground}" Color="#576573" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionActiveGrip}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionButtonActiveHoveredBackground}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionButtonActiveHoveredBorder}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionButtonActivePressedBackground}" Color="#93A1AF" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowCaptionButtonActivePressedBorder}" Color="#93A1AF" />
+
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabSelectedActiveBackground}" Color="#576573" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabSelectedActiveText}" Color="GhostWhite" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabSelectedInactiveText}" Color="#D0D0D0" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.ToolWindowTabUnselectedHoveredText}" Color="GhostWhite" />
+
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.DockingButtonForegroundBrushKey}" Color="#576573" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.PreviewBoxBackgroundBrushKey}" Color="#758391" />
+                <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.PreviewBoxBorderBrushKey}" Color="Gray" />
+            </ResourceDictionary>
 
             <!-- ToggleButton Active Background Brushes -->
             <SolidColorBrush x:Key="ToggleButtonActiveBackgroundLight" Color="LightGray"/>

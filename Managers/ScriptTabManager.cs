@@ -20,6 +20,7 @@ namespace Skriptorium.Managers
         private readonly DockingManager _dockingManager;
         private readonly LayoutDocumentPane _defaultDocumentPane;
         private int _newScriptCounter = 1;
+        private bool _isInitializing = true;
 
         public ScriptTabManager(DockingManager dockingManager, LayoutDocumentPane documentPane)
         {
@@ -68,7 +69,26 @@ namespace Skriptorium.Managers
                         editor.Focus();
                     }
                     _dockingManager.Focus();
-                }), DispatcherPriority.Background);
+
+                    if (!_isInitializing)
+                    {
+                        var targetPane = GetActiveDocumentPane();
+                        var tabControl = FindVisualChildren<TabControl>(_dockingManager)
+                            .FirstOrDefault(tc => tc.Items.SourceCollection == targetPane.Children);
+                        if (tabControl != null)
+                        {
+                            var tabPanel = FindVisualChildren<DocumentPaneTabPanel>(tabControl).FirstOrDefault();
+                            if (tabPanel != null)
+                            {
+                                var scrollViewer = GetAncestor<ScrollViewer>(tabPanel);
+                                if (scrollViewer != null)
+                                {
+                                    scrollViewer.ScrollToRightEnd();
+                                }
+                            }
+                        }
+                    }
+                }), DispatcherPriority.ApplicationIdle);
             }
             else
             {
@@ -86,7 +106,26 @@ namespace Skriptorium.Managers
                             editor.Focus();
                         }
                         _dockingManager.Focus();
-                    }), DispatcherPriority.Background);
+
+                        if (!_isInitializing)
+                        {
+                            var targetPane = GetActiveDocumentPane();
+                            var tabControl = FindVisualChildren<TabControl>(_dockingManager)
+                                .FirstOrDefault(tc => tc.Items.SourceCollection == targetPane.Children);
+                            if (tabControl != null)
+                            {
+                                var tabPanel = FindVisualChildren<DocumentPaneTabPanel>(tabControl).FirstOrDefault();
+                                if (tabPanel != null)
+                                {
+                                    var scrollViewer = GetAncestor<ScrollViewer>(tabPanel);
+                                    if (scrollViewer != null)
+                                    {
+                                        scrollViewer.ScrollToRightEnd();
+                                    }
+                                }
+                            }
+                        }
+                    }), DispatcherPriority.ApplicationIdle);
                 }
                 else
                 {
@@ -206,7 +245,26 @@ namespace Skriptorium.Managers
                     editor.Focus();
                 }
                 _dockingManager.Focus();
-            }), DispatcherPriority.Background);
+
+                if (!_isInitializing)
+                {
+                    var activePane = GetActiveDocumentPane();
+                    var tabControl = FindVisualChildren<TabControl>(_dockingManager)
+                        .FirstOrDefault(tc => tc.Items.SourceCollection == activePane.Children);
+                    if (tabControl != null)
+                    {
+                        var tabPanel = FindVisualChildren<DocumentPaneTabPanel>(tabControl).FirstOrDefault();
+                        if (tabPanel != null)
+                        {
+                            var scrollViewer = GetAncestor<ScrollViewer>(tabPanel);
+                            if (scrollViewer != null)
+                            {
+                                scrollViewer.ScrollToRightEnd();
+                            }
+                        }
+                    }
+                }
+            }), DispatcherPriority.ApplicationIdle);
         }
 
         public ScriptEditor? GetActiveScriptEditor()
@@ -341,6 +399,7 @@ namespace Skriptorium.Managers
             {
                 WrapTabPanelsInScrollViewer();
                 RegisterMouseWheelHandlers();
+                _isInitializing = false;
             };
 
             // WICHTIG: Nach Layout-Änderungen neu anwenden
@@ -523,10 +582,8 @@ namespace Skriptorium.Managers
                 {
                     // Horizontales Scrolling per Mausrad, Richtung angepasst für natürliche Navigation
                     double step = e.Delta / 120.0 * 100; // Positiv für Wheel up
-                    double offset = scrollViewer.HorizontalOffset - step; // Inverted für left-scroll on up
+                    double offset = scrollViewer.HorizontalOffset - step;
                     scrollViewer.ScrollToHorizontalOffset(offset);
-
-                    // Sehr wichtig: Das Event als handled markieren, damit das Editor-Scrollen nicht ausgeführt wird
                     e.Handled = true;
                 }
             }
