@@ -21,7 +21,7 @@
         <StackPanel Grid.Row="0">
             <TextBlock Text="Skriptorium ©" FontWeight="Bold" FontSize="16" Margin="0,0,0,5" />
             <TextBlock Text="Version: 1.0" Margin="0,0,0,5"/>
-            <TextBlock Text="Entwickler: Lapis, Nemora" Margin="0,0,0,5" />
+            <TextBlock Text="Entwickler: Lapis, Nemora26" Margin="0,0,0,5" />
             <TextBlock x:Name="TextBlockDatum" Margin="0,0,0,10"/>
             <TextBlock Text="Lizenziert unter GNU General Public License Version 3" TextWrapping="Wrap" Margin="0,0,0,10"/>
         </StackPanel>
