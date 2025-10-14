@@ -529,6 +529,12 @@ namespace Skriptorium.Analysis
             "HUM_HEAD_NEMORA", "HUM_HEAD_PONYBEARD", "HUM_HEAD_PONYNEU", "HUM_HEAD_SABROSA",
             "HUM_HEAD_SIDEBURNS", "HUM_HEAD_ZOPFI_BART", "HUM_HEAD_ZOPFI_NOBART",
 
+            "Hum_Head_BabeHair", "Hum_Head_Babe8", "Hum_Head_Babe7", "Hum_Head_Babe6", "Hum_Head_Babe5",
+            "Hum_Head_Babe4", "Hum_Head_Babe3", "Hum_Head_Babe2", "Hum_Head_Babe1", "Hum_Head_Babe",
+
+            "HUM_HEAD_BABE9", "HUM_HEAD_BABE11", "HUM_HEAD_BABE12", "HUM_HEAD_BABE13", "HUM_HEAD_BABE14",
+            "HUM_HEAD_GRELKA", "HUM_HEAD_REMI",
+
             // Face
             "Face_N_Gomez", "Face_N_Scar", "Face_N_Raven", "Face_N_Bullit",
             "Face_B_Thorus", "Face_N_Corristo", "Face_N_Milten", "Face_N_Bloodwyn",
