@@ -81,6 +81,8 @@
             <TreeView.Resources>
                 <!-- Kontextmenü für Dateien & Ordner -->
                 <ContextMenu x:Key="FileContextMenu">
+                    <MenuItem Header="In Explorer öffnen" Click="MenuOpenInExplorer_Click" FontSize="12"/>
+                    <Separator/>
                     <MenuItem Header="Umbenennen" Click="MenuRename_Click" FontSize="12"/>
                     <MenuItem Header="Löschen" Click="MenuDelete_Click" FontSize="12"/>
                 </ContextMenu>
@@ -90,7 +92,8 @@
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal"
-                                ContextMenu="{StaticResource FileContextMenu}">
+                                ContextMenu="{StaticResource FileContextMenu}"
+                                ToolTip="{Binding FullPath}">
                         <Image Source="{Binding Icon}" Width="16" Height="16" Margin="2"/>
                         <TextBlock Text="{Binding Name}" Margin="2"/>
                     </StackPanel>

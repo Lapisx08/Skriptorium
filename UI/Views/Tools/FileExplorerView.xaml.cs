@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -196,6 +198,48 @@ namespace Skriptorium.UI.Views
                 }
             }
         }
+
+        private void MenuOpenInExplorer_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTree.SelectedItem is FileNode node && !node.IsDummy)
+            {
+                try
+                {
+                    string path = node.FullPath;
+                    if (node.IsDirectory)
+                    {
+                        // For directories, open the folder directly
+                        Process.Start("explorer.exe", path);
+                    }
+                    else
+                    {
+                        // For files, use SHOpenFolderAndSelectItems to open parent and select file
+                        IntPtr pidl = ILCreateFromPath(path);
+                        try
+                        {
+                            SHOpenFolderAndSelectItems(pidl, 0, null, 0);
+                        }
+                        finally
+                        {
+                            ILFree(pidl);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Fehler beim Öffnen im Explorer:\n{ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        [DllImport("shell32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr ILCreateFromPath(string pszPath);
+
+        [DllImport("shell32.dll", SetLastError = true)]
+        private static extern int SHOpenFolderAndSelectItems(IntPtr pidlFolder, uint cidl, IntPtr[] apidl, int dwFlags);
+
+        [DllImport("shell32.dll", SetLastError = true)]
+        private static extern void ILFree(IntPtr pidl);
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
@@ -410,7 +454,7 @@ namespace Skriptorium.UI.Views
             if (_isLoaded || !IsDirectory || IsDummy) return;
 
             // Änderungen über Dispatcher ausführen, um InvalidOperationException zu vermeiden
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 Children.Clear();
 
