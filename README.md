@@ -13,7 +13,7 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 * Effiziente Tabverwaltung und Docking der Skripte
 * Daedalus-Syntax-Highlighting für bessere Lesbarkeit
 * NPC und Dialog Generator zur Zeitersparnis beim Skripten
-* Weitere gängige Funktionen 
+* Weitere gängige Funktionen
 
 
 
@@ -22,7 +22,7 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 ### Systemanforderungen
 
 * Zielbetriebssystem 10.0.26100.0 (Windows 11)
-* Unterstützte Mindest-Betriebssystemversion 10.0.19041.0 (Windows 10)
+* Unterstütztes Mindest-Betriebssystemversion 10.0.19041.0 (Windows 10)
 * .NET 8.0 Runtime (Windows-spezifische Variante)
 
 
@@ -38,7 +38,7 @@ Skriptorium ist ein Skripteditor zur Erstellung Bearbeitung von Daedalus-Skripte
 
 
 
-### Abhängigkeiten
+### Genutzte Pakete
 
 * MahApps.Metro (2.4.11)
 * AvalonEdit, Version (6.3.1.120)

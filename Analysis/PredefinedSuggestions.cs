@@ -519,6 +519,16 @@ namespace Skriptorium.Analysis
             "BodyTexBabe_L", "BodyTexBabe_B", "BodyTex_Player", "BodyTex_T", "BodyTexBabe_F",
             "BodyTexBabe_S",
 
+            // Head
+            "Hum_Head_Psionic", "Hum_Head_Thief", "Hum_Head_Bald", "Hum_Head_Pony", "Hum_Head_Fighter",
+            "Hum_Head_FatBald",
+
+            "HUM_HEAD_BALD_BART", "HUM_HEAD_BEARD", "HUM_HEAD_BEARD2", "HUM_HEAD_BEARD4", "HUM_HEAD_BRODA2",
+            "HUM_HEAD_IRO", "HUM_HEAD_KRUSSEL_BART", "HUM_HEAD_KRUSSEL_NOBART", "HUM_HEAD_LANGOFFEN_BART",
+            "HUM_HEAD_LANGOFFEN_NOBART", "HUM_HEAD_LONG", "HUM_HEAD_LONGHAIR", "HUM_HEAD_MUSTACHE",
+            "HUM_HEAD_NEMORA", "HUM_HEAD_PONYBEARD", "HUM_HEAD_PONYNEU", "HUM_HEAD_SABROSA",
+            "HUM_HEAD_SIDEBURNS", "HUM_HEAD_ZOPFI_BART", "HUM_HEAD_ZOPFI_NOBART",
+
             // Face
             "Face_N_Gomez", "Face_N_Scar", "Face_N_Raven", "Face_N_Bullit",
             "Face_B_Thorus", "Face_N_Corristo", "Face_N_Milten", "Face_N_Bloodwyn",
