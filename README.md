@@ -4,35 +4,35 @@ Das Skriptorium ist ein Skripteditor zur Erstellung und Bearbeitung von Daedalus
 Wenn das Programm Skriptorium als Standardprogramm für Daedalus-Skripte gesetzt ist, wird beim Öffnen eines solchen Skripts das Programm automatisch gestartet und die Datei geöffnet. Das Skriptorium lässt nur eine Instanz des Programms zu. Das heißt, beim Öffnen von Daedalus-Skripten im Explorer werden diese im laufenden Programm geöffnet. Ist die Tableiste überladen und schwebt man mit der Maus darüber, kann man mithilfe des Mausrads durch die Tabs scrollen. Alternativ lässt sich die Tableiste unterhalb des Dateinamens anklicken, um mit den linken und rechten Pfeiltasten durch die Tableiste zu navigieren.
 
 ## Funktionen
-⦁ Speziell für Daedalus-Skripte optimiert
-⦁ Moderne WPF-Oberfläche mit hellem und dunklem Anzeigemodus
-⦁ Effiziente Tabverwaltung und Docking der Skripte
-⦁ Daedalus-Syntax-Highlighting für bessere Lesbarkeit
-⦁ NPC und Dialog Generator zur Zeitersparnis beim Skripten
-⦁ Weitere gängige Funktionen
+- Speziell für Daedalus-Skripte optimiert
+- Moderne WPF-Oberfläche mit hellem und dunklem Anzeigemodus
+- Effiziente Tabverwaltung und Docking der Skripte
+- Daedalus-Syntax-Highlighting für bessere Lesbarkeit
+- NPC und Dialog Generator zur Zeitersparnis beim Skripten
+- Weitere gängige Funktionen
 
 ## Systemanforderungen
-⦁ Zielbetriebssystem 10.0.26100.0 (Windows 11)
-⦁ Unterstütztes Mindest-Betriebssystemversion 10.0.19041.0 (Windows 10)
-⦁ .NET 8.0 Runtime (Windows-spezifische Variante)
+- Zielbetriebssystem 10.0.26100.0 (Windows 11)
+- Unterstütztes Mindest-Betriebssystemversion 10.0.19041.0 (Windows 10)
+- .NET 8.0 Runtime (Windows-spezifische Variante)
 
 ## Installation
 1. SkriptoriumSetup.exe starten
 2. Folge dem Installationsassistenten
 
 ## Genutzte Pakete
- ⦁ MahApps.Metro (2.4.11)
- ⦁ AvalonEdit (6.3.1.120)
- ⦁ Dirkster.AvalonDock (4.72.1)
- ⦁ Dirkster.AvalonDock.Themes.VS2013 (4.72.1)
- ⦁ Ookii.Dialogs.Wpf (5.0.1)
+ - MahApps.Metro (2.4.11)
+ - AvalonEdit (6.3.1.120)
+ - Dirkster.AvalonDock (4.72.1)
+ - Dirkster.AvalonDock.Themes.VS2013 (4.72.1)
+ - Ookii.Dialogs.Wpf (5.0.1)
 
 ## Entwicklung
 Das Projekt wurde in C# mit .NET 8.0 WPF in Visual Studio 2022 entwickelt
 
 ## Entwickler
-⦁ Lapis
-⦁ Nemora26
+- Lapis
+- Nemora26
 
 ## Lizenz
 Lizenziert unter der GNU General Public License Version 3. Genaue Informationen siehe LICENSE.txt
@@ -41,10 +41,10 @@ Lizenziert unter der GNU General Public License Version 3. Genaue Informationen 
 Kontaktmöglichkeit bei Fragen, Kritik oder Interesse an einer Mitwirkung des Projekts: lapisx08@protonmail.com
 
 ## Hinweise
-⦁ Der Microsoft Defender (Windows Defender) kann anschlagen, weil das Programm weder mit einem Zertifikat versehen noch bei Microsoft gelistet ist
-⦁ Die Autovervollständigung deckt die wichtigsten Begriffe der Original-Skripte von Gothic 2 ab, allerdings ist die Erfassung noch nicht vollständig
-⦁ Der Parser ist noch unvollständig. Das Tool Codestruktur ist vom Perser abhängig. Deswegen stürzt das Programm ab, wenn das Tool Codestruktur die Struktur eins Skripts aufzuschlüsseln versucht, das nicht fehlerfrei geparst werden kann
-⦁ Das Syntax-Highlighting kann geringfügige Unstimmigkeiten aufweisen
+- Der Microsoft Defender (Windows Defender) kann anschlagen, weil das Programm weder mit einem Zertifikat versehen noch bei Microsoft gelistet ist
+- Die Autovervollständigung deckt die wichtigsten Begriffe der Original-Skripte von Gothic 2 ab, allerdings ist die Erfassung noch nicht vollständig
+- Der Parser ist noch unvollständig. Das Tool Codestruktur ist vom Perser abhängig. Deswegen stürzt das Programm ab, wenn das Tool Codestruktur die Struktur eins Skripts aufzuschlüsseln versucht, das nicht fehlerfrei geparst werden kann
+- Das Syntax-Highlighting kann geringfügige Unstimmigkeiten aufweisen
 
 
 ## Anleitung
