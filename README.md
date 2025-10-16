@@ -48,7 +48,7 @@ Kontaktmöglichkeit bei Fragen, Kritik oder Interesse an einer Mitwirkung des Pr
 
 
 ## Anleitung
-
+<details>
 
 
 ### Über Skriptorium
@@ -186,3 +186,4 @@ Auswahlmöglichkeiten:
 
 Zeile hinzufügen:
 - Über Zeile hinzufügen können Dialogzeilen hinzugefügt werden, über den Minus-Button können Dialogzeilen gelöscht werden
+<details>
