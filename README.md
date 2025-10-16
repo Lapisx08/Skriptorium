@@ -43,7 +43,7 @@ Kontaktmöglichkeit bei Fragen, Kritik oder Interesse an einer Mitwirkung des Pr
 ## Hinweise
 - Der Microsoft Defender (Windows Defender) kann anschlagen, weil das Programm weder mit einem Zertifikat versehen noch bei Microsoft gelistet ist
 - Die Autovervollständigung deckt die wichtigsten Begriffe der Original-Skripte von Gothic 2 ab, allerdings ist die Erfassung noch nicht vollständig
-- Der Parser ist noch unvollständig. Das Tool Codestruktur ist vom Perser abhängig. Deswegen stürzt das Programm ab, wenn das Tool Codestruktur die Struktur eins Skripts aufzuschlüsseln versucht, das nicht fehlerfrei geparst werden kann
+- Der Parser ist noch unvollständig. Das Tool Codestruktur ist vom Parser abhängig. Deswegen stürzt das Programm ab, wenn das Tool Codestruktur die Struktur eins Skripts aufzuschlüsseln versucht, das nicht fehlerfrei geparst werden kann
 - Das Syntax-Highlighting kann geringfügige Unstimmigkeiten aufweisen
 
 
