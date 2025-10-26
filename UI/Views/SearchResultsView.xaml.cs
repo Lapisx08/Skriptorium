@@ -68,22 +68,26 @@ namespace Skriptorium.UI.Views
 
         private static string ReadFileAutoEncoding(string filePath)
         {
+            // Zuerst StreamReader mit BOM-Erkennung
             try
             {
-                string text = File.ReadAllText(filePath, Encoding.Latin1);
-                if (!text.Contains('\uFFFD')) // Prüfen, ob kein Ersatzzeichen (�) vorhanden ist
+                using (var reader = new StreamReader(filePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
                 {
-                    System.Diagnostics.Debug.WriteLine($"Datei {filePath} erfolgreich mit Latin1 geladen.");
-                    return text;
+                    return reader.ReadToEnd();
                 }
-                text = File.ReadAllText(filePath, Encoding.UTF8);
-                System.Diagnostics.Debug.WriteLine($"Datei {filePath} erfolgreich mit UTF-8 geladen.");
-                return text;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Fehler beim Lesen der Datei {filePath}: {ex.Message}");
-                throw; // Exception weiterwerfen, damit sie in NavigateToMatch behandelt wird
+                // Fallback: Latin1 / ANSI
+                try
+                {
+                    return File.ReadAllText(filePath, Encoding.Latin1);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Fehler beim Lesen der Datei {filePath}: {ex.Message}");
+                    throw;
+                }
             }
         }
     }

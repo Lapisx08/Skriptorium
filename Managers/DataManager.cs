@@ -2,11 +2,13 @@
 using Skriptorium.UI;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
+using UtfUnknown;
 
 namespace Skriptorium.Managers
 {
@@ -25,31 +27,49 @@ namespace Skriptorium.Managers
         private static readonly List<string> recentFiles = new();
         private static string? lastUsedDirectory = null;
 
-        // Liest Dateien: immer zuerst Latin1, Fallback UTF-8
+        // Speichert erkannte Kodierungen pro Datei
+        private static readonly ConcurrentDictionary<string, Encoding> fileEncodings = new();
+
+        // Liest Datei mit automatischer Kodierungserkennung via UtfUnknown
         private static string ReadFileAutoEncoding(string filePath)
         {
-            byte[] bytes = File.ReadAllBytes(filePath);
-
-            // Versuch Latin1
             try
             {
-                var text = Encoding.Latin1.GetString(bytes);
-                if (!text.Contains('\uFFFD')) // Keine ungültigen Zeichen
-                    return text;
+                var result = CharsetDetector.DetectFromFile(filePath);
+                Encoding encoding = result.Detected?.Encoding ?? Encoding.UTF8;
+                fileEncodings[filePath] = encoding;
+                return File.ReadAllText(filePath, encoding);
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignorieren, Fallback auf UTF-8
+                Console.WriteLine($"Fehler beim Lesen der Datei '{filePath}': {ex.Message}");
+                fileEncodings[filePath] = Encoding.Latin1;
+                return File.ReadAllText(filePath, Encoding.Latin1);
             }
-
-            // Fallback UTF-8
-            return Encoding.UTF8.GetString(bytes);
         }
 
-        // Speichert immer Latin1
-        private static void WriteFileLatin1(string filePath, string content)
+        // Speichert Datei und behält die ursprüngliche Kodierung bei
+        private static void WriteFileAutoEncoding(string filePath, string content)
         {
-            File.WriteAllText(filePath, content, Encoding.Latin1);
+            Encoding encodingToUse;
+            if (fileEncodings.TryGetValue(filePath, out var detected))
+            {
+                encodingToUse = detected;
+            }
+            else
+            {
+                // Neue Datei oder Encoding unbekannt → UTF-8 Standard (ohne BOM)
+                encodingToUse = new UTF8Encoding(false);
+            }
+
+            try
+            {
+                File.WriteAllText(filePath, content, encodingToUse);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler beim Speichern der Datei '{filePath}': {ex.Message}");
+            }
         }
 
         public static void SaveOpenTabs(IEnumerable<ScriptEditor> editors)
@@ -71,7 +91,7 @@ namespace Skriptorium.Managers
 
                 Directory.CreateDirectory(Path.GetDirectoryName(TabStateFilePath)!);
                 var json = JsonSerializer.Serialize(tabStates, new JsonSerializerOptions { WriteIndented = true });
-                WriteFileLatin1(TabStateFilePath, json);
+                WriteFileAutoEncoding(TabStateFilePath, json);
             }
             catch (Exception ex)
             {
@@ -153,7 +173,7 @@ namespace Skriptorium.Managers
 
             try
             {
-                WriteFileLatin1(activeEditor.FilePath, activeEditor.Text);
+                WriteFileAutoEncoding(activeEditor.FilePath, activeEditor.Text);
                 activeEditor.ResetModifiedFlag();
                 AddRecentFile(activeEditor.FilePath);
                 lastUsedDirectory = Path.GetDirectoryName(activeEditor.FilePath);
@@ -183,7 +203,7 @@ namespace Skriptorium.Managers
             {
                 try
                 {
-                    WriteFileLatin1(dlg.FileName, activeEditor.Text);
+                    WriteFileAutoEncoding(dlg.FileName, activeEditor.Text);
                     activeEditor.FilePath = dlg.FileName;
                     activeEditor.ResetModifiedFlag();
                     AddRecentFile(dlg.FileName);

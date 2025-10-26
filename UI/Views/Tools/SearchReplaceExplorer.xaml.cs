@@ -34,6 +34,7 @@ namespace Skriptorium.UI.Views
         private readonly DispatcherTimer _searchTimer;
         private CancellationTokenSource _cts;
         private readonly List<string> _errors = new List<string>();
+        private static readonly ConcurrentDictionary<string, Encoding> _fileEncodings = new();
 
         public SearchReplaceExplorer(ScriptTabManager tabManager)
         {
@@ -376,22 +377,34 @@ namespace Skriptorium.UI.Views
         {
             try
             {
-                string text = await File.ReadAllTextAsync(filePath, Encoding.Latin1, ct);
-                if (!text.Contains('\uFFFD')) return text;
-                return await File.ReadAllTextAsync(filePath, Encoding.UTF8, ct);
+                var result = UtfUnknown.CharsetDetector.DetectFromFile(filePath);
+                Encoding encoding = result.Detected?.Encoding ?? Encoding.UTF8;
+                _fileEncodings[filePath] = encoding;
+                using var reader = new StreamReader(filePath, encoding);
+                return await reader.ReadToEndAsync(ct);
             }
-            catch { return string.Empty; }
+            catch
+            {
+                _fileEncodings[filePath] = Encoding.Latin1;
+                using var reader = new StreamReader(filePath, Encoding.Latin1);
+                return await reader.ReadToEndAsync(ct);
+            }
         }
 
         private static string ReadFileAutoEncoding(string filePath)
         {
             try
             {
-                string text = File.ReadAllText(filePath, Encoding.Latin1);
-                if (!text.Contains('\uFFFD')) return text;
-                return File.ReadAllText(filePath, Encoding.UTF8);
+                var result = UtfUnknown.CharsetDetector.DetectFromFile(filePath);
+                Encoding encoding = result.Detected?.Encoding ?? Encoding.UTF8;
+                _fileEncodings[filePath] = encoding;
+                return File.ReadAllText(filePath, encoding);
             }
-            catch { return string.Empty; }
+            catch
+            {
+                _fileEncodings[filePath] = Encoding.Latin1;
+                return File.ReadAllText(filePath, Encoding.Latin1);
+            }
         }
 
         // *** Collapse-Button ***

@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Skriptorium.Common;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Linq;
-using Skriptorium.Common;
 
 namespace Skriptorium.UI.Views
 {
@@ -56,6 +57,29 @@ namespace Skriptorium.UI.Views
             }
         }
 
+        private string ReadFileUtfUnknown(string filePath)
+        {
+            try
+            {
+                // Erst versuchen, UTF-8/UTF-16/UTF-32 mit BOM zu erkennen
+                using (var reader = new StreamReader(filePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+                {
+                    string text = reader.ReadToEnd();
+                    if (!text.Contains('\uFFFD')) // kein Ersatzzeichen
+                        return text;
+                }
+
+                // Fallback: Latin1 / ANSI
+                string fallback = File.ReadAllText(filePath, Encoding.Latin1);
+                return fallback;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Fehler beim Laden von {filePath}: {ex.Message}");
+                // letzter Versuch: Latin1
+                return File.ReadAllText(filePath, Encoding.Latin1);
+            }
+        }
         private void FileTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (FileTree.SelectedItem is FileNode node && !node.IsDirectory && !node.IsDummy)
@@ -63,7 +87,7 @@ namespace Skriptorium.UI.Views
                 try
                 {
                     var mainWindow = Window.GetWindow(this) as MainWindow;
-                    var content = File.ReadAllText(node.FullPath);
+                    var content = ReadFileUtfUnknown(node.FullPath); // UTF-Unknown
                     mainWindow?.OpenFileInNewTab(content, node.FullPath);
                 }
                 catch (Exception ex)
