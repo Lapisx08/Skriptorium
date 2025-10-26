@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Skriptorium.Common;
+using UtfUnknown;
 
 namespace Skriptorium.UI.Views
 {
@@ -68,26 +69,16 @@ namespace Skriptorium.UI.Views
 
         private static string ReadFileAutoEncoding(string filePath)
         {
-            // Zuerst StreamReader mit BOM-Erkennung
             try
             {
-                using (var reader = new StreamReader(filePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
-                {
-                    return reader.ReadToEnd();
-                }
+                var result = CharsetDetector.DetectFromFile(filePath);
+                Encoding encoding = result.Detected?.Encoding ?? Encoding.UTF8;
+                return File.ReadAllText(filePath, encoding);
             }
-            catch
+            catch (Exception ex)
             {
-                // Fallback: Latin1 / ANSI
-                try
-                {
-                    return File.ReadAllText(filePath, Encoding.Latin1);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Fehler beim Lesen der Datei {filePath}: {ex.Message}");
-                    throw;
-                }
+                System.Diagnostics.Debug.WriteLine($"Fehler beim Lesen der Datei {filePath}: {ex.Message}");
+                return File.ReadAllText(filePath, Encoding.Latin1);
             }
         }
     }

@@ -252,15 +252,14 @@ namespace Skriptorium.Managers
             {
                 try
                 {
-                    var lines = File.ReadAllLines(RecentFilesPath, Encoding.Latin1);
+                    var content = ReadFileAutoEncoding(RecentFilesPath);
+                    var lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
                     recentFiles.Clear();
                     recentFiles.AddRange(lines.Where(File.Exists));
                 }
-                catch
+                catch (Exception ex)
                 {
-                    var linesUtf8 = File.ReadAllLines(RecentFilesPath, Encoding.UTF8);
-                    recentFiles.Clear();
-                    recentFiles.AddRange(linesUtf8.Where(File.Exists));
+                    Console.WriteLine($"Fehler beim Laden der kürzlichen Dateien: {ex.Message}");
                 }
             }
         }
@@ -270,7 +269,8 @@ namespace Skriptorium.Managers
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(RecentFilesPath)!);
-                File.WriteAllLines(RecentFilesPath, recentFiles, Encoding.Latin1);
+                var content = string.Join(Environment.NewLine, recentFiles);
+                WriteFileAutoEncoding(RecentFilesPath, content);
             }
             catch
             {
