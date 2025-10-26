@@ -25,6 +25,7 @@ namespace Skriptorium.UI
         private readonly SearchManager _searchManager;
         private readonly DataMenuManager _dataMenuManager;
         private ScriptEditor? _currentScriptEditor;
+        public double GlobalZoom { get; set; } = 1.0;
 
         public MainWindow()
         {
@@ -200,7 +201,7 @@ namespace Skriptorium.UI
                 _currentScriptEditor.ApplySyntaxHighlightingState();
                 UpdateStatusBar();
 
-                int zoomPercent = (int)(_currentScriptEditor.Zoom * 100);
+                int zoomPercent = (int)(GlobalZoom * 100);
                 switch (zoomPercent)
                 {
                     case 20: ZoomComboBox.SelectedIndex = 0; break;
@@ -214,7 +215,6 @@ namespace Skriptorium.UI
                     case 400: ZoomComboBox.SelectedIndex = 8; break;
                     default: ZoomComboBox.SelectedIndex = 3; break;
                 }
-                _currentScriptEditor?.SetZoom(_currentScriptEditor.Zoom);
 
                 // Neue Synchronisation: FileExplorer zur Datei springen
                 SyncFileExplorerToActiveScript();
@@ -223,6 +223,17 @@ namespace Skriptorium.UI
             {
                 StatusPositionText.Text = "Zeile 1, Spalte 1";
                 StatusCharCountText.Text = "0 Zeichen";
+            }
+        }
+
+        public void SetGlobalZoom(double newZoom)
+        {
+            if (Math.Abs(GlobalZoom - newZoom) < double.Epsilon) return;
+
+            GlobalZoom = newZoom;
+            foreach (var editor in _tabManager.GetAllOpenEditors())
+            {
+                editor.SetZoom(GlobalZoom);
             }
         }
 
@@ -713,16 +724,12 @@ namespace Skriptorium.UI
         {
             if (!IsLoaded) return; // Ignoriert frühe Events
 
-            var editor = _tabManager.GetActiveScriptEditor();
-            if (editor != null && ZoomComboBox.SelectedItem is ComboBoxItem selectedItem &&
+            if (ZoomComboBox.SelectedItem is ComboBoxItem selectedItem &&
                 selectedItem.Content is string percentString &&
                 double.TryParse(percentString.TrimEnd('%'), out double percent))
             {
                 double newZoom = percent / 100.0;
-                if (editor.Zoom != newZoom) // Nur setzen, wenn sich der Zoom-Wert ändert
-                {
-                    editor.SetZoom(newZoom);
-                }
+                SetGlobalZoom(newZoom);
             }
         }
 

@@ -155,6 +155,15 @@ namespace Skriptorium.UI
             UpdateFoldings();
 
             InitializeAutocompletion();
+
+            // Setze initialen globalen Zoom (falls MainWindow verfügbar)
+            Loaded += (s, e) =>
+            {
+                if (Window.GetWindow(this) is MainWindow mainWindow)
+                {
+                    SetZoom(mainWindow.GlobalZoom);
+                }
+            };
         }
 
         private void InitializeAutocompletion()
@@ -378,17 +387,29 @@ namespace Skriptorium.UI
                 bool zoomIn = e.Delta > 0;
                 double newZoom = GetNextZoomStep(zoomIn);
 
-                if (newZoom != Zoom)
+                if (Math.Abs(newZoom - Zoom) >= double.Epsilon)
                 {
-                    SetZoom(newZoom);
                     if (Window.GetWindow(this) is MainWindow mainWindow)
                     {
+                        mainWindow.SetGlobalZoom(newZoom);
+
                         int zoomPercent = (int)(newZoom * 100);
                         var comboBox = mainWindow.FindName("ZoomComboBox") as ComboBox;
                         if (comboBox != null)
                         {
-                            int index = Array.IndexOf(_zoomSteps, newZoom);
-                            comboBox.SelectedIndex = index;
+                            switch (zoomPercent)
+                            {
+                                case 20: comboBox.SelectedIndex = 0; break;
+                                case 50: comboBox.SelectedIndex = 1; break;
+                                case 75: comboBox.SelectedIndex = 2; break;
+                                case 100: comboBox.SelectedIndex = 3; break;
+                                case 125: comboBox.SelectedIndex = 4; break;
+                                case 150: comboBox.SelectedIndex = 5; break;
+                                case 200: comboBox.SelectedIndex = 6; break;
+                                case 300: comboBox.SelectedIndex = 7; break;
+                                case 400: comboBox.SelectedIndex = 8; break;
+                                default: comboBox.SelectedIndex = 3; break;
+                            }
                         }
                     }
                 }
