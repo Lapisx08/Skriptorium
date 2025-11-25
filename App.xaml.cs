@@ -24,7 +24,25 @@ namespace Skriptorium
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            // Settings laden
             Settings.Default.Reload();
+
+            // ===== Sprache laden =====
+            string savedLang = string.IsNullOrWhiteSpace(Settings.Default.Language) ? "de" : Settings.Default.Language;
+            try
+            {
+                LanguageManager.ChangeLanguage(savedLang);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Laden der Sprache {savedLang}: {ex.Message}",
+                    "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                // Fallback auf Deutsch
+                LanguageManager.ChangeLanguage("de");
+            }
+
+            // ===== Theme laden =====
             string themeName = string.IsNullOrWhiteSpace(Settings.Default.Theme)
                 ? DefaultTheme
                 : Settings.Default.Theme;

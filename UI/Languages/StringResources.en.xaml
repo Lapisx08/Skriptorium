@@ -1,0 +1,71 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- MainWindow -->
+
+    <!-- Skriptorium -->
+    <sys:String x:Key="AboutSkriptorium">About Skriptorium</sys:String>
+    <sys:String x:Key="Settings">Settings</sys:String>
+    <sys:String x:Key="Exit">Exit</sys:String>
+
+    <!-- File -->
+    <sys:String x:Key="File">File</sys:String>
+    <sys:String x:Key="New">New</sys:String>
+    <sys:String x:Key="Open">Open</sys:String>
+    <sys:String x:Key="LastOpened">Last Opened</sys:String>
+    <sys:String x:Key="Save">Save</sys:String>
+    <sys:String x:Key="SaveAs">Save As...</sys:String>
+    <sys:String x:Key="SaveAll">Save All</sys:String>
+    <sys:String x:Key="Close">Close</sys:String>
+
+    <!-- Edit -->
+    <sys:String x:Key="Edit">Edit</sys:String>
+    <sys:String x:Key="Undo">Undo</sys:String>
+    <sys:String x:Key="Redo">Redo</sys:String>
+    <sys:String x:Key="Cut">Cut</sys:String>
+    <sys:String x:Key="Copy">Copy</sys:String>
+    <sys:String x:Key="Paste">Paste</sys:String>
+    <sys:String x:Key="Duplicate">Duplicate</sys:String>
+    <sys:String x:Key="SelectAll">Select All</sys:String>
+
+    <!-- Search -->
+    <sys:String x:Key="Search">Search</sys:String>
+    <sys:String x:Key="SearchAndReplace">Search and Replace</sys:String>
+
+    <!-- Bookmarks -->
+    <sys:String x:Key="Bookmarks">Bookmarks</sys:String>
+    <sys:String x:Key="AddAndRemove">Add and Remove</sys:String>
+    <sys:String x:Key="Next">Next</sys:String>
+    <sys:String x:Key="Previous">Previous</sys:String>
+    <sys:String x:Key="RemoveAll">Remove All</sys:String>
+
+    <!-- Tools -->
+    <sys:String x:Key="Tools">Tools</sys:String>
+    <sys:String x:Key="ToggleSyntax-Highlighting">Toggle Syntax-Highlighting</sys:String>
+    <sys:String x:Key="ToggleAutocompletion">Toggle Autocompletion</sys:String>
+    <sys:String x:Key="Comments">Comments</sys:String>
+    <sys:String x:Key="BlockComment">Block Comment</sys:String>
+    <sys:String x:Key="SmallCommentField">Small Comment Field</sys:String>
+    <sys:String x:Key="MiddleCommentField">Middle Comment Field</sys:String>
+    <sys:String x:Key="BigCommentField">Big Comment Field</sys:String>
+    <sys:String x:Key="CollapseAndExpandFoldings">Collapse and Expand Foldings</sys:String>
+    <sys:String x:Key="IndentText">Indent Text</sys:String>
+    <sys:String x:Key="CheckSyntax">Check Syntax</sys:String>
+    <sys:String x:Key="FileExplorer">File Explorer</sys:String>
+    <sys:String x:Key="SearchExplorer">Search Explorer</sys:String>
+    <sys:String x:Key="CodeStructure">Code Structure</sys:String>
+    <sys:String x:Key="NPCGenerator">NPC Generator</sys:String>
+    <sys:String x:Key="DialogGenerator">Dialog Generator</sys:String>
+
+    <!-- Code Structure -->
+    <sys:String x:Key="Instances">Instances</sys:String>
+    <sys:String x:Key="Functions">Functions</sys:String>
+    <sys:String x:Key="Variables">Variables</sys:String>
+    <sys:String x:Key="Constants">Constants</sys:String>
+    <sys:String x:Key="Name">Name</sys:String>
+    <sys:String x:Key="Type">Type</sys:String>
+    <sys:String x:Key="Value">Value</sys:String>
+    <sys:String x:Key="Line">Line</sys:String>
+
+</ResourceDictionary>

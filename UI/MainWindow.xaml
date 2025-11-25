@@ -14,188 +14,188 @@
         <!-- Menüleiste -->
         <Menu DockPanel.Dock="Top" BorderBrush="Gray" FontSize="12" BorderThickness="0,1,0,1">
             <MenuItem Header="Skriptorium">
-                <MenuItem Header="Über Skriptorium" InputGestureText="Strg + I" Click="MenuSkriptoriumUeber_Click">
+                <MenuItem Header="{DynamicResource AboutSkriptorium}" InputGestureText="Strg + I" Click="MenuSkriptoriumUeber_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE946;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Einstellungen" InputGestureText="Strg + ," Click="MenuSkriptoriumEinstellungen_Click">
+                <MenuItem Header="{DynamicResource Settings}" InputGestureText="Strg + ," Click="MenuSkriptoriumEinstellungen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Beenden" InputGestureText="Alt + F4" Click="MenuSkriptoriumBeenden_Click">
+                <MenuItem Header="{DynamicResource Exit}" InputGestureText="Alt + F4" Click="MenuSkriptoriumBeenden_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8BB;" FontSize="12"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
 
-            <MenuItem Header="Datei">
-                <MenuItem Header="Neues Skript" InputGestureText="Strg + N" Click="MenuDateiNeuesSkript_Click">
+            <MenuItem Header="{DynamicResource File}">
+                <MenuItem Header="{DynamicResource New}" InputGestureText="Strg + N" Click="MenuDateiNeuesSkript_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE710;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Öffnen" InputGestureText="Strg + O" Click="MenuDateiÖffnen_Click">
+                <MenuItem Header="{DynamicResource Open}" InputGestureText="Strg + O" Click="MenuDateiÖffnen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED25;" FontSize="17"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="MenuDateiZuletztGeoeffnet" Header="Zuletzt geöffnet">
+                <MenuItem x:Name="MenuDateiZuletztGeoeffnet" Header="{DynamicResource LastOpened}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE81C;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Speichern" InputGestureText="Strg + S" Click="MenuDateiSpeichern_Click">
+                <MenuItem Header="{DynamicResource Save}" InputGestureText="Strg + S" Click="MenuDateiSpeichern_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE105;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Speichern unter…" InputGestureText="Strg + Shift + S" Click="MenuDateiSpeichernUnter_Click">
+                <MenuItem Header="{DynamicResource SaveAs}" InputGestureText="Strg + Shift + S" Click="MenuDateiSpeichernUnter_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE792;" FontSize="17"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Alles speichern" InputGestureText="Strg + Alt + S" Click="MenuDateiAllesSpeichern_Click">
+                <MenuItem Header="{DynamicResource SaveAll}" InputGestureText="Strg + Alt + S" Click="MenuDateiAllesSpeichern_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEA35;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Schließen" InputGestureText="Strg + W" Click="MenuDateiSchließen_Click">
+                <MenuItem Header="{DynamicResource Close}" InputGestureText="Strg + W" Click="MenuDateiSchließen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8BB;" FontSize="12"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
 
-            <MenuItem Header="Bearbeiten">
-                <MenuItem Header="Rückgängig" InputGestureText="Strg + Z" Click="MenuBearbeitenRueckgaengig_Click">
+            <MenuItem Header="{DynamicResource Edit}">
+                <MenuItem Header="{DynamicResource Undo}" InputGestureText="Strg + Z" Click="MenuBearbeitenRueckgaengig_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A7;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Wiederholen" InputGestureText="Strg + Y" Click="MenuBearbeitenWiederholen_Click">
+                <MenuItem Header="{DynamicResource Redo}" InputGestureText="Strg + Y" Click="MenuBearbeitenWiederholen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Ausschneiden" InputGestureText="Strg + X" Click="MenuBearbeitenAusschneiden_Click">
+                <MenuItem Header="{DynamicResource Cut}" InputGestureText="Strg + X" Click="MenuBearbeitenAusschneiden_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C6;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Kopieren" InputGestureText="Strg + C" Click="MenuBearbeitenKopieren_Click">
+                <MenuItem Header="{DynamicResource Copy}" InputGestureText="Strg + C" Click="MenuBearbeitenKopieren_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C8;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Einfügen" InputGestureText="Strg + V" Click="MenuBearbeitenEinfuegen_Click">
+                <MenuItem Header="{DynamicResource Paste}" InputGestureText="Strg + V" Click="MenuBearbeitenEinfuegen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77F;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Duplizieren" InputGestureText="Strg + D" Click="MenuBearbeitenDuplizieren_Click">
+                <MenuItem Header="{DynamicResource Duplicate}" InputGestureText="Strg + D" Click="MenuBearbeitenDuplizieren_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C8;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Alles auswählen" InputGestureText="Strg + A" Click="MenuBearbeitenAllesAuswaehlen_Click"/>
+                <MenuItem Header="{DynamicResource SelectAll}" InputGestureText="Strg + A" Click="MenuBearbeitenAllesAuswaehlen_Click"/>
             </MenuItem>
 
-            <MenuItem Header="Suchen">
-                <MenuItem Header="Suchen und Ersetzen" InputGestureText="Strg + F" Click="FindInEditor_Click">
+            <MenuItem Header="{DynamicResource Search}">
+                <MenuItem Header="{DynamicResource SearchAndReplace}" InputGestureText="Strg + F" Click="FindInEditor_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE721;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
 
-            <MenuItem Header="Lesezeichen">
-                <MenuItem Header="Lesezeichen setzen und entfernen" InputGestureText="F2" Click="MenuLesezeichenUmschalten_Click">
+            <MenuItem Header="{DynamicResource Bookmarks}">
+                <MenuItem Header="{DynamicResource AddAndRemove}" InputGestureText="F2" Click="MenuLesezeichenUmschalten_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE840;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Zum nächsten" InputGestureText="Strg + F2" Click="MenuLesezeichenNaechstes_Click">
+                <MenuItem Header="{DynamicResource Next}" InputGestureText="Strg + F2" Click="MenuLesezeichenNaechstes_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72B;" FontSize="13"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Zum vorherigen" InputGestureText="Strg + Shift + F2" Click="MenuLesezeichenVorheriges_Click">
+                <MenuItem Header="{DynamicResource Previous}" InputGestureText="Strg + Shift + F2" Click="MenuLesezeichenVorheriges_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72A;" FontSize="13"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Alle Lesezeichen löschen" InputGestureText="Strg + Alt + F2" Click="MenuLesezeichenAlleLoeschen_Click">
+                <MenuItem Header="{DynamicResource RemoveAll}" InputGestureText="Strg + Alt + F2" Click="MenuLesezeichenAlleLoeschen_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77A;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
 
-            <MenuItem Header="Tools">
-                <MenuItem Header="Syntax-Highlighting umschalten" InputGestureText="Strg + H" Click="SyntaxHighlightingUmschalten_Click">
+            <MenuItem Header="{DynamicResource Tools}">
+                <MenuItem Header="{DynamicResource ToggleSyntax-Highlighting}" InputGestureText="Strg + H" Click="SyntaxHighlightingUmschalten_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7E6;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Autovervollständigung umschalten" InputGestureText="Strg + Shift + A" Click="ToggleAutocompletion_Click">
+                <MenuItem Header="{DynamicResource ToggleAutocompletion}" InputGestureText="Strg + Shift + A" Click="ToggleAutocompletion_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE932;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Kommentare">
+                <MenuItem Header="{DynamicResource Comments}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="14"/>
                     </MenuItem.Icon>
-                    <MenuItem Header="Blockkommentar" InputGestureText="Strg + K" Click="Blockkommentar_Click"/>
-                    <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + Shift + K" Click="KleinesKommentarfeld_Click"/>
-                    <MenuItem Header="Mittleres Kommentarfeld" InputGestureText="Strg + Alt + K" Click="MittleresKommentarfeld_Click"/>
-                    <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Shift + Alt + K" Click="GroßesKommentarfeld_Click"/>
+                    <MenuItem Header="{DynamicResource BlockComment}" InputGestureText="Strg + K" Click="Blockkommentar_Click"/>
+                    <MenuItem Header="{DynamicResource SmallCommentField}" InputGestureText="Strg + Shift + K" Click="KleinesKommentarfeld_Click"/>
+                    <MenuItem Header="{DynamicResource MiddleCommentField}" InputGestureText="Strg + Alt + K" Click="MittleresKommentarfeld_Click"/>
+                    <MenuItem Header="{DynamicResource BigCommentField}" InputGestureText="Strg + Shift + Alt + K" Click="GroßesKommentarfeld_Click"/>
                 </MenuItem>
-                <MenuItem Header="Foldings ein- und ausklappen" InputGestureText="Strg + M" Click="ToggleFoldings_Click">
+                <MenuItem Header="{DynamicResource CollapseAndExpandFoldings}" InputGestureText="Strg + M" Click="ToggleFoldings_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Text einrücken" InputGestureText="Strg + E" Click="MenuCodeFormatieren_Click">
+                <MenuItem Header="{DynamicResource IndentText}" InputGestureText="Strg + E" Click="MenuCodeFormatieren_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Syntax prüfen" InputGestureText="F5" Click="SyntaxCheckButton_Click">
+                <MenuItem Header="{DynamicResource CheckSyntax}" InputGestureText="F5" Click="SyntaxCheckButton_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE768;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Datei Explorer" InputGestureText="Strg + Shift + E" Click="MenuToolsFileExplorer_Click">
+                <MenuItem Header="{DynamicResource FileExplorer}" InputGestureText="Strg + Shift + E" Click="MenuToolsFileExplorer_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Explorer Suche" InputGestureText="Strg + Shift + F" Click="MenuToolsSearchExplorer_Click">
+                <MenuItem Header="{DynamicResource SearchExplorer}" InputGestureText="Strg + Shift + F" Click="MenuToolsSearchExplorer_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF8A5;" FontSize="15"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Code Struktur" InputGestureText="Strg + Shift + C" Click="MenuToolsCodeStructure_Click">
+                <MenuItem Header="{DynamicResource CodeStructure}" InputGestureText="Strg + Shift + C" Click="MenuToolsCodeStructure_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="NPC Generator" InputGestureText="Strg + G" Click="MenuNPCGenerator_Click">
+                <MenuItem Header="{DynamicResource NPCGenerator}" InputGestureText="Strg + G" Click="MenuNPCGenerator_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Dialog Generator" InputGestureText="Strg + Shift + G" Click="MenuDialogGenerator_Click">
+                <MenuItem Header="{DynamicResource DialogGenerator}" InputGestureText="Strg + Shift + G" Click="MenuDialogGenerator_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="14"/>
                     </MenuItem.Icon>
@@ -205,60 +205,60 @@
 
         <!-- Toolbar -->
         <ToolBar DockPanel.Dock="Top" ToolBarTray.IsLocked="True" Height="28" Background="Transparent">
-            <Button ToolTip="Neues Skript" Click="MenuDateiNeuesSkript_Click">
+            <Button ToolTip="{DynamicResource New}" Click="MenuDateiNeuesSkript_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE710;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Öffnen" Click="MenuDateiÖffnen_Click">
+            <Button ToolTip="{DynamicResource Open}" Click="MenuDateiÖffnen_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED25;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Speichern" Click="MenuDateiSpeichern_Click">
+            <Button ToolTip="{DynamicResource Save}" Click="MenuDateiSpeichern_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE105;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Alles speichern" Click="MenuDateiAllesSpeichern_Click">
+            <Button ToolTip="{DynamicResource SaveAll}" Click="MenuDateiAllesSpeichern_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEA35;" FontSize="12"/>
             </Button>
             <Separator />
-            <Button ToolTip="Rückgängig" Click="MenuBearbeitenRueckgaengig_Click">
+            <Button ToolTip="{DynamicResource Undo}" Click="MenuBearbeitenRueckgaengig_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A7;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Wiederholen" Click="MenuBearbeitenWiederholen_Click">
+            <Button ToolTip="{DynamicResource Redo}" Click="MenuBearbeitenWiederholen_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" FontSize="12"/>
             </Button>
             <Separator />
-            <Button ToolTip="Suchen und Ersetzen" Click="FindInEditor_Click">
+            <Button ToolTip="{DynamicResource SearchAndReplace}" Click="FindInEditor_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE721;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Kommentare" Click="KommentareButton_Click">
+            <Button ToolTip="{DynamicResource Comments}" Click="KommentareButton_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="12"/>
                 <Button.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Blockkommentar" InputGestureText="Strg + K" Click="Blockkommentar_Click" FontSize="12"/>
-                        <MenuItem Header="Kleines Kommentarfeld" InputGestureText="Strg + Shift + K" Click="KleinesKommentarfeld_Click" FontSize="12"/>
-                        <MenuItem Header="Mittleres Kommentarfeld" InputGestureText="Strg + Alt + K" Click="MittleresKommentarfeld_Click" FontSize="12"/>
-                        <MenuItem Header="Großes Kommentarfeld" InputGestureText="Strg + Shift + Alt + K" Click="GroßesKommentarfeld_Click" FontSize="12"/>
+                        <MenuItem Header="{DynamicResource BlockComment}" InputGestureText="Strg + K" Click="Blockkommentar_Click" FontSize="12"/>
+                        <MenuItem Header="{DynamicResource SmallCommentField}" InputGestureText="Strg + Shift + K" Click="KleinesKommentarfeld_Click" FontSize="12"/>
+                        <MenuItem Header="{DynamicResource MiddleCommentField}" InputGestureText="Strg + Alt + K" Click="MittleresKommentarfeld_Click" FontSize="12"/>
+                        <MenuItem Header="{DynamicResource BigCommentField}" InputGestureText="Strg + Shift + Alt + K" Click="GroßesKommentarfeld_Click" FontSize="12"/>
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
-            <Button ToolTip="Text einrücken" Click="MenuCodeFormatieren_Click">
+            <Button ToolTip="{DynamicResource IndentText}" Click="MenuCodeFormatieren_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Foldings ein- und ausklappen" Click="ToggleFoldings_Click">
+            <Button ToolTip="{DynamicResource CollapseAndExpandFoldings}" Click="ToggleFoldings_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="12"/>
             </Button>
             <Separator />
-            <Button ToolTip="Datei Explorer" Click="MenuToolsFileExplorer_Click">
+            <Button ToolTip="{DynamicResource FileExplorer}" Click="MenuToolsFileExplorer_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Explorer Suche" Click="MenuToolsSearchExplorer_Click">
+            <Button ToolTip="{DynamicResource SearchExplorer}" Click="MenuToolsSearchExplorer_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF8A5;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Code Struktur" Click="MenuToolsCodeStructure_Click">
+            <Button ToolTip="{DynamicResource CodeStructure}" Click="MenuToolsCodeStructure_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="12"/>
             </Button>
-            <Button ToolTip="NPC Generator" Click="MenuNPCGenerator_Click">
+            <Button ToolTip="{DynamicResource NPCGenerator}" Click="MenuNPCGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Dialog Generator" Click="MenuDialogGenerator_Click">
+            <Button ToolTip="{DynamicResource DialogGenerator}" Click="MenuDialogGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="12"/>
             </Button>
         </ToolBar>

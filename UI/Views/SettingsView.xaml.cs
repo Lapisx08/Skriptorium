@@ -5,6 +5,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
+using Skriptorium.Managers; // LanguageManager
 
 namespace Skriptorium.UI.Views
 {
@@ -16,8 +17,9 @@ namespace Skriptorium.UI.Views
         {
             InitializeComponent();
 
-            var theme = Properties.Settings.Default.Theme; // z. B. "Dark.Blue"
-            string baseTheme = theme?.Split('.')[0] ?? "Light";
+            // Theme-Voreinstellung
+            string savedTheme = Properties.Settings.Default.Theme ?? "Light";
+            string baseTheme = savedTheme.Split('.')[0];
 
             foreach (ComboBoxItem item in ComboTheme.Items)
             {
@@ -28,54 +30,67 @@ namespace Skriptorium.UI.Views
                 }
             }
 
+            // Sprache-Voreinstellung
+            string savedLang = Properties.Settings.Default.Language ?? "de";
+            foreach (ComboBoxItem item in ComboLanguage.Items)
+            {
+                if (item.Tag?.ToString() == savedLang)
+                {
+                    ComboLanguage.SelectedItem = item;
+                    break;
+                }
+            }
+
             _isInitializing = false;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Voreinstellung: Tagmodus
-            string saved = Properties.Settings.Default.Theme ?? "Light";
-
-            // Skript-Ordnerpfad laden
+            // Skript-Pfad laden
             TxtScriptPath.Text = Properties.Settings.Default.ScriptSearchPath;
         }
 
-        // Sofortiger Theme-Wechsel bei Auswahl
+        // Theme wechseln
         private void ComboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isInitializing) return;
 
             if (ComboTheme.SelectedItem is ComboBoxItem item && item.Tag is string themeKey)
             {
-                OnThemeSelected(themeKey);
+                string accent = "Steel";
+                string fullTheme = $"{themeKey}.{accent}";
+                ThemeManager.Current.ChangeTheme(Application.Current, fullTheme);
+
+                Properties.Settings.Default.Theme = fullTheme;
+                Properties.Settings.Default.Save();
             }
         }
 
-        private void OnThemeSelected(string baseTheme)
+        // Sprache wechseln
+        private void ComboLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Accent festlegen – könnte später auch auswählbar gemacht werden
-            string accent = "Steel";
-            string fullTheme = $"{baseTheme}.{accent}";
+            if (_isInitializing) return;
 
-            // Theme global anwenden
-            ThemeManager.Current.ChangeTheme(Application.Current, fullTheme);
+            if (ComboLanguage.SelectedItem is ComboBoxItem item && item.Tag is string langCode)
+            {
+                LanguageManager.ChangeLanguage(langCode);
 
-            // Theme speichern
-            Properties.Settings.Default.Theme = fullTheme;
-            Properties.Settings.Default.Save();
+                Properties.Settings.Default.Language = langCode;
+                Properties.Settings.Default.Save();
+            }
         }
 
+        // Skript-Pfad auswählen
         private void BtnBrowse_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new VistaFolderBrowserDialog
             {
                 Description = "Wähle den Skript-Ordner",
-                UseDescriptionForTitle = true, // damit Description als Fenstertitel angezeigt wird
+                UseDescriptionForTitle = true,
                 ShowNewFolderButton = true
             };
 
             bool? result = dialog.ShowDialog();
-
             if (result == true)
             {
                 TxtScriptPath.Text = dialog.SelectedPath;

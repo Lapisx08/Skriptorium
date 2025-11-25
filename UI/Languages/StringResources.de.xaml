@@ -1,0 +1,74 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- MainWindow -->
+
+    <!-- Skriptorium -->
+    <sys:String x:Key="AboutSkriptorium">Über Skriptorium</sys:String>
+    <sys:String x:Key="Settings">Einstellungen</sys:String>
+    <sys:String x:Key="Exit">Beenden</sys:String>
+
+    <!-- File -->
+    <sys:String x:Key="File">Datei</sys:String>
+    <sys:String x:Key="New">Neu</sys:String>
+    <sys:String x:Key="Open">Öffnen</sys:String>
+    <sys:String x:Key="LastOpened">Zuletzt geöffnet</sys:String>
+    <sys:String x:Key="Save">Speichern</sys:String>
+    <sys:String x:Key="SaveAs">Speichern unter...</sys:String>
+    <sys:String x:Key="SaveAll">Alles speichern</sys:String>
+    <sys:String x:Key="Close">Schließen</sys:String>
+
+    <!-- Edit -->
+    <sys:String x:Key="Edit">Bearbeiten</sys:String>
+    <sys:String x:Key="Undo">Rückgängig</sys:String>
+    <sys:String x:Key="Redo">Wiederholen</sys:String>
+    <sys:String x:Key="Cut">Ausschneiden</sys:String>
+    <sys:String x:Key="Copy">Kopieren</sys:String>
+    <sys:String x:Key="Paste">Einfügen</sys:String>
+    <sys:String x:Key="Duplicate">Duplizieren</sys:String>
+    <sys:String x:Key="SelectAll">Alles auswählen</sys:String>
+
+    <!-- Search -->
+    <sys:String x:Key="Search">Suchen</sys:String>
+    <sys:String x:Key="SearchAndReplace">Suchen und Ersetzen</sys:String>
+
+    <!-- Bookmarks -->
+    <sys:String x:Key="Bookmarks">Lesezeichen</sys:String>
+    <sys:String x:Key="AddAndRemove">Setzen und entfernen</sys:String>
+    <sys:String x:Key="Next">Zum nächsten</sys:String>
+    <sys:String x:Key="Previous">Zum vorherigen</sys:String>
+    <sys:String x:Key="RemoveAll">Alle löschen</sys:String>
+
+    <!-- Tools -->
+    <sys:String x:Key="Tools">Tools</sys:String>
+    <sys:String x:Key="ToggleSyntax-Highlighting">Syntax-Highlighting umschalten</sys:String>
+    <sys:String x:Key="ToggleAutocompletion">Autovervollständigung umschalten</sys:String>
+    <sys:String x:Key="Comments">Kommentare</sys:String>
+    <sys:String x:Key="BlockComment">Blockkommentar</sys:String>
+    <sys:String x:Key="SmallCommentField">Kleines Kommentarfeld</sys:String>
+    <sys:String x:Key="MiddleCommentField">Mittleres Kommentarfeld</sys:String>
+    <sys:String x:Key="BigCommentField">Großes Kommentarfeld</sys:String>
+    <sys:String x:Key="CollapseAndExpandFoldings">Foldings ein- und ausklappen</sys:String>
+    <sys:String x:Key="IndentText">Text einrücken</sys:String>
+    <sys:String x:Key="CheckSyntax">Syntax prüfen</sys:String>
+    <sys:String x:Key="FileExplorer">Datei Explorer</sys:String>
+    <sys:String x:Key="SearchExplorer">Explorer Suche</sys:String>
+    <sys:String x:Key="CodeStructure">Code Struktur</sys:String>
+    <sys:String x:Key="NPCGenerator">NPC Generator</sys:String>
+    <sys:String x:Key="DialogGenerator">Dialog Generator</sys:String>
+
+    <!-- Code Structure -->
+    <sys:String x:Key="Instances">Instanzen</sys:String>
+    <sys:String x:Key="Functions">Funktionen</sys:String>
+    <sys:String x:Key="Variables">Variablen</sys:String>
+    <sys:String x:Key="Constants">Konstanten</sys:String>
+    <sys:String x:Key="Name">Name</sys:String>
+    <sys:String x:Key="Type">Typ</sys:String>
+    <sys:String x:Key="Value">Wert</sys:String>
+    <sys:String x:Key="Line">Zeile</sys:String>
+
+    <!-- Dialog Generator -->
+
+
+</ResourceDictionary>

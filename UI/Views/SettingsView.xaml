@@ -11,24 +11,25 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <!-- TabControl -->
             <RowDefinition Height="Auto"/>
-            <!-- Schließen Button -->
         </Grid.RowDefinitions>
 
-        <!-- TabControl über gesamte Fläche -->
+        <!-- TabControl -->
         <TabControl Grid.Row="0">
             <!-- Tab: Allgemein -->
             <TabItem Header="Allgemein">
                 <TabItem.HeaderTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16" />
+                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16"/>
                     </DataTemplate>
                 </TabItem.HeaderTemplate>
+
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <!-- Anzeigemodus -->
                         <RowDefinition Height="Auto"/>
+                        <!-- Sprache -->
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -49,6 +50,18 @@
                         <ComboBoxItem Content="Tagmodus" Tag="Light"/>
                         <ComboBoxItem Content="Nachtmodus" Tag="Dark"/>
                     </ComboBox>
+
+                    <!-- Sprache -->
+                    <TextBlock Text="Sprache:" 
+                               Grid.Row="1" Grid.Column="0" 
+                               Margin="0,0,5,5" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="ComboLanguage"
+                              Grid.Row="1" Grid.Column="1" 
+                              Margin="0,0,0,5"
+                              SelectionChanged="ComboLanguage_SelectionChanged">
+                        <ComboBoxItem Content="Deutsch" Tag="de"/>
+                        <ComboBoxItem Content="English" Tag="en"/>
+                    </ComboBox>
                 </Grid>
             </TabItem>
 
@@ -56,9 +69,10 @@
             <TabItem Header="Pfade">
                 <TabItem.HeaderTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16" />
+                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16"/>
                     </DataTemplate>
                 </TabItem.HeaderTemplate>
+
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -70,7 +84,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Skript-Pfad Auswahl -->
+                    <!-- Skript-Pfad -->
                     <TextBlock Text="Pfad zu Gothic Skripts:" 
                                Grid.Row="0" Grid.Column="0" 
                                Margin="0,0,5,5" VerticalAlignment="Center"/>
