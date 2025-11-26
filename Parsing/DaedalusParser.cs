@@ -292,67 +292,6 @@ namespace Skriptorium.Parsing
             return instanceDecls;
         }
 
-        private InstanceDeclaration ParseInstance()
-        {
-            var startToken = Current();
-            Advance();
-            var nameToken = Current();
-            if (!(Match(TokenType.InstanceName) || Match(TokenType.SelfKeyword) ||
-                  Match(TokenType.OtherKeyword) || Match(TokenType.SlfKeyword)))
-            {
-                throw new ParseException("Instanzname oder spezielles Schlüsselwort (self, other, hero, slf) erwartet", nameToken, "instance name");
-            }
-
-            var instance = new InstanceDeclaration
-            {
-                Name = nameToken.Value,
-                Line = startToken.Line,
-                Column = startToken.Column
-            };
-            Advance();
-
-            Consume(TokenType.OpenParenthesis, "'(' erwartet");
-            var baseToken = Consume(TokenType.Identifier, "Basisklasse erwartet");
-            instance.BaseClass = baseToken.Value;
-            Consume(TokenType.CloseParenthesis, "')' erwartet");
-
-            if (Match(TokenType.OpenBracket))
-            {
-                Advance();
-                while (!Check(TokenType.CloseBracket) && !IsAtEnd())
-                {
-                    try
-                    {
-                        var stmt = ParseStatement();
-                        if (stmt != null)
-                            instance.Body.Add(stmt);
-                        else
-                            Advance();
-                    }
-                    catch (ParseException ex)
-                    {
-                        if (Current().Type == TokenType.Semicolon)
-                        {
-                            throw new ParseException("'}' vor ';' erwartet", Current(), "'}'");
-                        }
-                        else if (Current().Type == TokenType.EOF)
-                        {
-                            throw new ParseException("Unerwartetes Dateiende. '}' zum Schließen des Instanzblocks erwartet.", Current(), "'}'");
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                }
-                Consume(TokenType.CloseBracket, "'}' erwartet");
-            }
-
-            if (Match(TokenType.Semicolon)) Advance();
-
-            return instance;
-        }
-
         private ClassDeclaration ParseClass()
         {
             var startToken = Current();

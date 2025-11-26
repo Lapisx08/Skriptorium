@@ -239,11 +239,11 @@
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
-            <Button ToolTip="{DynamicResource IndentText}" Click="MenuCodeFormatieren_Click">
-                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="12"/>
-            </Button>
             <Button ToolTip="{DynamicResource CollapseAndExpandFoldings}" Click="ToggleFoldings_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="{DynamicResource IndentText}" Click="MenuCodeFormatieren_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="12"/>
             </Button>
             <Separator />
             <Button ToolTip="{DynamicResource FileExplorer}" Click="MenuToolsFileExplorer_Click">

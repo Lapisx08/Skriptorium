@@ -13,9 +13,7 @@ namespace Skriptorium.Managers
             _window = window;
         }
 
-        /// <summary>
-        /// Registriert eine Tastenkombination, die beim Auslösen die Aktion action aufruft.
-        /// </summary>
+        // Registriert eine Tastenkombination, die beim Auslösen die Action aufruft
         public void Register(Key key, ModifierKeys modifiers, Action action)
         {
             var command = new RoutedCommand();

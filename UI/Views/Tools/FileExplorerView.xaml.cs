@@ -118,10 +118,13 @@ namespace Skriptorium.UI.Views
             var node = GetTargetNode();
             if (node == null) return;
 
-            string newPath = Path.Combine(node.FullPath, "Neue_Datei.d");
+            // Name aus Ressourcen holen
+            string baseName = Application.Current.TryFindResource("NewScript") as string ?? "Neue Skript";
+
+            string newPath = Path.Combine(node.FullPath, $"{baseName}.d");
             int i = 1;
             while (File.Exists(newPath))
-                newPath = Path.Combine(node.FullPath, $"Neue_Datei{i++}.d");
+                newPath = Path.Combine(node.FullPath, $"{baseName}{i++}.d");
 
             File.WriteAllText(newPath, "");
             node.Refresh();
@@ -132,10 +135,13 @@ namespace Skriptorium.UI.Views
             var node = GetTargetNode();
             if (node == null) return;
 
-            string newPath = Path.Combine(node.FullPath, "Neuer Ordner");
+            // Name aus Ressourcen holen
+            string baseName = Application.Current.TryFindResource("NewFolder") as string ?? "Neuer Ordner";
+
+            string newPath = Path.Combine(node.FullPath, baseName);
             int i = 1;
             while (Directory.Exists(newPath))
-                newPath = Path.Combine(node.FullPath, $"Neuer Ordner {i++}");
+                newPath = Path.Combine(node.FullPath, $"{baseName} {i++}");
 
             Directory.CreateDirectory(newPath);
             node.Refresh();
@@ -163,7 +169,7 @@ namespace Skriptorium.UI.Views
             if (FileTree.SelectedItem is FileNode node && !node.IsDummy)
             {
                 string input = Microsoft.VisualBasic.Interaction.InputBox(
-                    "Neuer Name:", "Umbenennen", node.Name);
+                    Application.Current.TryFindResource("NewName") as string ?? "Neuer Name:", Application.Current.TryFindResource("Rename") as string ?? "Umbenennen", node.Name);
 
                 if (!string.IsNullOrWhiteSpace(input))
                 {
@@ -201,7 +207,7 @@ namespace Skriptorium.UI.Views
             if (FileTree.SelectedItem is FileNode node && !node.IsDummy)
             {
                 if (MessageBox.Show($"Soll „{node.Name}“ wirklich gelöscht werden?",
-                    "Löschen", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                    Application.Current.TryFindResource("Delete") as string ?? "Löschen", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
                     try
                     {

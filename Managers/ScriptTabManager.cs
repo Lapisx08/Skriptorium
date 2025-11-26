@@ -44,55 +44,32 @@ namespace Skriptorium.Managers
         public void MoveNewTabToEnd()
         {
             var pane = GetActiveDocumentPane();
-            var children = pane.Children.ToList();
-
-            // Dynamischer Präfix für "Neues Skript" aus den Ressourcen
             string newScriptPrefix = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
 
-            // Suche das neue Skript anhand des dynamischen Präfixes
-            var newTab = children.FirstOrDefault(d => d.Title.StartsWith(newScriptPrefix, StringComparison.OrdinalIgnoreCase));
+            var newTab = pane.Children.OfType<LayoutDocument>()
+                           .FirstOrDefault(d => d.Title.StartsWith(newScriptPrefix, StringComparison.OrdinalIgnoreCase));
+
             if (newTab != null)
             {
-                children.Remove(newTab);
-                children.Add(newTab);
-                pane.Children.Clear();
-                foreach (var child in children)
-                    pane.Children.Add(child);
-
-                newTab.IsActive = true;
-                _dockingManager.ActiveContent = newTab;
-
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
+                    // Direktes Verschieben innerhalb der Children-Collection
+                    pane.Children.Remove(newTab);
+                    pane.Children.Add(newTab);
+
+                    newTab.IsActive = true;
+                    _dockingManager.ActiveContent = newTab;
+
                     if (newTab.Content is ScriptEditor editor)
                         editor.Focus();
+
                     _dockingManager.Focus();
 
                     if (!_isInitializing)
                         ScrollToRightEnd();
-                }), DispatcherPriority.ApplicationIdle);
-            }
-            else
-            {
-                var lastTab = children.LastOrDefault();
-                if (lastTab != null)
-                {
-                    lastTab.IsActive = true;
-                    _dockingManager.ActiveContent = lastTab;
-
-                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        if (lastTab.Content is ScriptEditor editor)
-                            editor.Focus();
-                        _dockingManager.Focus();
-
-                        if (!_isInitializing)
-                            ScrollToRightEnd();
-                    }), DispatcherPriority.ApplicationIdle);
-                }
+                }), DispatcherPriority.Background);
             }
         }
-
 
         private LayoutDocumentPane GetActiveDocumentPane()
         {

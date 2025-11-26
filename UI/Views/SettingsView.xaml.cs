@@ -85,7 +85,7 @@ namespace Skriptorium.UI.Views
         {
             var dialog = new VistaFolderBrowserDialog
             {
-                Description = "Wähle den Skript-Ordner",
+                Description = Application.Current.TryFindResource("SelectTheScriptFolder") as string ?? "Wähle den Skript-Ordner",
                 UseDescriptionForTitle = true,
                 ShowNewFolderButton = true
             };

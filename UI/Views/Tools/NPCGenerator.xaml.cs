@@ -160,7 +160,7 @@ namespace Skriptorium.UI.Views.Tools
         private string GenerateNpcVisual()
         {
             string selectedGender = ((ComboBoxItem)genderDropdown.SelectedItem)?.Content.ToString();
-            Gender gender = selectedGender == "Weiblich" ? Gender.FEMALE : Gender.MALE;
+            Gender gender = selectedGender == Application.Current.TryFindResource("Female") as string ? Gender.FEMALE : Gender.MALE;
 
             string head = gender == Gender.MALE
                 ? maleHeads[rng.Next(maleHeads.Count)]
@@ -221,13 +221,13 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine($"    flags    =  {flagsEntry.Text}; // NPC_FLAG_IMMORTAL oder 0");
             sb.AppendLine($"    npctype  =  {((ComboBoxItem)npcTypeDropdown.SelectedItem)?.Content};");
 
-            if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == "Ja")
+            if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
                 sb.AppendLine("    level    =  1;");
             }
             sb.AppendLine();
 
-            if (((ComboBoxItem)aivarsDropdown.SelectedItem)?.Content.ToString() == "Ja")
+            if (((ComboBoxItem)aivarsDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
                 // AIVARS
                 sb.AppendLine("    // ------ AIVARS ------");
@@ -248,7 +248,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine($"    B_SetAttributesToChapter (self, 1); // Setzt Attribute und Level entsprechend des angegebenen Kapitels (1-6)");
             sb.AppendLine();
 
-            if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == "Ja")
+            if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
                 sb.AppendLine("    // Ersetzte bei Nutzung individueller Attribute B_SetAttributesToChapter (self, 1);");
                 sb.AppendLine("    attribute[ATR_STRENGTH]       =  10;");
@@ -292,7 +292,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("    B_SetFightSkills (self, 10); // Grenzen für Talent-Level liegen bei 30 und 60 / Der enthaltene B_AddFightSkill setzt alle Kampftalente gleichhoch");
             sb.AppendLine();
 
-            if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() == "Ja")
+            if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
                 sb.AppendLine("    // Ersetzte bei Nutzung individueller Kampf-Talente B_SetFightSkills (self, 10);");
                 sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_1H, 10);");

@@ -78,6 +78,14 @@
     <sys:String x:Key="Reset">Zurücksetzen</sys:String>
     <sys:String x:Key="Yes">Ja</sys:String>
     <sys:String x:Key="No">Nein</sys:String>
+    <sys:String x:Key="Dialog">Dialog</sys:String>
+    <sys:String x:Key="GiveXP">XP Geben</sys:String>
+    <sys:String x:Key="GiveItem">Item Geben</sys:String>
+    <sys:String x:Key="EndDialog">Ende-Dialog</sys:String>
+    <sys:String x:Key="Hero">Held</sys:String>
+    <sys:String x:Key="NPC">NPC</sys:String>
+    <sys:String x:Key="ItemInstance">Iteminstanz:</sys:String>
+    <sys:String x:Key="Number">Anzahl:</sys:String>
 
     <!-- File Explorer -->
     <sys:String x:Key="NewScript">Neues Skript</sys:String>
@@ -87,6 +95,7 @@
     <sys:String x:Key="OpenInExplorer">In Explorer öffnen</sys:String>
     <sys:String x:Key="Rename">Umbenennen</sys:String>
     <sys:String x:Key="Delete">Löschen</sys:String>
+    <sys:String x:Key="NewName">Neuer Name:</sys:String>
 
     <!-- NPC Generator -->
     <sys:String x:Key="Guild">Gilde:</sys:String>
@@ -111,6 +120,7 @@
     <!-- AboutSkriptorium -->
     <sys:String x:Key="Version">Version: 1.0</sys:String>
     <sys:String x:Key="Developer">Entwickler: Lapis, Nemora26</sys:String>
+    <sys:String x:Key="Date">Datum:</sys:String>
     <sys:String x:Key="Licensing">Lizenziert unter GNU General Public License Version 3</sys:String>
     <sys:String x:Key="ViewLicense">Lizenz anzeigen</sys:String>
 
@@ -134,6 +144,7 @@
     <sys:String x:Key="Language">Sprache:</sys:String>
     <sys:String x:Key="Paths">Pfade</sys:String>
     <sys:String x:Key="PathToGothicScripts">Pfad zu Gothic Skripts:</sys:String>
+    <sys:String x:Key="SelectTheScriptFolder">Wähle den Skript-Ordner</sys:String>
 
     <!-- Data Manager -->
     <sys:String x:Key="TextFiles">Text-Dateien (*.txt)|*.txt</sys:String>
@@ -146,12 +157,4 @@
     <sys:String x:Key="MsgScriptModified">Dieses Skript wurde geändert. Möchtest du es speichern?</sys:String>
     <sys:String x:Key="MsgSaveChangesTitle">Änderungen speichern?</sys:String>
     <sys:String x:Key="MsgUnsaved">Nicht gespeichert</sys:String>
-
-
-    
-    
-    
-    
-
-
 </ResourceDictionary>

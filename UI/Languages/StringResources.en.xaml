@@ -78,6 +78,14 @@
     <sys:String x:Key="Reset">Reset</sys:String>
     <sys:String x:Key="Yes">Yes</sys:String>
     <sys:String x:Key="No">No</sys:String>
+    <sys:String x:Key="Dialog">Dialog</sys:String>
+    <sys:String x:Key="GiveXP">Give XP</sys:String>
+    <sys:String x:Key="GiveItem">Give Item</sys:String>
+    <sys:String x:Key="EndDialog">End Dialog</sys:String>
+    <sys:String x:Key="Hero">Hero</sys:String>
+    <sys:String x:Key="NPC">NPC</sys:String>
+    <sys:String x:Key="ItemInstance">Item Instance:</sys:String>
+    <sys:String x:Key="Number">Number:</sys:String>
 
     <!-- File Explorer -->
     <sys:String x:Key="NewScript">New Script</sys:String>
@@ -87,6 +95,7 @@
     <sys:String x:Key="OpenInExplorer">Open In Explorer</sys:String>
     <sys:String x:Key="Rename">Rename</sys:String>
     <sys:String x:Key="Delete">Delete</sys:String>
+    <sys:String x:Key="NewName">New Name:</sys:String>
 
     <!-- NPC Generator -->
     <sys:String x:Key="Guild">Guild:</sys:String>
@@ -111,9 +120,11 @@
     <!-- AboutSkriptorium -->
     <sys:String x:Key="Version">Version: 1.0</sys:String>
     <sys:String x:Key="Developer">Developer: Lapis, Nemora26</sys:String>
+    <sys:String x:Key="Date">Date:</sys:String>
     <sys:String x:Key="Licensing">Licensed under the GNU General Public License Version 3</sys:String>
     <sys:String x:Key="ViewLicense">View License</sys:String>
 
+    <!-- Search and Replace -->
     <sys:String x:Key="Search3">Search:</sys:String>
     <sys:String x:Key="ReplaceWith">Replace With:</sys:String>
     <sys:String x:Key="SearchIn">Search In:</sys:String>
@@ -133,6 +144,7 @@
     <sys:String x:Key="Language">Language:</sys:String>
     <sys:String x:Key="Paths">Paths</sys:String>
     <sys:String x:Key="PathToGothicScripts">Path To Gothic Scripts:</sys:String>
+    <sys:String x:Key="SelectTheScriptFolder">Select The Script Folder</sys:String>
 
     <!-- Data Manager -->
     <sys:String x:Key="TextFiles">Text Files (*.txt)|*.txt</sys:String>
@@ -145,10 +157,4 @@
     <sys:String x:Key="MsgScriptModified">This script has been modified. Do you want to save it?</sys:String>
     <sys:String x:Key="MsgSaveChangesTitle">Save changes?</sys:String>
     <sys:String x:Key="MsgUnsaved">Not saved</sys:String>
-
-
-
-
-
-
 </ResourceDictionary>

@@ -16,7 +16,10 @@ namespace Skriptorium.UI.Views
             string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             string lastModified = File.GetLastWriteTime(exePath).ToString("dd.MM.yyyy");
 
-            TextBlockDatum.Text = $"Datum: {lastModified}";
+            // Sprachabhängiges Label aus Ressourcen
+            string dateLabel = Application.Current.TryFindResource("Date") as string ?? "Datum:";
+
+            TextBlockDatum.Text = $"{dateLabel} {lastModified}";
         }
 
         private void LicenseButton_Click(object sender, RoutedEventArgs e)

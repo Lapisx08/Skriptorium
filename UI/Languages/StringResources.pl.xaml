@@ -78,6 +78,14 @@
     <sys:String x:Key="Reset">Resetuj</sys:String>
     <sys:String x:Key="Yes">Tak</sys:String>
     <sys:String x:Key="No">Nie</sys:String>
+    <sys:String x:Key="Dialog">Dialog</sys:String>
+    <sys:String x:Key="GiveXP">XP Daj</sys:String>
+    <sys:String x:Key="GiveItem">Pozycja Daj</sys:String>
+    <sys:String x:Key="EndDialog">Koniec dialogu</sys:String>
+    <sys:String x:Key="Hero">Bohater</sys:String>
+    <sys:String x:Key="NPC">NPC</sys:String>
+    <sys:String x:Key="ItemInstance">Instancja elementu:</sys:String>
+    <sys:String x:Key="Number">Liczba:</sys:String>
 
     <!-- File Explorer -->
     <sys:String x:Key="NewScript">Nowy skrypt</sys:String>
@@ -87,6 +95,7 @@
     <sys:String x:Key="OpenInExplorer">Otwórz w Eksploratorze</sys:String>
     <sys:String x:Key="Rename">Zmiana nazwy</sys:String>
     <sys:String x:Key="Delete">Usuń</sys:String>
+    <sys:String x:Key="NewName">Nowa nazwa:</sys:String>
 
     <!-- NPC Generator -->
     <sys:String x:Key="Guild">Gildia:</sys:String>
@@ -111,6 +120,7 @@
     <!-- AboutSkriptorium -->
     <sys:String x:Key="Version">Wersja: 1.0</sys:String>
     <sys:String x:Key="Developer">Programista: Lapis, Nemora26</sys:String>
+    <sys:String x:Key="Date">Data:</sys:String>
     <sys:String x:Key="Licensing">Licencjonowane na podstawie licencji GNU General Public License wersja 3.</sys:String>
     <sys:String x:Key="ViewLicense">Pokaż licencję</sys:String>
 
@@ -134,8 +144,17 @@
     <sys:String x:Key="Language">Język:</sys:String>
     <sys:String x:Key="Paths">Ścieżki</sys:String>
     <sys:String x:Key="PathToGothicScripts">Ścieżka do skryptów Gothic:</sys:String>
+    <sys:String x:Key="SelectTheScriptFolder">Wybierz folder skryptów</sys:String>
 
+    <!-- Data Manager -->
+    <sys:String x:Key="TextFiles">Pliki tekstowe (*.txt)|*.txt</sys:String>
+    <sys:String x:Key="DaedalusFiles">Pliki Daedalus (*.d)|*.d</sys:String>
+    <sys:String x:Key="SourceFiles">Pliki źródłowe(*.src)|*.src</sys:String>
+    <sys:String x:Key="AllSupported">Wszystkie obsługiwane pliki (*.d;*.txt;*.src)|*.d;*.txt;*.src</sys:String>
 
-
-
+    <!-- Script Tabmanager -->
+    <sys:String x:Key="NewScriptName">Nowe</sys:String>
+    <sys:String x:Key="MsgScriptModified">Ten skrypt został zmieniony. Czy chcesz go zapisać?</sys:String>
+    <sys:String x:Key="MsgSaveChangesTitle">Zapisać zmiany?</sys:String>
+    <sys:String x:Key="MsgUnsaved">Nie zapisano</sys:String>
 </ResourceDictionary>

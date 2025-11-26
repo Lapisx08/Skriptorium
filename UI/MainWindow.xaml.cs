@@ -25,6 +25,8 @@ namespace Skriptorium.UI
         private readonly SearchManager _searchManager;
         private readonly DataMenuManager _dataMenuManager;
         private ScriptEditor? _currentScriptEditor;
+        private DialogGenerator? _dialogGenerator;
+
         public double GlobalZoom { get; set; } = 1.0;
 
         public MainWindow()
@@ -121,7 +123,7 @@ namespace Skriptorium.UI
         // Handler-Methode für Sprachänderungen
         private void OnLanguageChanged(object? sender, EventArgs e)
         {
-            // Alle relevanten Panels finden und Titel aktualisieren
+            // Panels aktualisieren (wie vorher)
             var panels = dockingManager.Layout.Descendents()
                 .OfType<LayoutAnchorable>()
                 .Where(a => a.ContentId == "SearchResults"
@@ -131,21 +133,20 @@ namespace Skriptorium.UI
 
             foreach (var panel in panels)
             {
-                // Resource anhand der ContentId ermitteln
                 string newTitle = Application.Current.FindResource(panel.ContentId) as string
                                   ?? panel.ContentId switch
                                   {
                                       "SearchResults" => "Suchergebnisse",
                                       "CodeStructure" => "Code Struktur",
                                       "FileExplorer" => "Datei Explorer",
-                                      "SearchExplorer" => "Explorer Suche", // Fallback
+                                      "SearchExplorer" => "Explorer Suche",
                                       _ => panel.Title
                                   };
 
                 panel.Title = newTitle;
             }
 
-            // Alle „Neu“-Tabs finden und Titel dynamisch anpassen
+            // „Neu“-Tabs aktualisieren
             var documentTabs = dockingManager.Layout.Descendents()
                 .OfType<LayoutDocument>()
                 .Where(d => d.Title.StartsWith("Neu") || d.Title.StartsWith("New", StringComparison.OrdinalIgnoreCase));
@@ -154,21 +155,27 @@ namespace Skriptorium.UI
 
             foreach (var doc in documentTabs)
             {
-                // Nummer aus dem alten Titel extrahieren
                 int number = 0;
                 string oldTitle = doc.Title;
                 string digits = new string(oldTitle.SkipWhile(c => !char.IsDigit(c)).ToArray());
                 if (int.TryParse(digits, out int parsed))
                     number = parsed;
 
-                // Neuen Titel setzen
                 doc.Title = $"{newScriptPrefix}{number}";
+            }
+
+            // Dialog-Generator aktualisieren (Dropdowns + Labels)
+            if (_dialogGenerator != null)
+            {
+                _dialogGenerator.UpdateDialogComboBoxes(); // ComboBox-Texte
+                _dialogGenerator.UpdateDialogLabels();      // XP / Iteminstanz / Anzahl
             }
         }
 
         public void OpenFileInNewTab(string content, string path)
         {
-            string tabTitle = string.IsNullOrWhiteSpace(path) ? "Neu" : Path.GetFileName(path);
+            string newTabText = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
+            string tabTitle = string.IsNullOrWhiteSpace(path) ? newTabText : Path.GetFileName(path);
             _tabManager.AddNewTab(content, tabTitle, path);
         }
 
@@ -586,9 +593,19 @@ namespace Skriptorium.UI
 
         private void MenuDialogGenerator_Click(object sender, RoutedEventArgs e)
         {
-            var dialogGenerator = new DialogGenerator();
-            dialogGenerator.Owner = this;
-            dialogGenerator.Show();
+            if (_dialogGenerator == null || !_dialogGenerator.IsVisible)
+            {
+                _dialogGenerator = new DialogGenerator
+                {
+                    Owner = this
+                };
+                _dialogGenerator.Closed += (s, args) => _dialogGenerator = null; // Referenz zurücksetzen
+                _dialogGenerator.Show();
+            }
+            else
+            {
+                _dialogGenerator.Focus();
+            }
         }
 
         private void MenuToolsFileExplorer_Click(object sender, RoutedEventArgs e)
