@@ -118,9 +118,16 @@ namespace Skriptorium.Managers
 
         public static void OpenFile(Action<string, string> onFileLoaded)
         {
+            string filter = string.Join("|",
+                Application.Current.TryFindResource("TextFiles") as string ?? "Textdateien (*.txt)|*.txt",
+                Application.Current.TryFindResource("DaedalusFiles") as string ?? "Daedalus-Skripte (*.d)|*.d",
+                Application.Current.TryFindResource("SourceFiles") as string ?? "Source-Skripte (*.src)|*.src",
+                Application.Current.TryFindResource("AllSupported") as string ?? "Alle unterstützten Dateien (*.d;*.txt;*.src)|*.d;*.txt;*.src"
+            );
+
             var dlg = new OpenFileDialog
             {
-                Filter = "Textdateien (*.txt)|*.txt|Daedalus-Skripte (*.d)|*.d|Source-Skripte (*.src)|*.src|Alle unterstützten Dateien (*.d;*.txt;*.src)|*.d;*.txt;*.src",
+                Filter = filter,
                 DefaultExt = ".d",
                 FilterIndex = 4,
                 InitialDirectory = GetInitialDirectory()
@@ -129,6 +136,7 @@ namespace Skriptorium.Managers
             if (dlg.ShowDialog() == true)
                 OpenFile(dlg.FileName, onFileLoaded);
         }
+
 
         public static void OpenFile(string filePath, Action<string, string> onFileLoaded, Action<string>? onError = null)
         {
@@ -192,7 +200,11 @@ namespace Skriptorium.Managers
 
             var dlg = new SaveFileDialog
             {
-                Filter = "Textdateien (*.txt)|*.txt|Daedalus-Skripte (*.d)|*.d|Source-Skripte (*.src)|*.src|Alle unterstützten Dateien (*.d;*.txt;*.src)|*.d;*.txt;*.src",
+                Filter =
+                    (Application.Current.TryFindResource("TextFiles") as string ?? "Textdateien (*.txt)|*.txt") + "|" +
+                    (Application.Current.TryFindResource("DaedalusFiles") as string ?? "Daedalus-Skripte (*.d)|*.d") + "|" +
+                    (Application.Current.TryFindResource("SourceFiles") as string ?? "Source-Skripte (*.src)|*.src") + "|" +
+                    (Application.Current.TryFindResource("AllSupported") as string ?? "Alle unterstützten Dateien (*.d;*.txt;*.src)|*.d;*.txt;*.src"),
                 DefaultExt = ".d",
                 FilterIndex = 4,
                 InitialDirectory = GetInitialDirectory(),

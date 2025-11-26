@@ -45,7 +45,7 @@ namespace Skriptorium.UI
 
             // 2. Shortcuts registrieren
             _shortcutManager.Register(Key.I, ModifierKeys.Control,
-                                  () => MenuSkriptoriumUeber_Click(null, null));
+                                      () => MenuSkriptoriumUeber_Click(null, null));
             _shortcutManager.Register(Key.OemComma, ModifierKeys.Control,
                                       () => MenuSkriptoriumEinstellungen_Click(null, null));
             _shortcutManager.Register(Key.N, ModifierKeys.Control,
@@ -114,6 +114,56 @@ namespace Skriptorium.UI
             DataManager.LoadRecentFiles();
             _dataMenuManager.UpdateRecentFilesMenu();
             _tabManager.AddNewTab();
+
+            LanguageManager.LanguageChanged += OnLanguageChanged;
+        }
+
+        // Handler-Methode für Sprachänderungen
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            // Alle relevanten Panels finden und Titel aktualisieren
+            var panels = dockingManager.Layout.Descendents()
+                .OfType<LayoutAnchorable>()
+                .Where(a => a.ContentId == "SearchResults"
+                         || a.ContentId == "CodeStructure"
+                         || a.ContentId == "FileExplorer"
+                         || a.ContentId == "SearchExplorer");
+
+            foreach (var panel in panels)
+            {
+                // Resource anhand der ContentId ermitteln
+                string newTitle = Application.Current.FindResource(panel.ContentId) as string
+                                  ?? panel.ContentId switch
+                                  {
+                                      "SearchResults" => "Suchergebnisse",
+                                      "CodeStructure" => "Code Struktur",
+                                      "FileExplorer" => "Datei Explorer",
+                                      "SearchExplorer" => "Explorer Suche", // Fallback
+                                      _ => panel.Title
+                                  };
+
+                panel.Title = newTitle;
+            }
+
+            // Alle „Neu“-Tabs finden und Titel dynamisch anpassen
+            var documentTabs = dockingManager.Layout.Descendents()
+                .OfType<LayoutDocument>()
+                .Where(d => d.Title.StartsWith("Neu") || d.Title.StartsWith("New", StringComparison.OrdinalIgnoreCase));
+
+            string newScriptPrefix = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
+
+            foreach (var doc in documentTabs)
+            {
+                // Nummer aus dem alten Titel extrahieren
+                int number = 0;
+                string oldTitle = doc.Title;
+                string digits = new string(oldTitle.SkipWhile(c => !char.IsDigit(c)).ToArray());
+                if (int.TryParse(digits, out int parsed))
+                    number = parsed;
+
+                // Neuen Titel setzen
+                doc.Title = $"{newScriptPrefix}{number}";
+            }
         }
 
         public void OpenFileInNewTab(string content, string path)
@@ -290,18 +340,6 @@ namespace Skriptorium.UI
                 _tabManager.AddNewTab(content, System.IO.Path.GetFileName(path), path);
                 _dataMenuManager.UpdateRecentFilesMenu();
             });
-        }
-
-        private void OpenRecentFile_Click(object? sender, RoutedEventArgs? e)
-        {
-            if (sender is MenuItem mi && mi.Tag is string path)
-            {
-                DataManager.OpenFile(path, (content, file) =>
-                {
-                    _tabManager.AddNewTab(content, System.IO.Path.GetFileName(file), file);
-                    _dataMenuManager.UpdateRecentFilesMenu();
-                });
-            }
         }
 
         private void MenuDateiSpeichern_Click(object? sender, RoutedEventArgs? e)
@@ -566,6 +604,8 @@ namespace Skriptorium.UI
 
             if (existing != null)
             {
+                // Titel bei bestehendem Panel aktualisieren
+                existing.Title = Application.Current.FindResource("FileExplorer") as string ?? "Datei Explorer";
                 existing.IsVisible = true;
                 existing.IsActive = true;
                 return;
@@ -575,7 +615,7 @@ namespace Skriptorium.UI
 
             var anchorable = new LayoutAnchorable
             {
-                Title = "Datei Explorer",
+                Title = Application.Current.FindResource("FileExplorer") as string ?? "Datei Explorer",  // Initial setzen
                 Content = fileExplorer,
                 CanClose = true,
                 CanFloat = true,
@@ -602,22 +642,26 @@ namespace Skriptorium.UI
 
         private void ShowCodeStructureView()
         {
+            // Prüfen, ob Panel schon existiert
             var existing = dockingManager.Layout.Descendents()
                 .OfType<LayoutAnchorable>()
                 .FirstOrDefault(a => a.ContentId == "CodeStructure");
 
             if (existing != null)
             {
+                // Titel bei bestehendem Panel dynamisch aktualisieren
+                existing.Title = Application.Current.FindResource("CodeStructure") as string ?? "Code Struktur";
                 existing.IsVisible = true;
                 existing.IsActive = true;
                 return;
             }
 
+            // Neues Panel erstellen
             var codeStructureView = new CodeStructureView(_tabManager, dockingManager);
 
             var anchorable = new LayoutAnchorable
             {
-                Title = "Code Struktur",
+                Title = Application.Current.FindResource("CodeStructure") as string ?? "Code Struktur",  // Initial
                 Content = codeStructureView,
                 CanClose = true,
                 CanFloat = true,
@@ -625,6 +669,7 @@ namespace Skriptorium.UI
                 ContentId = "CodeStructure"
             };
 
+            // Panel im Layout hinzufügen
             anchorable.AddToLayout(dockingManager, AnchorableShowStrategy.Right);
 
             var pane = anchorable.FindParent<LayoutAnchorablePane>();
@@ -640,7 +685,7 @@ namespace Skriptorium.UI
 
         private void MenuToolsSearchExplorer_Click(object sender, RoutedEventArgs e)
         {
-            const string contentId = "ExplorerSearch";
+            const string contentId = "SearchExplorer";
 
             // Prüfen, ob die Suche bereits existiert
             var existing = dockingManager.Layout.Descendents()
@@ -649,7 +694,8 @@ namespace Skriptorium.UI
 
             if (existing != null)
             {
-                // Schon vorhanden → sichtbar machen und aktivieren
+                // Titel bei bestehendem Panel aktualisieren
+                existing.Title = Application.Current.FindResource("SearchExplorer") as string ?? "Explorer Suche";
                 existing.IsVisible = true;
                 existing.IsActive = true;
                 return;
@@ -660,7 +706,7 @@ namespace Skriptorium.UI
 
             var anchorable = new LayoutAnchorable
             {
-                Title = "Explorer Suche",
+                Title = Application.Current.FindResource("SearchExplorer") as string ?? "Explorer Suche",  // Initial setzen
                 Content = searchExplorer,
                 CanClose = true,
                 CanFloat = true,
@@ -682,7 +728,6 @@ namespace Skriptorium.UI
             anchorable.IsVisible = true;
             anchorable.IsActive = true;
         }
-
 
         private void ScriptEditor_TextChanged(object sender, EventArgs e)
         {

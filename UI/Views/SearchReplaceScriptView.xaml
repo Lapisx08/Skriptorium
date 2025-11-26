@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        Title="Suchen" TitleCharacterCasing="Normal"
+        Title="{DynamicResource SearchAndReplace}" TitleCharacterCasing="Normal"
         Height="325" Width="500"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
@@ -30,7 +30,7 @@
 
         <!-- Suchen -->
         <DockPanel Grid.Row="0" Margin="0,0,0,10">
-            <TextBlock Text="Suchen:" Width="110" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource Search3}" Width="110" VerticalAlignment="Center"/>
             <ComboBox x:Name="ComboSearchText"
                       Height="25" Width="Auto"
                       IsEditable="True"
@@ -41,7 +41,7 @@
 
         <!-- Ersetzen -->
         <DockPanel Grid.Row="1" Margin="0,0,0,10">
-            <TextBlock Text="Ersetzen durch:" Width="110" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource ReplaceWith}" Width="110" VerticalAlignment="Center"/>
             <ComboBox x:Name="ComboReplaceText"
                       Height="25" Width="Auto"
                       IsEditable="True"
@@ -52,33 +52,33 @@
 
         <!-- Suchen in -->
         <DockPanel Grid.Row="2" Margin="0,0,0,10">
-            <CheckBox x:Name="ChkSearchIn" Content="Suchen in:" Width="110" VerticalAlignment="Center"
+            <CheckBox x:Name="ChkSearchIn" Content="{DynamicResource SearchIn}" Width="110" VerticalAlignment="Center"
                       Checked="ChkSearchIn_Checked" Unchecked="ChkSearchIn_Unchecked"/>
             <ComboBox x:Name="ComboSearchIn" Margin="10,0,0,0" Width="Auto" IsEnabled="False">
-                <ComboBoxItem Content="In allen offenen Skripten"/>
-                <ComboBoxItem Content="Im gesetzten Verzeichnis"/>
+                <ComboBoxItem Content="{DynamicResource InAllOpenScripts}"/>
+                <ComboBoxItem Content="{DynamicResource InTheSelectedDirectory}"/>
             </ComboBox>
         </DockPanel>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,10">
             <Button x:Name="BtnFindNext" Width="100" Click="BtnFindNext_Click">
-                <TextBlock Text="Suchen"/>
+                <TextBlock Text="{DynamicResource Search2}"/>
             </Button>
             <Button x:Name="BtnReplaceNext" Width="110" Margin="10,0,0,0" Click="BtnReplace_Click">
-                <TextBlock Text="Ersetzen"/>
+                <TextBlock Text="{DynamicResource Replace}"/>
             </Button>
             <Button x:Name="BtnReplaceAll" Width="100" Margin="10,0,0,0" Click="BtnReplaceAll_Click">
-                <TextBlock Text="Alles Ersetzen"/>
+                <TextBlock Text="{DynamicResource ReplaceAll}"/>
             </Button>
         </StackPanel>
 
         <!-- Optionen -->
         <GroupBox Header="Optionen" Grid.Row="4" Margin="0,0,0,10">
             <StackPanel Margin="10">
-                <CheckBox x:Name="ChkCase" Content="Groß-/Kleinschreibung"/>
-                <CheckBox x:Name="ChkWholeWord" Content="Nur ganzes Wort suchen"/>
-                <CheckBox x:Name="ChkSelectionOnly" Content="Nur markierter Text"
+                <CheckBox x:Name="ChkCase" Content="{DynamicResource CaseSensitive}"/>
+                <CheckBox x:Name="ChkWholeWord" Content="{DynamicResource MatchWholeWord}"/>
+                <CheckBox x:Name="ChkSelectionOnly" Content="{DynamicResource OnlySelectedText}"
                           Checked="ChkSelectionOnly_Checked"
                           Unchecked="ChkSelectionOnly_Unchecked"/>
             </StackPanel>

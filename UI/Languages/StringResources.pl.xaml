@@ -1,0 +1,141 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Skriptorium -->
+    <sys:String x:Key="AboutSkriptorium">O Skriptorium</sys:String>
+    <sys:String x:Key="Settings">Ustawienia</sys:String>
+    <sys:String x:Key="Exit">Zakończ</sys:String>
+
+    <!-- File -->
+    <sys:String x:Key="File">Plik</sys:String>
+    <sys:String x:Key="New">Nowe</sys:String>
+    <sys:String x:Key="Open">Otwórz</sys:String>
+    <sys:String x:Key="LastOpened">Ostatnio otwarte</sys:String>
+    <sys:String x:Key="Save">Zapisz</sys:String>
+    <sys:String x:Key="SaveAs">Zapisz jako...</sys:String>
+    <sys:String x:Key="SaveAll">Zapisz wszystko</sys:String>
+    <sys:String x:Key="Close">Zamknij</sys:String>
+
+    <!-- Edit -->
+    <sys:String x:Key="Edit">Edytuj</sys:String>
+    <sys:String x:Key="Undo">Cofnij</sys:String>
+    <sys:String x:Key="Redo">Powtórz</sys:String>
+    <sys:String x:Key="Cut">Wycinanie</sys:String>
+    <sys:String x:Key="Copy">Kopiowanie</sys:String>
+    <sys:String x:Key="Paste">Wstawianie</sys:String>
+    <sys:String x:Key="Duplicate">Duplikowanie</sys:String>
+    <sys:String x:Key="SelectAll">Wybierz wszystko</sys:String>
+
+    <!-- Search -->
+    <sys:String x:Key="Search">Wyszukiwanie</sys:String>
+    <sys:String x:Key="SearchAndReplace">Wyszukiwanie i zamiana</sys:String>
+
+    <!-- Bookmarks -->
+    <sys:String x:Key="Bookmarks">Zakładka</sys:String>
+    <sys:String x:Key="AddAndRemove">Zakładanie i zdejmowanie</sys:String>
+    <sys:String x:Key="Next">Do następnego</sys:String>
+    <sys:String x:Key="Previous">Poprzednia strona</sys:String>
+    <sys:String x:Key="RemoveAll">Usuń wszystkie</sys:String>
+
+    <!-- Tools -->
+    <sys:String x:Key="Tools">Narzędzia</sys:String>
+    <sys:String x:Key="ToggleSyntax-Highlighting">Przełączanie podświetlania składni</sys:String>
+    <sys:String x:Key="ToggleAutocompletion">Przełączanie autouzupełniania</sys:String>
+    <sys:String x:Key="Comments">Komentarze</sys:String>
+    <sys:String x:Key="BlockComment">Komentarz blokowy</sys:String>
+    <sys:String x:Key="SmallCommentField">Małe pole komentarza</sys:String>
+    <sys:String x:Key="MiddleCommentField">Środkowe pole komentarza</sys:String>
+    <sys:String x:Key="BigCommentField">Duże pole komentarza</sys:String>
+    <sys:String x:Key="CollapseAndExpandFoldings">Rozkładanie i składanie</sys:String>
+    <sys:String x:Key="IndentText">Wcięcie tekstu</sys:String>
+    <sys:String x:Key="CheckSyntax">Sprawdź składnię</sys:String>
+    <sys:String x:Key="FileExplorer">Eksplorator plików</sys:String>
+    <sys:String x:Key="SearchExplorer">Wyszukiwanie Explorer</sys:String>
+    <sys:String x:Key="CodeStructure">Struktura kodu</sys:String>
+    <sys:String x:Key="NPCGenerator">Generator NPC</sys:String>
+    <sys:String x:Key="DialogGenerator">Generator dialogów</sys:String>
+
+    <!-- Code Structure -->
+    <sys:String x:Key="Instances">Instancjen</sys:String>
+    <sys:String x:Key="Functions">Funkcje</sys:String>
+    <sys:String x:Key="Variables">Zmienne</sys:String>
+    <sys:String x:Key="Constants">Stałe</sys:String>
+    <sys:String x:Key="Name">Nazwa</sys:String>
+    <sys:String x:Key="Type">Typ</sys:String>
+    <sys:String x:Key="Value">Wartość</sys:String>
+    <sys:String x:Key="Line">Wiersz</sys:String>
+
+    <!-- Dialog Generator -->
+    <sys:String x:Key="DialogInstance">Instancja dialogowa:</sys:String>
+    <sys:String x:Key="NPCInstance">Instancja NPC:</sys:String>
+    <sys:String x:Key="Description">Opis:</sys:String>
+    <sys:String x:Key="DialogNumber">Numer dialogowy:</sys:String>
+    <sys:String x:Key="Important">Ważne:</sys:String>
+    <sys:String x:Key="Permanent">Stały:</sys:String>
+    <sys:String x:Key="AddLine">Dodaj wiersz</sys:String>
+    <sys:String x:Key="Generate">Generowanie</sys:String>
+    <sys:String x:Key="Reset">Resetuj</sys:String>
+    <sys:String x:Key="Yes">Tak</sys:String>
+    <sys:String x:Key="No">Nie</sys:String>
+
+    <!-- File Explorer -->
+    <sys:String x:Key="NewScript">Nowy skrypt</sys:String>
+    <sys:String x:Key="NewFolder">Nowy folder</sys:String>
+    <sys:String x:Key="CollapseAll">Zwiń wszystko</sys:String>
+    <sys:String x:Key="RefreshFileExplorer">Aktualizacja Eksploratora plików</sys:String>
+    <sys:String x:Key="OpenInExplorer">Otwórz w Eksploratorze</sys:String>
+    <sys:String x:Key="Rename">Zmiana nazwy</sys:String>
+    <sys:String x:Key="Delete">Usuń</sys:String>
+
+    <!-- NPC Generator -->
+    <sys:String x:Key="Guild">Gildia:</sys:String>
+    <sys:String x:Key="ID">ID:</sys:String>
+    <sys:String x:Key="Voice">Głos:</sys:String>
+    <sys:String x:Key="Flags">Flagi:</sys:String>
+    <sys:String x:Key="NPCType">Typ NPC:</sys:String>
+    <sys:String x:Key="AIVARs">AIVARs:</sys:String>
+    <sys:String x:Key="IndividualAttributes">Indywidualne atrybuty:</sys:String>
+    <sys:String x:Key="IndividualFightTalents">Indywidualne talenty bojowe:</sys:String>
+    <sys:String x:Key="Gender">Płeć:</sys:String>
+    <sys:String x:Key="Male">Męski</sys:String>
+    <sys:String x:Key="Female">Żeński</sys:String>
+
+    <!-- Search Explorer -->
+    <sys:String x:Key="Search2">Szukaj</sys:String>
+    <sys:String x:Key="CaseSensitive">Zwracaj uwagę na wielkość liter</sys:String>
+    <sys:String x:Key="MatchWholeWord">Wyszukaj tylko całe słowo</sys:String>
+    <sys:String x:Key="Replace">Zastąpienie</sys:String>
+    <sys:String x:Key="ReplaceAll">Zastąp wszystko</sys:String>
+
+    <!-- AboutSkriptorium -->
+    <sys:String x:Key="Version">Wersja: 1.0</sys:String>
+    <sys:String x:Key="Developer">Programista: Lapis, Nemora26</sys:String>
+    <sys:String x:Key="Licensing">Licencjonowane na podstawie licencji GNU General Public License wersja 3.</sys:String>
+    <sys:String x:Key="ViewLicense">Pokaż licencję</sys:String>
+
+    <!-- Search and Replace -->
+    <sys:String x:Key="Search3">Szukaj:</sys:String>
+    <sys:String x:Key="ReplaceWith">Zastąpić przez:</sys:String>
+    <sys:String x:Key="SearchIn">Szukaj w:</sys:String>
+    <sys:String x:Key="InAllOpenScripts">We wszystkich otwartych skryptach</sys:String>
+    <sys:String x:Key="InTheSelectedDirectory">W ustalonym katalogu</sys:String>
+    <sys:String x:Key="OnlySelectedText">Tylko zaznaczony tekst</sys:String>
+
+    <!-- Search Results -->
+    <sys:String x:Key="SearchResults">Wyniki wyszukiwania</sys:String>
+    <sys:String x:Key="NavigateToMatch">Przejdź do wyniku</sys:String>
+
+    <!-- Settings -->
+    <sys:String x:Key="General">Ogólne</sys:String>
+    <sys:String x:Key="Theme">Tryb wyświetlania:</sys:String>
+    <sys:String x:Key="LightMode">Tryb dzienny</sys:String>
+    <sys:String x:Key="DarkMode">Tryb nocny</sys:String>
+    <sys:String x:Key="Language">Język:</sys:String>
+    <sys:String x:Key="Paths">Ścieżki</sys:String>
+    <sys:String x:Key="PathToGothicScripts">Ścieżka do skryptów Gothic:</sys:String>
+
+
+
+
+</ResourceDictionary>

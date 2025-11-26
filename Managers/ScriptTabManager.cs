@@ -45,7 +45,12 @@ namespace Skriptorium.Managers
         {
             var pane = GetActiveDocumentPane();
             var children = pane.Children.ToList();
-            var newTab = children.FirstOrDefault(d => d.Title.StartsWith("Neu"));
+
+            // Dynamischer Präfix für "Neues Skript" aus den Ressourcen
+            string newScriptPrefix = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
+
+            // Suche das neue Skript anhand des dynamischen Präfixes
+            var newTab = children.FirstOrDefault(d => d.Title.StartsWith(newScriptPrefix, StringComparison.OrdinalIgnoreCase));
             if (newTab != null)
             {
                 children.Remove(newTab);
@@ -88,6 +93,7 @@ namespace Skriptorium.Managers
             }
         }
 
+
         private LayoutDocumentPane GetActiveDocumentPane()
         {
             if (_defaultDocumentPane.ChildrenCount > 0)
@@ -129,9 +135,22 @@ namespace Skriptorium.Managers
             var scriptEditor = new ScriptEditor { FilePath = filePath ?? "" };
             scriptEditor.SetTextAndResetModified(content);
 
-            string baseTitle = tabTitle ?? $"Neu{_newScriptCounter++}";
-            if (!string.IsNullOrWhiteSpace(filePath))
+            // Dynamisches Präfix für "Neues Skript" aus den Ressourcen
+            string newScriptPrefix = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
+
+            string baseTitle;
+            if (!string.IsNullOrWhiteSpace(tabTitle))
+            {
+                baseTitle = tabTitle;
+            }
+            else if (!string.IsNullOrWhiteSpace(filePath))
+            {
                 baseTitle = Path.GetFileName(filePath);
+            }
+            else
+            {
+                baseTitle = $"{newScriptPrefix}{_newScriptCounter++}";
+            }
 
             var document = new LayoutDocument { Title = baseTitle, Content = scriptEditor, IsActive = false };
 
@@ -240,13 +259,22 @@ namespace Skriptorium.Managers
             if (!editor.IsModified)
                 return true;
 
+            string msg = Application.Current.FindResource("MsgScriptModified") as string
+                             ?? "Dieses Skript wurde geändert. Möchtest du es speichern?";
+
+            string title = Application.Current.FindResource("MsgSaveChangesTitle") as string
+                             ?? "Änderungen speichern?";
+
             var result = MessageBox.Show(
-                "Dieses Skript wurde geändert. Möchtest du es speichern?",
-                "Änderungen speichern?",
+                msg,
+                title,
                 MessageBoxButton.YesNoCancel,
                 MessageBoxImage.Warning
             );
-            if (result == MessageBoxResult.Cancel) return false;
+
+            if (result == MessageBoxResult.Cancel)
+                return false;
+
             if (result == MessageBoxResult.Yes)
             {
                 bool saved = DataManager.SaveFile(editor);
@@ -257,8 +285,18 @@ namespace Skriptorium.Managers
 
                 var doc = GetDocumentForEditor(editor);
                 if (doc != null)
-                    doc.ToolTip = string.IsNullOrWhiteSpace(editor.FilePath) ? "Nicht gespeichert" : editor.FilePath;
+                {
+                    string tooltip = editor.FilePath;
+                    if (string.IsNullOrWhiteSpace(tooltip))
+                    {
+                        tooltip = Application.Current.FindResource("MsgUnsaved") as string
+                                  ?? "Nicht gespeichert";
+                    }
+
+                    doc.ToolTip = tooltip;
+                }
             }
+
             return true;
         }
 
@@ -352,16 +390,16 @@ namespace Skriptorium.Managers
         {
             string xamlTemplate = @"
         <ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='ScrollBar'>
-            <Grid Background='Transparent' Height='0'>
+            <Grid Background='Transparent' Height='4'>
                 <Track Name='PART_Track'>
                     <Track.DecreaseRepeatButton>
                         <RepeatButton Command='ScrollBar.LineLeftCommand' Opacity='0' IsTabStop='False'/>
                     </Track.DecreaseRepeatButton>
                     <Track.Thumb>
-                        <Thumb Height='0'>
+                        <Thumb Height='4'>
                             <Thumb.Template>
                                 <ControlTemplate TargetType='Thumb'>
-                                    <Border Background='Transparent' CornerRadius='2'/>
+                                    <Border Background='Gray' CornerRadius='2'/>
                                 </ControlTemplate>
                             </Thumb.Template>
                         </Thumb>

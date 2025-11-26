@@ -8,7 +8,7 @@
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5">
             <!-- Datei -->
             <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent"
-        Click="BtnCreateFile_Click" ToolTip="Neue Datei">
+        Click="BtnCreateFile_Click" ToolTip="{DynamicResource NewScript}">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
@@ -21,7 +21,7 @@
 
             <!-- Ordner -->
             <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent"
-        Click="BtnCreateFolder_Click" ToolTip="Neuer Ordner">
+        Click="BtnCreateFolder_Click" ToolTip="{DynamicResource NewFolder}">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
@@ -34,7 +34,7 @@
 
             <!-- Einklappen -->
             <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent"
-        Click="BtnCollapse_Click" ToolTip="Alles einklappen">
+        Click="BtnCollapse_Click" ToolTip="Collapse All">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
@@ -47,7 +47,7 @@
 
             <!-- Refresh -->
             <Button Width="26" Height="26" Margin="1" Background="Transparent" BorderBrush="Transparent"
-        Click="BtnRefresh_Click" ToolTip="Datei Explorer aktualisieren">
+        Click="BtnRefresh_Click" ToolTip="{DynamicResource RefreshFileExplorer}">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
@@ -81,10 +81,10 @@
             <TreeView.Resources>
                 <!-- Kontextmenü für Dateien & Ordner -->
                 <ContextMenu x:Key="FileContextMenu">
-                    <MenuItem Header="In Explorer öffnen" Click="MenuOpenInExplorer_Click" FontSize="12"/>
+                    <MenuItem Header="{DynamicResource OpenInExplorer}" Click="MenuOpenInExplorer_Click" FontSize="12"/>
                     <Separator/>
-                    <MenuItem Header="Umbenennen" Click="MenuRename_Click" FontSize="12"/>
-                    <MenuItem Header="Löschen" Click="MenuDelete_Click" FontSize="12"/>
+                    <MenuItem Header="{DynamicResource Rename}" Click="MenuRename_Click" FontSize="12"/>
+                    <MenuItem Header="{DynamicResource Delete}" Click="MenuDelete_Click" FontSize="12"/>
                 </ContextMenu>
             </TreeView.Resources>
 

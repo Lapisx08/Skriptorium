@@ -103,7 +103,7 @@ namespace Skriptorium.UI.Views
 
         private void OnDocumentClosed(object sender, DocumentClosedEventArgs e)
         {
-            if (e.Document.Content is ScriptEditor && ChkSearchIn.IsChecked == true && SearchIn == "In allen offenen Skripten" && !string.IsNullOrEmpty(SearchText))
+            if (e.Document.Content is ScriptEditor && ChkSearchIn.IsChecked == true && SearchIn == (Application.Current.FindResource("InAllOpenScripts") as string) && !string.IsNullOrEmpty(SearchText))
             {
                 Dispatcher.InvokeAsync(FindAllOccurrencesAsync);
             }
@@ -240,8 +240,8 @@ namespace Skriptorium.UI.Views
             (bool isCaseSensitive, bool isWholeWord, bool isSearchInAllScripts, bool isSearchInDirectory, bool restrictToSelection, string selectedText, int selectionStart, string documentText, string scriptPath) = await Dispatcher.InvokeAsync(() => (
                 ChkCase.IsChecked == true,
                 ChkWholeWord.IsChecked == true,
-                ChkSearchIn.IsChecked == true && SearchIn == "In allen offenen Skripten",
-                ChkSearchIn.IsChecked == true && SearchIn == "Im gesetzten Verzeichnis",
+                ChkSearchIn.IsChecked == true && SearchIn == (Application.Current.FindResource("InAllOpenScripts") as string),
+                ChkSearchIn.IsChecked == true && SearchIn == (Application.Current.FindResource("InTheSelectedDirectory") as string),
                 ChkSelectionOnly.IsChecked == true && (_currentEditor?.Avalon.SelectionLength ?? 0) > 0,
                 _currentEditor?.Avalon.SelectedText ?? string.Empty,
                 _currentEditor?.Avalon.SelectionStart ?? 0,
@@ -454,7 +454,7 @@ namespace Skriptorium.UI.Views
                 }
             }
 
-            if (ChkSearchIn.IsChecked == true && (SearchIn == "In allen offenen Skripten" || SearchIn == "Im gesetzten Verzeichnis"))
+            if (ChkSearchIn.IsChecked == true && (SearchIn == (Application.Current.FindResource("InAllOpenScripts") as string) || SearchIn == (Application.Current.FindResource("InTheSelectedDirectory") as string)))
             {
                 ShowSearchResultsPanel();
                 if (_searchResults.Count > 0)
@@ -639,8 +639,8 @@ namespace Skriptorium.UI.Views
 
             await FindAllOccurrencesAsync();
 
-            bool isSearchInAllScripts = ChkSearchIn.IsChecked == true && SearchIn == "In allen offenen Skripten";
-            bool isSearchInDirectory = ChkSearchIn.IsChecked == true && SearchIn == "Im gesetzten Verzeichnis";
+            bool isSearchInAllScripts = ChkSearchIn.IsChecked == true && SearchIn == (Application.Current.FindResource("InAllOpenScripts") as string);
+            bool isSearchInDirectory = ChkSearchIn.IsChecked == true && SearchIn == (Application.Current.FindResource("InTheSelectedDirectory") as string);
             bool restrictToSelection = ChkSelectionOnly.IsChecked == true && (_currentEditor?.Avalon.SelectionLength ?? 0) > 0;
 
             int totalReplacedCount = 0;
@@ -922,34 +922,30 @@ namespace Skriptorium.UI.Views
             var existing = _dockingManager.Layout.Descendents()
                 .OfType<LayoutAnchorable>()
                 .FirstOrDefault(a => a.ContentId == "SearchResults");
-
             if (existing != null)
             {
+                // Titel bei bestehendem Panel aktualisieren
+                existing.Title = Application.Current.FindResource("SearchResults") as string ?? "Suchergebnisse";  // Fallback
                 existing.IsVisible = true;
                 existing.IsActive = true;
                 return;
             }
-
             var searchResultsView = new SearchResultsView(_tabManager, _searchResults);
-
             var anchorable = new LayoutAnchorable
             {
-                Title = "Suchergebnisse",
+                Title = Application.Current.FindResource("SearchResults") as string ?? "Suchergebnisse",  // Initial setzen
                 Content = searchResultsView,
                 CanClose = true,
                 CanFloat = true,
                 CanHide = false,
                 ContentId = "SearchResults"
             };
-
             anchorable.AddToLayout(_dockingManager, AnchorableShowStrategy.Left);
-
             var pane = anchorable.FindParent<LayoutAnchorablePane>();
             if (pane != null)
             {
                 pane.DockWidth = new GridLength(250, GridUnitType.Pixel);
             }
-
             anchorable.IsVisible = true;
             anchorable.IsActive = true;
         }

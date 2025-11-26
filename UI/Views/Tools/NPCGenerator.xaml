@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:Skriptorium.UI.Views.Tools"
-        Title="NPC Generator" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
+        Title="{DynamicResource NPCGenerator}" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
         Height="780" Width="700">
 
     <Grid Margin="10">
@@ -42,52 +42,52 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Name:" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource Name}" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <TextBox x:Name="nameEntry" Grid.Row="0" Grid.Column="1" Margin="5"/>
 
-            <TextBlock Text="Gilde:" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource Guild}" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <TextBox x:Name="guildEntry" Grid.Row="1" Grid.Column="1" Margin="5"/>
 
-            <TextBlock Text="ID:" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource ID}" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <TextBox x:Name="idEntry" Grid.Row="2" Grid.Column="1" Margin="5"/>
 
-            <TextBlock Text="Voice:" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource Voice}" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <TextBox x:Name="voiceEntry" Grid.Row="3" Grid.Column="1" Margin="5"/>
 
-            <TextBlock Text="Flags:" Grid.Row="4" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource Flags}" Grid.Row="4" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <ComboBox x:Name="flagsEntry" Grid.Row="4" Grid.Column="1" Margin="5" SelectedIndex="0">
                 <ComboBoxItem Content="0"/>
                 <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
             </ComboBox>
 
-            <TextBlock Text="NPC Type:" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource NPCType}" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <ComboBox x:Name="npcTypeDropdown" Grid.Row="5" Grid.Column="1" Margin="5" SelectedIndex="0">
                 <ComboBoxItem Content="NPCTYPE_MAIN"/>
                 <ComboBoxItem Content="NPCTYPE_FRIEND"/>
             </ComboBox>
 
-            <TextBlock Text="AIVARs:" Grid.Row="6" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource AIVARs}" Grid.Row="6" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <ComboBox x:Name="aivarsDropdown" Grid.Row="6" Grid.Column="1" Margin="5" SelectedIndex="1">
-                <ComboBoxItem Content="Ja"/>
-                <ComboBoxItem Content="Nein"/>
+                <ComboBoxItem Content="{DynamicResource Yes}"/>
+                <ComboBoxItem Content="{DynamicResource No}"/>
             </ComboBox>
 
-            <TextBlock Text="Individuelle Attribute:" Grid.Row="7" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource IndividualAttributes}" Grid.Row="7" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <ComboBox x:Name="attributesDropdown" Grid.Row="7" Grid.Column="1" Margin="5" SelectedIndex="1">
-                <ComboBoxItem Content="Ja"/>
-                <ComboBoxItem Content="Nein"/>
+                <ComboBoxItem Content="{DynamicResource Yes}"/>
+                <ComboBoxItem Content="{DynamicResource No}"/>
             </ComboBox>
 
-            <TextBlock Text="Individuelle Kampf-Talente:" Grid.Row="8" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource IndividualFightTalents}" Grid.Row="8" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <ComboBox x:Name="fightSkillsDropdown" Grid.Row="8" Grid.Column="1" Margin="5" SelectedIndex="1">
-                <ComboBoxItem Content="Ja"/>
-                <ComboBoxItem Content="Nein"/>
+                <ComboBoxItem Content="{DynamicResource Yes}"/>
+                <ComboBoxItem Content="{DynamicResource No}"/>
             </ComboBox>
 
-            <TextBlock Text="Geschlecht:" Grid.Row="9" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource Gender}" Grid.Row="9" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <ComboBox x:Name="genderDropdown" Grid.Row="9" Grid.Column="1" Margin="5" SelectedIndex="0">
-                <ComboBoxItem Content="Männlich"/>
-                <ComboBoxItem Content="Weiblich"/>
+                <ComboBoxItem Content="{DynamicResource Male}"/>
+                <ComboBoxItem Content="{DynamicResource Female}"/>
             </ComboBox>
 
         </Grid>
@@ -100,13 +100,13 @@
         <!-- Button-Leiste -->
         <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,0">
             <Button Click="GenerateCode_Click" Margin="5">
-                <TextBlock Text="Generieren"/>
+                <TextBlock Text="{DynamicResource Generate}"/>
             </Button>
             <Button Click="CopyToClipboard_Click" Margin="5">
-                <TextBlock Text="Kopieren"/>
+                <TextBlock Text="{DynamicResource Copy}"/>
             </Button>
             <Button Click="ResetFields_Click" Margin="5">
-                <TextBlock Text="Zurücksetzen"/>
+                <TextBlock Text="{DynamicResource Reset}"/>
             </Button>
         </StackPanel>
 

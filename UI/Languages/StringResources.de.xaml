@@ -2,8 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- MainWindow -->
-
     <!-- Skriptorium -->
     <sys:String x:Key="AboutSkriptorium">Über Skriptorium</sys:String>
     <sys:String x:Key="Settings">Einstellungen</sys:String>
@@ -30,7 +28,7 @@
     <sys:String x:Key="SelectAll">Alles auswählen</sys:String>
 
     <!-- Search -->
-    <sys:String x:Key="Search">Suchen</sys:String>
+    <sys:String x:Key="Search">Suche</sys:String>
     <sys:String x:Key="SearchAndReplace">Suchen und Ersetzen</sys:String>
 
     <!-- Bookmarks -->
@@ -69,6 +67,91 @@
     <sys:String x:Key="Line">Zeile</sys:String>
 
     <!-- Dialog Generator -->
+    <sys:String x:Key="DialogInstance">Dialoginstanz:</sys:String>
+    <sys:String x:Key="NPCInstance">NPC-Instanz:</sys:String>
+    <sys:String x:Key="Description">Beschreibung:</sys:String>
+    <sys:String x:Key="DialogNumber">Dialognummer:</sys:String>
+    <sys:String x:Key="Important">Wichtig:</sys:String>
+    <sys:String x:Key="Permanent">Permanent:</sys:String>
+    <sys:String x:Key="AddLine">Zeile hinzufügen</sys:String>
+    <sys:String x:Key="Generate">Generieren</sys:String>
+    <sys:String x:Key="Reset">Zurücksetzen</sys:String>
+    <sys:String x:Key="Yes">Ja</sys:String>
+    <sys:String x:Key="No">Nein</sys:String>
+
+    <!-- File Explorer -->
+    <sys:String x:Key="NewScript">Neues Skript</sys:String>
+    <sys:String x:Key="NewFolder">Neuer Ordner</sys:String>
+    <sys:String x:Key="CollapseAll">Alles einklappen</sys:String>
+    <sys:String x:Key="RefreshFileExplorer">Datei Explorer aktualisieren</sys:String>
+    <sys:String x:Key="OpenInExplorer">In Explorer öffnen</sys:String>
+    <sys:String x:Key="Rename">Umbenennen</sys:String>
+    <sys:String x:Key="Delete">Löschen</sys:String>
+
+    <!-- NPC Generator -->
+    <sys:String x:Key="Guild">Gilde:</sys:String>
+    <sys:String x:Key="ID">ID:</sys:String>
+    <sys:String x:Key="Voice">Voice:</sys:String>
+    <sys:String x:Key="Flags">Flags:</sys:String>
+    <sys:String x:Key="NPCType">NPC Type:</sys:String>
+    <sys:String x:Key="AIVARs">AIVARs:</sys:String>
+    <sys:String x:Key="IndividualAttributes">Individuelle Attribute:</sys:String>
+    <sys:String x:Key="IndividualFightTalents">Individuelle Kampf-Talente:</sys:String>
+    <sys:String x:Key="Gender">Geschlecht:</sys:String>
+    <sys:String x:Key="Male">Männlich</sys:String>
+    <sys:String x:Key="Female">Weiblich</sys:String>
+
+    <!-- Search Explorer -->
+    <sys:String x:Key="Search2">Suchen</sys:String>
+    <sys:String x:Key="CaseSensitive">Groß-/Kleinschreibung beachten</sys:String>
+    <sys:String x:Key="MatchWholeWord">Nur ganzes Wort suchen</sys:String>
+    <sys:String x:Key="Replace">Ersetzen</sys:String>
+    <sys:String x:Key="ReplaceAll">Alles ersetzen</sys:String>
+
+    <!-- AboutSkriptorium -->
+    <sys:String x:Key="Version">Version: 1.0</sys:String>
+    <sys:String x:Key="Developer">Entwickler: Lapis, Nemora26</sys:String>
+    <sys:String x:Key="Licensing">Lizenziert unter GNU General Public License Version 3</sys:String>
+    <sys:String x:Key="ViewLicense">Lizenz anzeigen</sys:String>
+
+    <!-- Search and Replace -->
+    <sys:String x:Key="Search3">Suchen:</sys:String>
+    <sys:String x:Key="ReplaceWith">Ersetzen durch:</sys:String>
+    <sys:String x:Key="SearchIn">Suchen in:</sys:String>
+    <sys:String x:Key="InAllOpenScripts">In allen offenen Skripten</sys:String>
+    <sys:String x:Key="InTheSelectedDirectory">Im gesetzten Verzeichnis</sys:String>
+    <sys:String x:Key="OnlySelectedText">Nur markierter Text</sys:String>
+
+    <!-- Search Results -->
+    <sys:String x:Key="SearchResults">Suchergebnisse</sys:String>
+    <sys:String x:Key="NavigateToMatch">Zum Treffer navigieren</sys:String>
+
+    <!-- Settings -->
+    <sys:String x:Key="General">Allgemein</sys:String>
+    <sys:String x:Key="Theme">Anzeigemodus:</sys:String>
+    <sys:String x:Key="LightMode">Tagmodus</sys:String>
+    <sys:String x:Key="DarkMode">Nachtmodus</sys:String>
+    <sys:String x:Key="Language">Sprache:</sys:String>
+    <sys:String x:Key="Paths">Pfade</sys:String>
+    <sys:String x:Key="PathToGothicScripts">Pfad zu Gothic Skripts:</sys:String>
+
+    <!-- Data Manager -->
+    <sys:String x:Key="TextFiles">Text-Dateien (*.txt)|*.txt</sys:String>
+    <sys:String x:Key="DaedalusFiles">Daedalus-Dateien (*.d)|*.d</sys:String>
+    <sys:String x:Key="SourceFiles">Source-Dateien (*.src)|*.src</sys:String>
+    <sys:String x:Key="AllSupported">Alle unterstützten Dateien (*.d;*.txt;*.src)|*.d;*.txt;*.src</sys:String>
+
+    <!-- Script Tabmanager -->
+    <sys:String x:Key="NewScriptName">Neu</sys:String>
+    <sys:String x:Key="MsgScriptModified">Dieses Skript wurde geändert. Möchtest du es speichern?</sys:String>
+    <sys:String x:Key="MsgSaveChangesTitle">Änderungen speichern?</sys:String>
+    <sys:String x:Key="MsgUnsaved">Nicht gespeichert</sys:String>
+
+
+    
+    
+    
+    
 
 
 </ResourceDictionary>

@@ -30,7 +30,7 @@
                          Padding="4,0,4,0"
                          TextChanged="TxtSearch_TextChanged"/>
 
-                <TextBlock Text="Suchen"
+                <TextBlock Text="{DynamicResource Search2}"
                            Foreground="Gray"
                            VerticalAlignment="Center"
                            Margin="8,0,0,0"
@@ -42,7 +42,7 @@
                               Width="26"
                               Height="26"
                               Click="BtnMatchCase_Click"
-                              ToolTip="Groß-/Kleinschreibung beachten">
+                              ToolTip="{DynamicResource CaseSensitive}">
                     <ToggleButton.Template>
                         <ControlTemplate TargetType="ToggleButton">
                             <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
@@ -67,7 +67,7 @@
                               Width="26"
                               Height="26"
                               Click="BtnWholeWord_Click"
-                              ToolTip="Nur ganzes Wort suchen">
+                              ToolTip="{DynamicResource MatchWholeWord}">
                     <ToggleButton.Template>
                         <ControlTemplate TargetType="ToggleButton">
                             <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
@@ -102,7 +102,7 @@
                          VerticalContentAlignment="Center"
                          Padding="4,0,4,0"/>
 
-                <TextBlock Text="Ersetzen"
+                <TextBlock Text="{DynamicResource Replace}"
                            Foreground="Gray"
                            VerticalAlignment="Center"
                            Margin="8,0,0,0"
@@ -114,7 +114,7 @@
                         Width="26"
                         Height="26"
                         Click="BtnReplaceAll_Click"
-                        ToolTip="Alles ersetzen">
+                        ToolTip="{DynamicResource ReplaceAll}">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
@@ -134,7 +134,7 @@
                         Width="26"
                         Height="26"
                         Click="BtnCollapseMatches_Click"
-                        ToolTip="Alles einklappen">
+                        ToolTip="{DynamicResource CollapseAll}">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
