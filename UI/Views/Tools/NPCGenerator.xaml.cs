@@ -21,7 +21,7 @@ namespace Skriptorium.UI.Views.Tools
             RestrictToNoDigits(guildEntry);
 
             // Standardauswahl für Flags = "0"
-            flagsEntry.SelectedIndex = 0; // 0 = 0, 1 = NPC_FLAG_IMMORTAL
+            flagsEntry.SelectedIndex = 0; // 0 = 0
 
             // Standardauswahl für NPC Type = NPCTYPE_MAIN
             npcTypeDropdown.SelectedIndex = 0;
@@ -174,7 +174,7 @@ namespace Skriptorium.UI.Views.Tools
                 ? maleFaces[rng.Next(maleFaces.Count)]
                 : femaleFaces[rng.Next(femaleFaces.Count)];
 
-            return $"B_SetNpcVisual (self, {gender}, \"{head}\", {face}, {bodyTex}, ITAR_Platzhalter); // Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird";
+            return $"B_SetNpcVisual (self, {gender}, \"{head}\", {face}, {bodyTex}, NO_ARMOR); // Ersetze NO_ARMOR durch die gewünschte Rüstungsinstanz / Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird";
         }
 
         private void GenerateCode_Click(object sender, RoutedEventArgs e)
@@ -218,7 +218,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine($"    guild    =  {guildText};");
             sb.AppendLine($"    id       =  {idEntry.Text};");
             sb.AppendLine($"    voice    =  {voiceEntry.Text};");
-            sb.AppendLine($"    flags    =  {flagsEntry.Text}; // NPC_FLAG_IMMORTAL oder 0");
+            sb.AppendLine($"    flags    =  {flagsEntry.Text};");
             sb.AppendLine($"    npctype  =  {((ComboBoxItem)npcTypeDropdown.SelectedItem)?.Content};");
 
             if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
@@ -231,12 +231,14 @@ namespace Skriptorium.UI.Views.Tools
             {
                 // AIVARS
                 sb.AppendLine("    // ------ AIVARS ------");
-                sb.AppendLine("    aivar[AIV_ToughGuy]              =  TRUE;");
+                sb.AppendLine("    aivar[AIV_ToughGuy]              =  TRUE; // Jubelt beim Kampf, hat keine Neuigkeiten bei Attack (kann über AIV_LastFightAgainstPlayer reagieren)");
                 sb.AppendLine("    aivar[AIV_ToughGuyNewsOverride]  =  TRUE;");
                 sb.AppendLine("    aivar[AIV_IGNORE_Murder]         =  TRUE;");
                 sb.AppendLine("    aivar[AIV_IGNORE_Theft]          =  TRUE;");
                 sb.AppendLine("    aivar[AIV_IGNORE_Sheepkiller]    =  TRUE;");
-                sb.AppendLine("    aivar[AIV_IgnoresArmor]          =  TRUE;");
+                sb.AppendLine("    aivar[AIV_IgnoresFakeGuild]      =  TRUE; // Ignoriert die falsche Gilde, die durch die Rüstung erzeugt wird");
+                sb.AppendLine("    aivar[AIV_IgnoresArmor]          =  TRUE; // Keine Reaktion oder Konsequenzen auf die Rüstung des Helden");
+                sb.AppendLine("    aivar[AIV_NPCIsRanger]           =  TRUE; // NPC gehört zum Ring des Wassers");
                 sb.AppendLine("    aivar[AIV_EnemyOverride]         =  TRUE;");
                 sb.AppendLine("    aivar[AIV_MagicUser]             =  MAGIC_ALWAYS; // Setzt immer Magie beim Kämpfen ein");
                 sb.AppendLine("    // Lösche die AIV, die nicht benötigt werden");
@@ -262,12 +264,12 @@ namespace Skriptorium.UI.Views.Tools
 
             // Kampf-Taktik
             sb.AppendLine("    // ------ Kampf-Taktik ------");
-            sb.AppendLine($"    fight_tactic  =  FAI_HUMAN_Platzhalter; // COWARD / NORMAL / STRONG / MASTER");
+            sb.AppendLine($"    fight_tactic  =  FAI_HUMAN_COWARD; // COWARD / NORMAL / STRONG / MASTER");
             sb.AppendLine();
 
             // Ausgerüstete Waffen
             sb.AppendLine("    // ------ Ausgerüstete Waffen ------");
-            sb.AppendLine($"    EquipItem (self, Item_Instanz); // Munition wird automatisch generiert, darf aber angegeben werden"); 
+            sb.AppendLine($"    EquipItem (self, ItMw_1h_Bau_Mace); // Ersetze die Iteminstanz durch die gewünschte Waffe / Munition wird automatisch generiert, darf aber angegeben werden"); 
             sb.AppendLine();
 
             // Inventar
@@ -279,7 +281,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("    // ------ Aussehen ------");
             sb.AppendLine($"    {GenerateNpcVisual()}");
             sb.AppendLine("    Mdl_SetModelFatness (self, 0); // -1 / 0 / 1 / 2");
-            sb.AppendLine("    Mdl_ApplyOverlayMds (self, \"Humans_Platzhalter.mds\"); // Tired / Militia / Mage / Arrogance / Relaxed");
+            sb.AppendLine("    Mdl_ApplyOverlayMds (self, \"Humans_Tired.mds\"); // Tired / Militia / Mage / Arrogance / Relaxed");
             sb.AppendLine();
 
             // NSC-relevante Talente
@@ -311,8 +313,8 @@ namespace Skriptorium.UI.Views.Tools
             // Tagesroutine-Funktion
             sb.AppendLine($"func void Rtn_Start_{idEntry.Text} () // Tages-Routine muss insgesamt immer 24 h ergeben und sie muss mindestens zwei Tagesabläufe umfassen");
             sb.AppendLine("{");
-            sb.AppendLine("    TA_Platzhalter  (08,00,20,00,\"WP_Platzhalter\");");
-            sb.AppendLine("    TA_Platzhalter  (20,00,08,00,\"WP_Platzhalter\");");
+            sb.AppendLine("    TA_Platzhalter (08,00,20,00,\"WP_Platzhalter\");");
+            sb.AppendLine("    TA_Platzhalter (20,00,08,00,\"WP_Platzhalter\");");
             sb.AppendLine("};");
 
             outputText.Text = sb.ToString();

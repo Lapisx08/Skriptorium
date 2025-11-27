@@ -115,9 +115,32 @@ namespace Skriptorium.UI
             // 4. Letzte Dateien laden und erstes Tab öffnen
             DataManager.LoadRecentFiles();
             _dataMenuManager.UpdateRecentFilesMenu();
-            _tabManager.AddNewTab();
+            this.Loaded += MainWindow_FirstLoaded;
 
             LanguageManager.LanguageChanged += OnLanguageChanged;
+        }
+
+        private void MainWindow_FirstLoaded(object sender, RoutedEventArgs e)
+        {
+            this.Loaded -= MainWindow_FirstLoaded; // nur einmal ausführen
+
+            // 1. Zuerst alle gespeicherten Tabs wieder öffnen (falls vorhanden)
+            var savedTabs = DataManager.LoadOpenTabs();
+            foreach (var tab in savedTabs)
+            {
+                if (!string.IsNullOrWhiteSpace(tab.FilePath) && File.Exists(tab.FilePath))
+                {
+                    DataManager.OpenFile(tab.FilePath, (content, path) =>
+                        _tabManager.AddNewTab(content, Path.GetFileName(path), path));
+                }
+                else if (!string.IsNullOrWhiteSpace(tab.Content))
+                {
+                    _tabManager.AddNewTab(tab.Content);
+                }
+            }
+
+            _tabManager.AddNewTab();
+            _tabManager.MoveNewTabToEnd();
         }
 
         // Handler-Methode für Sprachänderungen

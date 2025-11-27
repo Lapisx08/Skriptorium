@@ -45,29 +45,25 @@ namespace Skriptorium.Managers
         {
             var pane = GetActiveDocumentPane();
             string newScriptPrefix = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
-
             var newTab = pane.Children.OfType<LayoutDocument>()
                            .FirstOrDefault(d => d.Title.StartsWith(newScriptPrefix, StringComparison.OrdinalIgnoreCase));
 
             if (newTab != null)
             {
-                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                pane.Children.Remove(newTab);
+                pane.Children.Add(newTab);
+
+                newTab.IsActive = true;
+                _dockingManager.ActiveContent = newTab;
+
+                // Sofortiger Fokus ohne Verzögerung
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // Direktes Verschieben innerhalb der Children-Collection
-                    pane.Children.Remove(newTab);
-                    pane.Children.Add(newTab);
-
-                    newTab.IsActive = true;
-                    _dockingManager.ActiveContent = newTab;
-
                     if (newTab.Content is ScriptEditor editor)
                         editor.Focus();
-
                     _dockingManager.Focus();
-
-                    if (!_isInitializing)
-                        ScrollToRightEnd();
-                }), DispatcherPriority.Background);
+                    ScrollToRightEnd();
+                }, DispatcherPriority.Render);
             }
         }
 
@@ -139,31 +135,16 @@ namespace Skriptorium.Managers
             var targetPane = GetActiveDocumentPane();
             targetPane.Children.Add(document);
 
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                var tabControl = FindVisualChildren<TabControl>(_dockingManager)
-                    .FirstOrDefault(tc => tc.Items.SourceCollection == targetPane.Children);
-                if (tabControl != null)
-                {
-                    tabControl.PreviewMouseWheel -= TabControl_PreviewMouseWheel;
-                    tabControl.PreviewMouseWheel += TabControl_PreviewMouseWheel;
-                }
-
-                WrapTabPanelsInScrollViewer();
-            }), DispatcherPriority.Background);
-
-            document.IsActive = true;
+            document.IsActive = true; 
             _dockingManager.ActiveContent = document;
 
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            // Fokus sofort setzen (verhindert Flackern)
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 if (document.Content is ScriptEditor editor)
                     editor.Focus();
-                _dockingManager.Focus();
-
-                if (!_isInitializing)
-                    ScrollToRightEnd();
-            }), DispatcherPriority.ApplicationIdle);
+                ScrollToRightEnd();
+            }, DispatcherPriority.Render);
         }
 
         private void ScrollToRightEnd()
