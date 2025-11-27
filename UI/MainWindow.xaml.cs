@@ -148,11 +148,12 @@ namespace Skriptorium.UI
 
             // „Neu“-Tabs aktualisieren
             var documentTabs = dockingManager.Layout.Descendents()
-                .OfType<LayoutDocument>()
-                .Where(d => d.Title.StartsWith("Neu") || d.Title.StartsWith("New", StringComparison.OrdinalIgnoreCase));
+                    .OfType<LayoutDocument>()
+                    .Where(d => d.Title.StartsWith("Neu") ||
+                                d.Title.StartsWith("New", StringComparison.OrdinalIgnoreCase) ||
+                                d.Title.StartsWith("Nowe", StringComparison.OrdinalIgnoreCase));
 
             string newScriptPrefix = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
-
             foreach (var doc in documentTabs)
             {
                 int number = 0;
@@ -160,7 +161,6 @@ namespace Skriptorium.UI
                 string digits = new string(oldTitle.SkipWhile(c => !char.IsDigit(c)).ToArray());
                 if (int.TryParse(digits, out int parsed))
                     number = parsed;
-
                 doc.Title = $"{newScriptPrefix}{number}";
             }
 

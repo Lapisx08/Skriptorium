@@ -87,7 +87,6 @@ namespace Skriptorium.Common
             }
         }
 
-        #region PInvoke
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         private struct SHFILEINFO
         {
@@ -105,6 +104,5 @@ namespace Skriptorium.Common
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyIcon(IntPtr hIcon);
-        #endregion
     }
 }

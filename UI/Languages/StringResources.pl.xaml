@@ -4,60 +4,92 @@
 
     <!-- Skriptorium -->
     <sys:String x:Key="AboutSkriptorium">O Skriptorium</sys:String>
+    <sys:String x:Key="CtrlI">Ctrl + I</sys:String>
     <sys:String x:Key="Settings">Ustawienia</sys:String>
+    <sys:String x:Key="CtrlComma">Ctrl + ,</sys:String>
     <sys:String x:Key="Exit">Zakończ</sys:String>
 
     <!-- File -->
     <sys:String x:Key="File">Plik</sys:String>
     <sys:String x:Key="New">Nowe</sys:String>
+    <sys:String x:Key="CtrlN">Ctrl + N</sys:String>
     <sys:String x:Key="Open">Otwórz</sys:String>
+    <sys:String x:Key="CtrlO">Ctrl + O</sys:String>
     <sys:String x:Key="LastOpened">Ostatnio otwarte</sys:String>
     <sys:String x:Key="Save">Zapisz</sys:String>
+    <sys:String x:Key="CtrlS">Ctrl + S</sys:String>
     <sys:String x:Key="SaveAs">Zapisz jako...</sys:String>
+    <sys:String x:Key="CtrlShiftS">Ctrl+ Shift + S</sys:String>
     <sys:String x:Key="SaveAll">Zapisz wszystko</sys:String>
+    <sys:String x:Key="CtrlAltS">Ctrl + Alt + S</sys:String>
     <sys:String x:Key="Close">Zamknij</sys:String>
+    <sys:String x:Key="CtrlW">Ctrl + W</sys:String>
 
     <!-- Edit -->
     <sys:String x:Key="Edit">Edytuj</sys:String>
     <sys:String x:Key="Undo">Cofnij</sys:String>
+    <sys:String x:Key="CtrlZ">Ctrl + Z</sys:String>
     <sys:String x:Key="Redo">Powtórz</sys:String>
+    <sys:String x:Key="CtrlY">Ctrl + Y</sys:String>
     <sys:String x:Key="Cut">Wycinanie</sys:String>
+    <sys:String x:Key="CtrlX">Ctrl + X</sys:String>
     <sys:String x:Key="Copy">Kopiowanie</sys:String>
+    <sys:String x:Key="CtrlC">Ctrl + C</sys:String>
     <sys:String x:Key="Paste">Wstawianie</sys:String>
+    <sys:String x:Key="CtrlV">Ctrl + V</sys:String>
     <sys:String x:Key="Duplicate">Duplikowanie</sys:String>
+    <sys:String x:Key="CtrlD">Ctrl + D</sys:String>
     <sys:String x:Key="SelectAll">Wybierz wszystko</sys:String>
+    <sys:String x:Key="CtrlA">Ctrl + A</sys:String>
 
     <!-- Search -->
     <sys:String x:Key="Search">Wyszukiwanie</sys:String>
     <sys:String x:Key="SearchAndReplace">Wyszukiwanie i zamiana</sys:String>
+    <sys:String x:Key="CtrlF">Ctrl + F</sys:String>
 
     <!-- Bookmarks -->
     <sys:String x:Key="Bookmarks">Zakładka</sys:String>
-    <sys:String x:Key="AddAndRemove">Zakładanie i zdejmowanie</sys:String>
+    <sys:String x:Key="AddAndRemove">Przypnij i Odepnij</sys:String>
     <sys:String x:Key="Next">Do następnego</sys:String>
+    <sys:String x:Key="CtrlF2">Ctrl + F2</sys:String>
     <sys:String x:Key="Previous">Poprzednia strona</sys:String>
+    <sys:String x:Key="CtrlShiftF2">Ctrl+ Shift + F2</sys:String>
     <sys:String x:Key="RemoveAll">Usuń wszystkie</sys:String>
+    <sys:String x:Key="CtrlAltF2">Ctrl + Alt + F2</sys:String>
 
     <!-- Tools -->
     <sys:String x:Key="Tools">Narzędzia</sys:String>
     <sys:String x:Key="ToggleSyntax-Highlighting">Przełączanie podświetlania składni</sys:String>
+    <sys:String x:Key="CtrlH">Ctrl + H</sys:String>
     <sys:String x:Key="ToggleAutocompletion">Przełączanie autouzupełniania</sys:String>
+    <sys:String x:Key="CtrlShiftA">Ctrl + Shift + A</sys:String>
     <sys:String x:Key="Comments">Komentarze</sys:String>
     <sys:String x:Key="BlockComment">Komentarz blokowy</sys:String>
+    <sys:String x:Key="CtrlK">Ctrl + K</sys:String>
     <sys:String x:Key="SmallCommentField">Małe pole komentarza</sys:String>
+    <sys:String x:Key="CtrlShiftK">Ctrl + Shift + K</sys:String>
     <sys:String x:Key="MiddleCommentField">Środkowe pole komentarza</sys:String>
+    <sys:String x:Key="CtrlAltK">Ctrl + Alt + K</sys:String>
     <sys:String x:Key="BigCommentField">Duże pole komentarza</sys:String>
+    <sys:String x:Key="CtrlShiftAltK">Ctrl + Shift + Alt + K</sys:String>
     <sys:String x:Key="CollapseAndExpandFoldings">Rozkładanie i składanie</sys:String>
+    <sys:String x:Key="CtrlM">Ctrl + M</sys:String>
     <sys:String x:Key="IndentText">Wcięcie tekstu</sys:String>
+    <sys:String x:Key="CtrlE">Ctrl + E</sys:String>
     <sys:String x:Key="CheckSyntax">Sprawdź składnię</sys:String>
     <sys:String x:Key="FileExplorer">Eksplorator plików</sys:String>
-    <sys:String x:Key="SearchExplorer">Wyszukiwanie Explorer</sys:String>
+    <sys:String x:Key="CtrlShiftE">Ctrl + Shift + E</sys:String>
+    <sys:String x:Key="SearchExplorer">Wyszukiwarka</sys:String>
+    <sys:String x:Key="CtrlShiftF">Ctrl + Shift + F</sys:String>
     <sys:String x:Key="CodeStructure">Struktura kodu</sys:String>
+    <sys:String x:Key="CtrlShiftC">Ctrl + Shift + C</sys:String>
     <sys:String x:Key="NPCGenerator">Generator NPC</sys:String>
+    <sys:String x:Key="CtrlG">Ctrl + G</sys:String>
     <sys:String x:Key="DialogGenerator">Generator dialogów</sys:String>
+    <sys:String x:Key="CtrlShiftG">Ctrl + Shift + G</sys:String>
 
     <!-- Code Structure -->
-    <sys:String x:Key="Instances">Instancjen</sys:String>
+    <sys:String x:Key="Instances">Instancja</sys:String>
     <sys:String x:Key="Functions">Funkcje</sys:String>
     <sys:String x:Key="Variables">Zmienne</sys:String>
     <sys:String x:Key="Constants">Stałe</sys:String>
@@ -114,7 +146,7 @@
     <sys:String x:Key="Search2">Szukaj</sys:String>
     <sys:String x:Key="CaseSensitive">Zwracaj uwagę na wielkość liter</sys:String>
     <sys:String x:Key="MatchWholeWord">Wyszukaj tylko całe słowo</sys:String>
-    <sys:String x:Key="Replace">Zastąpienie</sys:String>
+    <sys:String x:Key="Replace">Zastąp</sys:String>
     <sys:String x:Key="ReplaceAll">Zastąp wszystko</sys:String>
 
     <!-- AboutSkriptorium -->

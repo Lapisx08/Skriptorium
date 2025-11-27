@@ -4,57 +4,89 @@
 
     <!-- Skriptorium -->
     <sys:String x:Key="AboutSkriptorium">Über Skriptorium</sys:String>
+    <sys:String x:Key="CtrlI">Strg + I</sys:String>
     <sys:String x:Key="Settings">Einstellungen</sys:String>
+    <sys:String x:Key="CtrlComma">Strg + ,</sys:String>
     <sys:String x:Key="Exit">Beenden</sys:String>
 
     <!-- File -->
     <sys:String x:Key="File">Datei</sys:String>
     <sys:String x:Key="New">Neu</sys:String>
+    <sys:String x:Key="CtrlN">Strg + N</sys:String>
     <sys:String x:Key="Open">Öffnen</sys:String>
+    <sys:String x:Key="CtrlO">Strg + O</sys:String>
     <sys:String x:Key="LastOpened">Zuletzt geöffnet</sys:String>
     <sys:String x:Key="Save">Speichern</sys:String>
+    <sys:String x:Key="CtrlS">Strg + S</sys:String>
     <sys:String x:Key="SaveAs">Speichern unter...</sys:String>
+    <sys:String x:Key="CtrlShiftS">Strg + Shift + S</sys:String>
     <sys:String x:Key="SaveAll">Alles speichern</sys:String>
+    <sys:String x:Key="CtrlAltS">Strg + Alt + S</sys:String>
     <sys:String x:Key="Close">Schließen</sys:String>
+    <sys:String x:Key="CtrlW">Strg + W</sys:String>
 
     <!-- Edit -->
     <sys:String x:Key="Edit">Bearbeiten</sys:String>
     <sys:String x:Key="Undo">Rückgängig</sys:String>
+    <sys:String x:Key="CtrlZ">Strg + Z</sys:String>
     <sys:String x:Key="Redo">Wiederholen</sys:String>
+    <sys:String x:Key="CtrlY">Strg + Y</sys:String>
     <sys:String x:Key="Cut">Ausschneiden</sys:String>
+    <sys:String x:Key="CtrlX">Strg + X</sys:String>
     <sys:String x:Key="Copy">Kopieren</sys:String>
+    <sys:String x:Key="CtrlC">Strg + C</sys:String>
     <sys:String x:Key="Paste">Einfügen</sys:String>
+    <sys:String x:Key="CtrlV">Strg + V</sys:String>
     <sys:String x:Key="Duplicate">Duplizieren</sys:String>
+    <sys:String x:Key="CtrlD">Strg + D</sys:String>
     <sys:String x:Key="SelectAll">Alles auswählen</sys:String>
+    <sys:String x:Key="CtrlA">Strg + A</sys:String>
 
     <!-- Search -->
     <sys:String x:Key="Search">Suche</sys:String>
     <sys:String x:Key="SearchAndReplace">Suchen und Ersetzen</sys:String>
+    <sys:String x:Key="CtrlF">Strg + F</sys:String>
 
     <!-- Bookmarks -->
     <sys:String x:Key="Bookmarks">Lesezeichen</sys:String>
     <sys:String x:Key="AddAndRemove">Setzen und entfernen</sys:String>
     <sys:String x:Key="Next">Zum nächsten</sys:String>
+    <sys:String x:Key="CtrlF2">Strg + F2</sys:String>
     <sys:String x:Key="Previous">Zum vorherigen</sys:String>
+    <sys:String x:Key="CtrlShiftF2">Strg + Shift + F2</sys:String>
     <sys:String x:Key="RemoveAll">Alle löschen</sys:String>
+    <sys:String x:Key="CtrlAltF2">Strg + Alt + F2</sys:String>
 
     <!-- Tools -->
     <sys:String x:Key="Tools">Tools</sys:String>
     <sys:String x:Key="ToggleSyntax-Highlighting">Syntax-Highlighting umschalten</sys:String>
+    <sys:String x:Key="CtrlH">Strg + H</sys:String>
     <sys:String x:Key="ToggleAutocompletion">Autovervollständigung umschalten</sys:String>
+    <sys:String x:Key="CtrlShiftA">Strg + Shift + A</sys:String>
     <sys:String x:Key="Comments">Kommentare</sys:String>
     <sys:String x:Key="BlockComment">Blockkommentar</sys:String>
+    <sys:String x:Key="CtrlK">Strg + K</sys:String>
     <sys:String x:Key="SmallCommentField">Kleines Kommentarfeld</sys:String>
+    <sys:String x:Key="CtrlShiftK">Strg + Shift + K</sys:String>
     <sys:String x:Key="MiddleCommentField">Mittleres Kommentarfeld</sys:String>
+    <sys:String x:Key="CtrlAltK">Strg + Alt + K</sys:String>
     <sys:String x:Key="BigCommentField">Großes Kommentarfeld</sys:String>
+    <sys:String x:Key="CtrlShiftAltK">Strg + Shift + Alt + K</sys:String>
     <sys:String x:Key="CollapseAndExpandFoldings">Foldings ein- und ausklappen</sys:String>
+    <sys:String x:Key="CtrlM">Strg + M</sys:String>
     <sys:String x:Key="IndentText">Text einrücken</sys:String>
+    <sys:String x:Key="CtrlE">Strg + E</sys:String>
     <sys:String x:Key="CheckSyntax">Syntax prüfen</sys:String>
     <sys:String x:Key="FileExplorer">Datei Explorer</sys:String>
+    <sys:String x:Key="CtrlShiftE">Strg + Shift + E</sys:String>
     <sys:String x:Key="SearchExplorer">Explorer Suche</sys:String>
+    <sys:String x:Key="CtrlShiftF">Strg + Shift + F</sys:String>
     <sys:String x:Key="CodeStructure">Code Struktur</sys:String>
+    <sys:String x:Key="CtrlShiftC">Strg + Shift + C</sys:String>
     <sys:String x:Key="NPCGenerator">NPC Generator</sys:String>
+    <sys:String x:Key="CtrlG">Strg + G</sys:String>
     <sys:String x:Key="DialogGenerator">Dialog Generator</sys:String>
+    <sys:String x:Key="CtrlShiftG">Strg + Shift + G</sys:String>
 
     <!-- Code Structure -->
     <sys:String x:Key="Instances">Instanzen</sys:String>
