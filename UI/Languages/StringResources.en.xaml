@@ -141,6 +141,7 @@
     <sys:String x:Key="Gender">Gender:</sys:String>
     <sys:String x:Key="Male">Male</sys:String>
     <sys:String x:Key="Female">Female</sys:String>
+    <sys:String x:Key="Comments2">Comments:</sys:String>
 
     <!-- Search Explorer -->
     <sys:String x:Key="Search2">Search</sys:String>

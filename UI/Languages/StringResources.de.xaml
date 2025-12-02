@@ -118,6 +118,7 @@
     <sys:String x:Key="NPC">NPC</sys:String>
     <sys:String x:Key="ItemInstance">Iteminstanz:</sys:String>
     <sys:String x:Key="Number">Anzahl:</sys:String>
+    <sys:String x:Key="Comments2">Kommentare:</sys:String>
 
     <!-- File Explorer -->
     <sys:String x:Key="NewScript">Neues Skript</sys:String>
