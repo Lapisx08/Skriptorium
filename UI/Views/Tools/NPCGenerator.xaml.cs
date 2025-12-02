@@ -252,12 +252,17 @@ namespace Skriptorium.UI.Views.Tools
 
             // Attribute
             sb.AppendLine("    // ------ Attribute ------");
-            sb.AppendLine($"    B_SetAttributesToChapter (self, 1);{(includeComments ? " // Setzt Attribute und Level entsprechend des angegebenen Kapitels (1-6)" : "")}");
-            sb.AppendLine();
+
+            // Nur hinzufügen, wenn keine individuellen Attribute gesetzt werden
+            if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() !=
+                (Application.Current.TryFindResource("Yes") as string))
+            {
+                sb.AppendLine($"    B_SetAttributesToChapter (self, 1);{(includeComments ? " // Setzt Attribute und Level entsprechend des angegebenen Kapitels (1-6)" : "")}");
+                sb.AppendLine();
+            }
 
             if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
-                sb.AppendLine($"    // Ersetzte bei Nutzung individueller Attribute B_SetAttributesToChapter (self, 1);{(includeComments ? "" : "")}");
                 sb.AppendLine("    attribute[ATR_STRENGTH]       =  10;");
                 sb.AppendLine("    attribute[ATR_DEXTERITY]      =  10;");
                 sb.AppendLine("    attribute[ATR_HITPOINTS_MAX]  =  40;");
@@ -296,12 +301,17 @@ namespace Skriptorium.UI.Views.Tools
 
             // Kampf-Talente
             sb.AppendLine("    // ------ Kampf-Talente ------");
-            sb.AppendLine($"    B_SetFightSkills (self, 10);{(includeComments ? " // Grenzen für Talent-Level liegen bei 30 und 60 / Der enthaltene B_AddFightSkill setzt alle Kampftalente gleichhoch" : "")}");
-            sb.AppendLine();
+
+            // Nur hinzufügen, wenn keine individuellen Kampf-Talente gesetzt werden
+            if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() !=
+                (Application.Current.TryFindResource("Yes") as string))
+            {
+                sb.AppendLine($"    B_SetFightSkills (self, 10);{(includeComments ? " // Grenzen für Talent-Level liegen bei 30 und 60 / Der enthaltene B_AddFightSkill setzt alle Kampftalente gleichhoch" : "")}");
+                sb.AppendLine();
+            }
 
             if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
-                sb.AppendLine($"    // Ersetzte bei Nutzung individueller Kampf-Talente B_SetFightSkills (self, 10);{(includeComments ? "" : "")}");
                 sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_1H, 10);");
                 sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_2H, 10);");
                 sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_BOW, 10);");
@@ -318,8 +328,8 @@ namespace Skriptorium.UI.Views.Tools
             // Tagesroutine-Funktion
             sb.AppendLine($"func void Rtn_Start_{idEntry.Text} (){(includeComments ? " // Tages-Routine muss insgesamt immer 24 h ergeben und sie muss mindestens zwei Tagesabläufe umfassen" : "")}");
             sb.AppendLine("{");
-            sb.AppendLine("    TA_Platzhalter (08,00,20,00,\"WP_Platzhalter\");");
-            sb.AppendLine("    TA_Platzhalter (20,00,08,00,\"WP_Platzhalter\");");
+            sb.AppendLine("    TA_Stand_ArmsCrossed (08,00,20,00,\"WP_Platzhalter\");");
+            sb.AppendLine("    TA_Stand_ArmsCrossed (20,00,08,00,\"WP_Platzhalter\");");
             sb.AppendLine("};");
 
             outputText.Text = sb.ToString();

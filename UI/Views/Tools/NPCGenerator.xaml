@@ -63,6 +63,7 @@
                 <ComboBoxItem Content="0"/>
                 <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
                 <ComboBoxItem Content="NPC_FLAG_IMPORTANT"/>
+                <ComboBoxItem Content="NPC_FLAG_GHOST|NPC_FLAG_IMMORTAL"/>
             </ComboBox>
             
             <TextBlock Text="{DynamicResource NPCType}" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
