@@ -1,6 +1,6 @@
 ﻿using AvalonDock;
-using AvalonDock.Layout;
 using AvalonDock.Controls;
+using AvalonDock.Layout;
 using Skriptorium.UI;
 using System;
 using System.Collections.Generic;
@@ -8,10 +8,10 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using System.Windows.Controls.Primitives;
 
 namespace Skriptorium.Managers
 {
@@ -21,7 +21,7 @@ namespace Skriptorium.Managers
         private readonly LayoutDocumentPane _defaultDocumentPane;
         private int _newScriptCounter = 1;
         private bool _isInitializing = true;
-
+        private readonly Dictionary<string, FileSystemWatcher> _watchers = new Dictionary<string, FileSystemWatcher>(StringComparer.OrdinalIgnoreCase);
         public ScriptTabManager(DockingManager dockingManager, LayoutDocumentPane documentPane)
         {
             _dockingManager = dockingManager;
@@ -47,15 +47,12 @@ namespace Skriptorium.Managers
             string newScriptPrefix = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
             var newTab = pane.Children.OfType<LayoutDocument>()
                            .FirstOrDefault(d => d.Title.StartsWith(newScriptPrefix, StringComparison.OrdinalIgnoreCase));
-
             if (newTab != null)
             {
                 pane.Children.Remove(newTab);
                 pane.Children.Add(newTab);
-
                 newTab.IsActive = true;
                 _dockingManager.ActiveContent = newTab;
-
                 // Sofortiger Fokus ohne Verzögerung
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -71,15 +68,12 @@ namespace Skriptorium.Managers
         {
             if (_defaultDocumentPane.ChildrenCount > 0)
                 return _defaultDocumentPane;
-
             if (_dockingManager.ActiveContent is LayoutDocument activeDoc)
                 return activeDoc.Parent as LayoutDocumentPane ?? _defaultDocumentPane;
-
             var layoutRoot = _dockingManager.Layout;
             var documentPane = layoutRoot.Descendents().OfType<LayoutDocumentPane>()
                 .FirstOrDefault(p => p.ChildrenCount > 0)
                 ?? layoutRoot.Descendents().OfType<LayoutDocumentPane>().FirstOrDefault();
-
             if (documentPane == null)
             {
                 documentPane = new LayoutDocumentPane();
@@ -96,7 +90,6 @@ namespace Skriptorium.Managers
                 else
                     paneGroup.InsertChildAt(paneGroup.ChildrenCount, documentPane);
             }
-
             return documentPane ?? _defaultDocumentPane;
         }
 
@@ -104,13 +97,10 @@ namespace Skriptorium.Managers
         {
             if (!string.IsNullOrWhiteSpace(filePath) && TryActivateTabByFilePath(filePath))
                 return;
-
             var scriptEditor = new ScriptEditor { FilePath = filePath ?? "" };
             scriptEditor.SetTextAndResetModified(content);
-
             // Dynamisches Präfix für "Neues Skript" aus den Ressourcen
             string newScriptPrefix = Application.Current.TryFindResource("NewScriptName") as string ?? "Neu";
-
             string baseTitle;
             if (!string.IsNullOrWhiteSpace(tabTitle))
             {
@@ -124,20 +114,14 @@ namespace Skriptorium.Managers
             {
                 baseTitle = $"{newScriptPrefix}{_newScriptCounter++}";
             }
-
             var document = new LayoutDocument { Title = baseTitle, Content = scriptEditor, IsActive = false };
-
             if (!string.IsNullOrWhiteSpace(filePath))
                 document.ToolTip = filePath;
-
             scriptEditor.TextChanged += (s, e) => UpdateTabTitle(scriptEditor);
-
             var targetPane = GetActiveDocumentPane();
             targetPane.Children.Add(document);
-
-            document.IsActive = true; 
+            document.IsActive = true;
             _dockingManager.ActiveContent = document;
-
             // Fokus sofort setzen (verhindert Flackern)
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -145,6 +129,112 @@ namespace Skriptorium.Managers
                     editor.Focus();
                 ScrollToRightEnd();
             }, DispatcherPriority.Render);
+            // Neu: Watcher einrichten, wenn Dateipfad vorhanden
+            SetupWatcher(filePath);
+        }
+
+        private void SetupWatcher(string? filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath) || _watchers.ContainsKey(filePath))
+                return;
+            string directory = Path.GetDirectoryName(filePath)!;
+            string fileName = Path.GetFileName(filePath);
+            var watcher = new FileSystemWatcher
+            {
+                Path = directory,
+                Filter = fileName,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName,
+                EnableRaisingEvents = true
+            };
+            watcher.Changed += OnFileChanged;
+            watcher.Renamed += OnFileRenamed;
+            watcher.Deleted += OnFileDeleted;
+            _watchers[filePath] = watcher;
+        }
+
+        private void RemoveWatcher(string filePath)
+        {
+            if (_watchers.TryGetValue(filePath, out var watcher))
+            {
+                watcher.Changed -= OnFileChanged;
+                watcher.Renamed -= OnFileRenamed;
+                watcher.Deleted -= OnFileDeleted;
+                watcher.Dispose();
+                _watchers.Remove(filePath);
+            }
+        }
+
+        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                string filePath = e.FullPath;
+                var editors = GetAllOpenEditors().Where(ed => string.Equals(ed.FilePath, filePath, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (!editors.Any() || !File.Exists(filePath)) return;
+
+                try
+                {
+                    string newContent = DataManager.ReadFileAutoEncoding(filePath);
+                    foreach (var editor in editors)
+                    {
+                        if (newContent == editor.Text) continue;
+                        if (editor.IsModified)
+                        {
+                            // Ohne MessageBox einfach lokale Änderungen beibehalten
+                            continue;
+                        }
+                        editor.SetTextAndResetModified(newContent);
+                        UpdateTabTitle(editor);
+                    }
+                    // Hinweis-MessageBox entfernt
+                }
+                catch (Exception ex)
+                {
+                    // Fehler-MessageBox entfernt, optional: Logging
+                }
+            });
+        }
+
+        private void OnFileRenamed(object sender, RenamedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                string oldPath = e.OldFullPath;
+                string newPath = e.FullPath;
+                var editors = GetAllOpenEditors().Where(ed => string.Equals(ed.FilePath, oldPath, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (editors.Any())
+                {
+                    foreach (var editor in editors)
+                    {
+                        editor.FilePath = newPath;
+                        var doc = GetDocumentForEditor(editor);
+                        if (doc != null)
+                        {
+                            doc.Title = Path.GetFileName(newPath);
+                            doc.ToolTip = newPath;
+                        }
+                        UpdateTabTitle(editor);
+                    }
+                    // Hinweis-MessageBox entfernt
+                }
+                // Watcher aktualisieren: Alten entfernen, neuen einrichten
+                RemoveWatcher(oldPath);
+                SetupWatcher(newPath);
+            });
+        }
+
+        private void OnFileDeleted(object sender, FileSystemEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                string filePath = e.FullPath;
+                var editors = GetAllOpenEditors().Where(ed => string.Equals(ed.FilePath, filePath, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (editors.Any())
+                {
+                    // Hinweis-MessageBox entfernt
+                }
+                RemoveWatcher(filePath);
+            });
         }
 
         private void ScrollToRightEnd()
@@ -168,15 +258,12 @@ namespace Skriptorium.Managers
             if (_dockingManager.ActiveContent is ScriptEditor editor) return editor;
             if (_dockingManager.ActiveContent is LayoutDocument doc && doc.Content is ScriptEditor docEditor)
                 return docEditor;
-
             var activeDocument = GetActiveDocumentPane().Children.OfType<LayoutDocument>().FirstOrDefault(d => d.IsActive);
             if (activeDocument != null && activeDocument.Content is ScriptEditor activeEditor)
                 return activeEditor;
-
             var firstDocument = GetActiveDocumentPane().Children.OfType<LayoutDocument>().FirstOrDefault();
             if (firstDocument != null && firstDocument.Content is ScriptEditor firstEditor)
                 return firstEditor;
-
             return null;
         }
 
@@ -184,7 +271,19 @@ namespace Skriptorium.Managers
         {
             var editor = GetActiveScriptEditor();
             if (editor != null && GetDocumentByEditor(editor) is LayoutDocument document)
-                document.Close();
+            {
+                if (ConfirmClose(editor))
+                {
+                    string filePath = editor.FilePath;
+                    document.Close();
+                    // Neu: Prüfen, ob noch Editoren für diesen Pfad offen sind
+                    var remainingEditors = GetAllOpenEditors().Count(ed => string.Equals(ed.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+                    if (remainingEditors == 0)
+                    {
+                        RemoveWatcher(filePath);
+                    }
+                }
+            }
         }
 
         public bool TryActivateTabByFilePath(string filePath)
@@ -206,9 +305,17 @@ namespace Skriptorium.Managers
 
         public bool ConfirmCloseAllTabs()
         {
-            foreach (var editor in GetAllOpenEditors())
+            foreach (var editor in GetAllOpenEditors().ToList()) // ToList() um Modifikation während Iteration zu vermeiden
+            {
                 if (!ConfirmClose(editor))
                     return false;
+                // Watcher entfernen, wenn letzter Editor für Path
+                var remaining = GetAllOpenEditors().Count(ed => string.Equals(ed.FilePath, editor.FilePath, StringComparison.OrdinalIgnoreCase));
+                if (remaining == 0)
+                {
+                    RemoveWatcher(editor.FilePath);
+                }
+            }
             return true;
         }
 
@@ -216,31 +323,24 @@ namespace Skriptorium.Managers
         {
             if (!editor.IsModified)
                 return true;
-
             string msg = Application.Current.FindResource("MsgScriptModified") as string
                              ?? "Dieses Skript wurde geändert. Möchtest du es speichern?";
-
             string title = Application.Current.FindResource("MsgSaveChangesTitle") as string
                              ?? "Änderungen speichern?";
-
             var result = MessageBox.Show(
                 msg,
                 title,
                 MessageBoxButton.YesNoCancel,
                 MessageBoxImage.Warning
             );
-
             if (result == MessageBoxResult.Cancel)
                 return false;
-
             if (result == MessageBoxResult.Yes)
             {
                 bool saved = DataManager.SaveFile(editor);
                 if (!saved) return false;
-
                 editor.ResetModifiedFlag();
                 UpdateTabTitle(editor);
-
                 var doc = GetDocumentForEditor(editor);
                 if (doc != null)
                 {
@@ -250,11 +350,9 @@ namespace Skriptorium.Managers
                         tooltip = Application.Current.FindResource("MsgUnsaved") as string
                                   ?? "Nicht gespeichert";
                     }
-
                     doc.ToolTip = tooltip;
                 }
             }
-
             return true;
         }
 
@@ -267,7 +365,6 @@ namespace Skriptorium.Managers
         {
             var document = GetDocumentByEditor(editor);
             if (document == null) return;
-
             string baseTitle = document.Title.TrimEnd('*');
             document.Title = editor.IsModified ? baseTitle + "*" : baseTitle;
         }
@@ -293,7 +390,6 @@ namespace Skriptorium.Managers
                 RegisterMouseWheelHandlers();
                 _isInitializing = false;
             };
-
             _dockingManager.LayoutUpdated += (s, e) => WrapTabPanelsInScrollViewer();
             _dockingManager.ActiveContentChanged += (s, e) => WrapTabPanelsInScrollViewer();
         }
@@ -304,12 +400,10 @@ namespace Skriptorium.Managers
             foreach (var tabPanel in tabPanels)
             {
                 if (tabPanel.Parent is ScrollViewer) continue;
-
                 if (tabPanel.Parent is Panel parentPanel)
                 {
                     int index = parentPanel.Children.IndexOf(tabPanel);
                     if (index == -1) continue;
-
                     parentPanel.Children.RemoveAt(index);
                     var scrollViewer = CreateCustomScrollViewer();
                     scrollViewer.Content = tabPanel;
@@ -319,7 +413,6 @@ namespace Skriptorium.Managers
                 {
                     var oldContent = parentDecorator.Child;
                     if (oldContent != tabPanel) continue;
-
                     var scrollViewer = CreateCustomScrollViewer();
                     scrollViewer.Content = tabPanel;
                     parentDecorator.Child = scrollViewer;
@@ -335,12 +428,10 @@ namespace Skriptorium.Managers
                 HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
                 VerticalScrollBarVisibility = ScrollBarVisibility.Disabled
             };
-
             var horizontalStyle = new Style(typeof(System.Windows.Controls.Primitives.ScrollBar));
             horizontalStyle.Setters.Add(new Setter(ScrollBar.OrientationProperty, Orientation.Horizontal));
             horizontalStyle.Setters.Add(new Setter(Control.TemplateProperty, CreateHorizontalScrollBarTemplate()));
             scrollViewer.Resources.Add(typeof(System.Windows.Controls.Primitives.ScrollBar), horizontalStyle);
-
             return scrollViewer;
         }
 
@@ -368,7 +459,6 @@ namespace Skriptorium.Managers
                 </Track>
             </Grid>
         </ControlTemplate>";
-
             return (ControlTemplate)System.Windows.Markup.XamlReader.Parse(xamlTemplate);
         }
 
@@ -391,7 +481,6 @@ namespace Skriptorium.Managers
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
                     if (child != null && child is T tChild)
                         yield return tChild;
-
                     foreach (T childOfChild in FindVisualChildren<T>(child))
                         yield return childOfChild;
                 }
@@ -425,19 +514,15 @@ namespace Skriptorium.Managers
             {
                 var original = e.OriginalSource as DependencyObject;
                 if (original == null) return;
-
                 if (!IsOverTabHeader(original)) return;
-
                 var tabPanel = GetAncestor<DocumentPaneTabPanel>(original) ?? FindVisualChildren<DocumentPaneTabPanel>(tabControl).FirstOrDefault();
                 ScrollViewer? scrollViewer = null;
-
                 if (tabPanel != null)
                 {
                     scrollViewer = GetAncestor<ScrollViewer>(tabPanel) ?? FindVisualChildren<ScrollViewer>(tabControl).FirstOrDefault();
                 }
                 else
                     scrollViewer = FindVisualChildren<ScrollViewer>(tabControl).FirstOrDefault();
-
                 if (scrollViewer != null && scrollViewer.ScrollableWidth > 0)
                 {
                     double step = e.Delta / 120.0 * 100;
@@ -446,6 +531,16 @@ namespace Skriptorium.Managers
                     e.Handled = true;
                 }
             }
+        }
+
+        // Methode zum Disposen aller Watcher (z. B. in MainWindow.OnClosing aufrufen)
+        public void DisposeAllWatchers()
+        {
+            foreach (var kvp in _watchers.ToList())
+            {
+                RemoveWatcher(kvp.Key);
+            }
+            _watchers.Clear();
         }
     }
 

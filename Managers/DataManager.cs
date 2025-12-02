@@ -28,10 +28,10 @@ namespace Skriptorium.Managers
         private static string? lastUsedDirectory = null;
 
         // Speichert erkannte Kodierungen pro Datei
-        private static readonly ConcurrentDictionary<string, Encoding> fileEncodings = new();
+        public static readonly ConcurrentDictionary<string, Encoding> fileEncodings = new();
 
         // Liest Datei mit automatischer Kodierungserkennung via UtfUnknown
-        private static string ReadFileAutoEncoding(string filePath)
+        public static string ReadFileAutoEncoding(string filePath)
         {
             try
             {
