@@ -384,39 +384,44 @@ namespace Skriptorium.Managers
 
         private void InitializeTabScrolling()
         {
-            _dockingManager.Loaded += (s, e) =>
+            _dockingManager.LayoutUpdated += (s, e) =>
             {
-                WrapTabPanelsInScrollViewer();
-                RegisterMouseWheelHandlers();
-                _isInitializing = false;
+                var tabPanels = FindVisualChildren<DocumentPaneTabPanel>(_dockingManager);
+                foreach (var tabPanel in tabPanels)
+                {
+                    if (GetAncestor<ScrollViewer>(tabPanel) is ScrollViewer)
+                        continue;
+
+                    var scrollViewer = CreateCustomScrollViewer();
+                    var parent = tabPanel.Parent as Panel;
+                    if (parent != null)
+                    {
+                        int index = parent.Children.IndexOf(tabPanel);
+                        if (index >= 0)
+                        {
+                            parent.Children.RemoveAt(index);
+                            scrollViewer.Content = tabPanel;
+                            parent.Children.Insert(index, scrollViewer);
+                            scrollViewer.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
+                        }
+                    }
+                    else if (tabPanel.Parent is Decorator decorator)
+                    {
+                        decorator.Child = scrollViewer;
+                        scrollViewer.Content = tabPanel;
+                        scrollViewer.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
+                    }
+                }
             };
-            _dockingManager.LayoutUpdated += (s, e) => WrapTabPanelsInScrollViewer();
-            _dockingManager.ActiveContentChanged += (s, e) => WrapTabPanelsInScrollViewer();
         }
 
-        private void WrapTabPanelsInScrollViewer()
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var tabPanels = FindVisualChildren<DocumentPaneTabPanel>(_dockingManager);
-            foreach (var tabPanel in tabPanels)
+            if (sender is ScrollViewer scrollViewer && scrollViewer.ScrollableWidth > 0)
             {
-                if (tabPanel.Parent is ScrollViewer) continue;
-                if (tabPanel.Parent is Panel parentPanel)
-                {
-                    int index = parentPanel.Children.IndexOf(tabPanel);
-                    if (index == -1) continue;
-                    parentPanel.Children.RemoveAt(index);
-                    var scrollViewer = CreateCustomScrollViewer();
-                    scrollViewer.Content = tabPanel;
-                    parentPanel.Children.Insert(index, scrollViewer);
-                }
-                else if (tabPanel.Parent is Decorator parentDecorator)
-                {
-                    var oldContent = parentDecorator.Child;
-                    if (oldContent != tabPanel) continue;
-                    var scrollViewer = CreateCustomScrollViewer();
-                    scrollViewer.Content = tabPanel;
-                    parentDecorator.Child = scrollViewer;
-                }
+                double step = e.Delta / 120.0 * 50; // scroll step
+                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - step);
+                e.Handled = true;
             }
         }
 
