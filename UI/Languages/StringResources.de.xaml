@@ -146,6 +146,9 @@
     <sys:String x:Key="Male">Männlich</sys:String>
     <sys:String x:Key="Female">Weiblich</sys:String>
 
+    <!-- Orc Generator -->
+    <sys:String x:Key="Level">Level:</sys:String>
+
     <!-- Search Explorer -->
     <sys:String x:Key="Search2">Suchen</sys:String>
     <sys:String x:Key="CaseSensitive">Groß-/Kleinschreibung beachten</sys:String>

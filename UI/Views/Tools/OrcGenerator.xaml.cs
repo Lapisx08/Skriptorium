@@ -18,9 +18,12 @@ namespace Skriptorium.UI.Views.Tools
             RestrictToNoDigits(nameEntry);
             RestrictToNumbers(idEntry);
             RestrictToNumbers(voiceEntry);
+            RestrictToNumbers(levelEntry);
 
             // Standardwerte passend für Orks
+            guildEntry.SelectedIndex = 0; // Standard = GIL_Orc
             flagsEntry.SelectedIndex = 0; // 0
+            aivRealIdEntry.SelectedIndex = 0; // ID_ORCWARRIOR
             includeCommentsDropdown.SelectedIndex = 1; // Nein
         }
 
@@ -91,7 +94,10 @@ namespace Skriptorium.UI.Views.Tools
             if (string.IsNullOrWhiteSpace(nameEntry.Text) ||
                 string.IsNullOrWhiteSpace(idEntry.Text) ||
                 string.IsNullOrWhiteSpace(voiceEntry.Text) ||
-                flagsEntry.SelectedItem == null)
+                string.IsNullOrWhiteSpace(levelEntry.Text) ||
+                flagsEntry.SelectedItem == null ||
+                guildEntry.SelectedItem == null ||
+                aivRealIdEntry.SelectedItem == null)
             {
                 MessageBox.Show("Bitte fülle alle Felder aus, bevor du den Code generierst.", "Fehlende Eingaben", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -107,13 +113,16 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine($"instance {idEntry.Text}_{nameSafe}_Ork (Npc_Default)");
             sb.AppendLine("{");
             sb.AppendLine("    // ------ NSC ------\"");
-            sb.AppendLine($"    name     =  \"{nameEntry.Text}\";");
-            sb.AppendLine("    guild    =  GIL_Orc;");
-            sb.AppendLine($"    id       =  {idEntry.Text};");
-            sb.AppendLine($"    voice    =  {voiceEntry.Text};");
-            sb.AppendLine($"    flags    =  {((ComboBoxItem)flagsEntry.SelectedItem)?.Content};");
-            sb.AppendLine("    npctype  =  NPCTYPE_MAIN;");
-            sb.AppendLine("    level    =  25;");
+            sb.AppendLine($"    name                   =  \"{nameEntry.Text}\";");
+            sb.AppendLine($"    guild                  =  {((ComboBoxItem)guildEntry.SelectedItem)?.Content};");
+
+            sb.AppendLine($"    aivar[AIV_MM_REAL_ID]  =  {((ComboBoxItem)aivRealIdEntry.SelectedItem)?.Content};");
+
+            sb.AppendLine($"    id                     =  {idEntry.Text};");
+            sb.AppendLine($"    voice                  =  {voiceEntry.Text};");
+            sb.AppendLine($"    flags                  =  {((ComboBoxItem)flagsEntry.SelectedItem)?.Content};");
+            sb.AppendLine("    npctype                =  NPCTYPE_MAIN;");
+            sb.AppendLine($"    level                  =  {levelEntry.Text};");
             sb.AppendLine();
 
             sb.AppendLine("    // ------ Attribute ------");
@@ -135,10 +144,10 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             sb.AppendLine("    //----- HitChances -----");
-            sb.AppendLine("    HitChance[NPC_TALENT_1H]        = 0;");
-            sb.AppendLine("    HitChance[NPC_TALENT_2H]        = 0;");
-            sb.AppendLine("    HitChance[NPC_TALENT_BOW]       = 0;");
-            sb.AppendLine("    HitChance[NPC_TALENT_CROSSBOW]  = 0;");
+            sb.AppendLine("    HitChance[NPC_TALENT_1H]        =  0;");
+            sb.AppendLine("    HitChance[NPC_TALENT_2H]        =  0;");
+            sb.AppendLine("    HitChance[NPC_TALENT_BOW]       =  0;");
+            sb.AppendLine("    HitChance[NPC_TALENT_CROSSBOW]  =  0;");
             sb.AppendLine();
 
             sb.AppendLine("    // ------ Kampf-Taktik ------");
@@ -155,7 +164,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("    // ------ Aussehen ------");
             sb.AppendLine("    Mdl_SetVisual (self, \"Orc.mds\");");
             sb.AppendLine("    //                       Body-Mesh          Body-Tex Skin-Color   Head-MMS     Head-Tex  Teeth-Tex  ARMOR");
-            sb.AppendLine("    Mdl_SetVisualBody (self, \"Orc_Body_Worker\", DEFAULT, DEFAULT, \"Orc_HeadWarrior\", DEFAULT, DEFAULT, NO_ARMOR);");
+            sb.AppendLine($"    Mdl_SetVisualBody (self, \"{((ComboBoxItem)bodyMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, \"{((ComboBoxItem)headMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, NO_ARMOR);");
             sb.AppendLine("    Mdl_SetModelFatness (self, 0);");
             sb.AppendLine();
 
@@ -190,9 +199,14 @@ namespace Skriptorium.UI.Views.Tools
             nameEntry.Text = string.Empty;
             idEntry.Text = string.Empty;
             voiceEntry.Text = string.Empty;
+            levelEntry.Text = string.Empty;
             outputText.Clear();
 
+            guildEntry.SelectedIndex = 0; // GIL_Orc
             flagsEntry.SelectedIndex = 0; // 0
+            bodyMeshEntry.SelectedIndex = 0; // ORC_BODYSLAVE
+            headMeshEntry.SelectedIndex = 0; // Orc_HeadWarrior
+            aivRealIdEntry.SelectedIndex = 0; // ID_ORCWARRIOR
             includeCommentsDropdown.SelectedIndex = 1; // Nein
 
             detailsPanel.Children.Clear();

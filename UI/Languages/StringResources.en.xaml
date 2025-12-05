@@ -146,6 +146,9 @@
     <sys:String x:Key="Female">Female</sys:String>
     <sys:String x:Key="Comments2">Comments:</sys:String>
 
+    <!-- Orc Generator -->
+    <sys:String x:Key="Level">Level:</sys:String>
+
     <!-- Search Explorer -->
     <sys:String x:Key="Search2">Search</sys:String>
     <sys:String x:Key="CaseSensitive">Case Sensitive</sys:String>
