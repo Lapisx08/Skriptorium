@@ -85,8 +85,10 @@
     <sys:String x:Key="CtrlShiftC">Strg + Shift + C</sys:String>
     <sys:String x:Key="NPCGenerator">NPC Generator</sys:String>
     <sys:String x:Key="CtrlG">Strg + G</sys:String>
-    <sys:String x:Key="DialogGenerator">Dialog Generator</sys:String>
+    <sys:String x:Key="OrcGenerator">Ork Generator</sys:String>
     <sys:String x:Key="CtrlShiftG">Strg + Shift + G</sys:String>
+    <sys:String x:Key="DialogGenerator">Dialog Generator</sys:String>
+    <sys:String x:Key="CtrlAltG">Strg + Alt + G</sys:String>
 
     <!-- Code Structure -->
     <sys:String x:Key="Instances">Instanzen</sys:String>
@@ -131,6 +133,7 @@
     <sys:String x:Key="NewName">Neuer Name:</sys:String>
 
     <!-- NPC Generator -->
+    <sys:String x:Key="Name2">Name:</sys:String>
     <sys:String x:Key="Guild">Gilde:</sys:String>
     <sys:String x:Key="ID">ID:</sys:String>
     <sys:String x:Key="Voice">Voice:</sys:String>

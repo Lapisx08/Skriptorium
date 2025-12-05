@@ -243,7 +243,7 @@ namespace Skriptorium.UI.Views.Tools
                 sb.AppendLine($"    aivar[AIV_IgnoresFakeGuild]      =  TRUE;{(includeComments ? " // Ignoriert die falsche Gilde, die durch die Rüstung erzeugt wird" : "")}");
                 sb.AppendLine($"    aivar[AIV_IgnoresArmor]          =  TRUE;{(includeComments ? " // Keine Reaktion oder Konsequenzen auf die Rüstung des Helden" : "")}");
                 sb.AppendLine($"    aivar[AIV_NPCIsRanger]           =  TRUE;{(includeComments ? " // NPC gehört zum Ring des Wassers" : "")}");
-                sb.AppendLine($"    aivar[AIV_NoFightParker]         =  TRUE;{(includeComments ? " // NPC wird weder angegriffen, noch greift er selbst welche an." : "")}");
+                sb.AppendLine($"    aivar[AIV_NoFightParker]         =  TRUE;{(includeComments ? " // NPC wird weder angegriffen, noch greift er selbst welche an" : "")}");
                 sb.AppendLine($"    aivar[AIV_EnemyOverride]         =  TRUE;{(includeComments ? "" : "")}");
                 sb.AppendLine($"    aivar[AIV_MagicUser]             =  MAGIC_ALWAYS;{(includeComments ? " // Setzt immer Magie beim Kämpfen ein" : "")}");
                 sb.AppendLine($"    // Lösche die AIV, die nicht benötigt werden{(includeComments ? "" : "")}");

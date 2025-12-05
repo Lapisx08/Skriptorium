@@ -1,0 +1,78 @@
+﻿<mah:MetroWindow x:Class="Skriptorium.UI.Views.Tools.OrcGenerator"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                 xmlns:local="clr-namespace:Skriptorium.UI.Views.Tools"
+                 Title="{DynamicResource OrcGenerator}" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
+                 Height="700" Width="700">
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="300"/>
+        </Grid.RowDefinitions>
+
+        <!-- Obere Eingabefelder für Orc-Grunddaten -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170"/>
+                <ColumnDefinition Width="400"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="{DynamicResource Name2}" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBox x:Name="nameEntry" Grid.Row="0" Grid.Column="1" Margin="5"/>
+
+            <TextBlock Text="{DynamicResource ID}" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBox x:Name="idEntry" Grid.Row="2" Grid.Column="1" Margin="5"/>
+
+            <TextBlock Text="{DynamicResource Voice}" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBox x:Name="voiceEntry" Grid.Row="3" Grid.Column="1" Margin="5"/>
+
+            <TextBlock Text="{DynamicResource Flags}" Grid.Row="4" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="flagsEntry" Grid.Row="4" Grid.Column="1" Margin="5" SelectedIndex="0">
+                <ComboBoxItem Content="0"/>
+                <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
+                <ComboBoxItem Content="NPC_FLAG_IMPORTANT"/>
+            </ComboBox>
+
+            <TextBlock Text="{DynamicResource Comments2}" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="includeCommentsDropdown" Grid.Row="5" Grid.Column="1" Margin="5" SelectedIndex="1">
+                <ComboBoxItem Content="{DynamicResource Yes}"/>
+                <ComboBoxItem Content="{DynamicResource No}"/>
+            </ComboBox>
+        </Grid>
+
+        <!-- Dynamischer Bereich für Details (leer, falls nicht gebraucht) -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="detailsPanel"/>
+        </ScrollViewer>
+
+        <!-- Button-Leiste -->
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,0">
+            <Button Click="GenerateCode_Click" Margin="5">
+                <TextBlock Text="{DynamicResource Generate}"/>
+            </Button>
+            <Button Click="CopyToClipboard_Click" Margin="5">
+                <TextBlock Text="{DynamicResource Copy}"/>
+            </Button>
+            <Button Click="ResetFields_Click" Margin="5">
+                <TextBlock Text="{DynamicResource Reset}"/>
+            </Button>
+        </StackPanel>
+
+        <!-- Output -->
+        <TextBox x:Name="outputText" Grid.Row="3" Margin="0,10,0,0"
+                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                 TextWrapping="Wrap" IsReadOnly="False" FontFamily="Consolas" FontSize="14"/>
+    </Grid>
+</mah:MetroWindow>

@@ -122,14 +122,29 @@ namespace Skriptorium.Managers
             targetPane.Children.Add(document);
             document.IsActive = true;
             _dockingManager.ActiveContent = document;
+
             // Fokus sofort setzen (verhindert Flackern)
             Application.Current.Dispatcher.Invoke(() =>
             {
+                var pane = GetActiveDocumentPane();
+
+                // Immer ans Ende verschieben (außer es ist das allererste Tab)
+                if (pane.Children.Count > 1)
+                {
+                    pane.Children.Remove(document);
+                    pane.Children.Add(document);
+                }
+
+                document.IsActive = true;
+                _dockingManager.ActiveContent = document;
+
                 if (document.Content is ScriptEditor editor)
                     editor.Focus();
+
                 ScrollToRightEnd();
             }, DispatcherPriority.Render);
-            // Neu: Watcher einrichten, wenn Dateipfad vorhanden
+
+            // Watcher einrichten, wenn Dateipfad vorhanden
             SetupWatcher(filePath);
         }
 

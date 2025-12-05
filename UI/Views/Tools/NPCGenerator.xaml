@@ -46,7 +46,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
-            <TextBlock Text="{DynamicResource Name}" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource Name2}" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
             <TextBox x:Name="nameEntry" Grid.Row="0" Grid.Column="1" Margin="5"/>
             
             <TextBlock Text="{DynamicResource Guild}" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>

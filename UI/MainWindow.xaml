@@ -195,7 +195,12 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="{DynamicResource DialogGenerator}" InputGestureText="{DynamicResource CtrlShiftG}" Click="MenuDialogGenerator_Click">
+                <MenuItem Header="{DynamicResource OrcGenerator}" InputGestureText="{DynamicResource CtrlShiftG}" Click="MenuOrcGenerator_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8D4;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource DialogGenerator}" InputGestureText="{DynamicResource CtrlAltG}" Click="MenuDialogGenerator_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="14"/>
                     </MenuItem.Icon>
@@ -257,6 +262,9 @@
             </Button>
             <Button ToolTip="{DynamicResource NPCGenerator}" Click="MenuNPCGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="{DynamicResource OrcGenerator}" Click="MenuOrcGenerator_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8D4;" FontSize="12"/>
             </Button>
             <Button ToolTip="{DynamicResource DialogGenerator}" Click="MenuDialogGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="12"/>

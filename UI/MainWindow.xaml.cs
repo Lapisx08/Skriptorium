@@ -107,6 +107,8 @@ namespace Skriptorium.UI
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
                                       () => MenuNPCGenerator_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift,
+                          () => MenuOrcGenerator_Click(null, null));
+            _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Alt,
                                       () => MenuDialogGenerator_Click(null, null));
 
             // 3. AvalonDock-Ereignisse
@@ -140,7 +142,6 @@ namespace Skriptorium.UI
             }
 
             _tabManager.AddNewTab();
-            _tabManager.MoveNewTabToEnd();
         }
 
         // Handler-Methode für Sprachänderungen
@@ -612,6 +613,13 @@ namespace Skriptorium.UI
             var npcGenerator = new NPCGenerator();
             npcGenerator.Owner = this;
             npcGenerator.Show();
+        }
+
+        private void MenuOrcGenerator_Click(object sender, RoutedEventArgs e)
+        {
+            var orcGenerator = new OrcGenerator();
+            orcGenerator.Owner = this;
+            orcGenerator.Show();
         }
 
         private void MenuDialogGenerator_Click(object sender, RoutedEventArgs e)
