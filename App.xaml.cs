@@ -11,6 +11,8 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using AvalonDock.Themes.VS2013.Themes;
+using System.Security.AccessControl;   // Neu: für PipeSecurity
+using System.Security.Principal;        // Neu: für SecurityIdentifier
 
 namespace Skriptorium
 {
@@ -37,7 +39,6 @@ namespace Skriptorium
             {
                 MessageBox.Show($"Fehler beim Laden der Sprache {savedLang}: {ex.Message}",
                     "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
-
                 // Fallback auf Deutsch
                 LanguageManager.ChangeLanguage("de");
             }
@@ -66,7 +67,6 @@ namespace Skriptorium
             // Single-Instance-Check
             bool isNewInstance = false;
             _mutex = new Mutex(true, MutexName, out isNewInstance);
-
             if (!isNewInstance)
             {
                 SendArgsToRunningInstance(e.Args);
@@ -145,11 +145,10 @@ namespace Skriptorium
         {
             var currentTheme = ThemeManager.Current.DetectTheme(this);
             bool isDark = currentTheme?.BaseColorScheme == "Dark";
-
             Application.Current.Resources["ToggleButtonActiveBackground"] =
-                isDark ?
-                    Application.Current.Resources["ToggleButtonActiveBackgroundDark"] :
-                    Application.Current.Resources["ToggleButtonActiveBackgroundLight"];
+                isDark
+                    ? Application.Current.Resources["ToggleButtonActiveBackgroundDark"]
+                    : Application.Current.Resources["ToggleButtonActiveBackgroundLight"];
         }
 
         private void SendArgsToRunningInstance(string[] args)
@@ -186,30 +185,43 @@ namespace Skriptorium
                 {
                     try
                     {
-                        using (var server = new NamedPipeServerStream(
-                            PipeName,
-                            PipeDirection.In,
-                            NamedPipeServerStream.MaxAllowedServerInstances,
-                            PipeTransmissionMode.Message,
-                            PipeOptions.Asynchronous))
+                        var pipeSecurity = new PipeSecurity();
+
+                        pipeSecurity.AddAccessRule(new PipeAccessRule(
+                            new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+                            PipeAccessRights.ReadWrite | PipeAccessRights.CreateNewInstance,
+                            AccessControlType.Allow));
+
+                        pipeSecurity.AddAccessRule(new PipeAccessRule(
+                            new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null),
+                            PipeAccessRights.FullControl,
+                            AccessControlType.Allow));
+
+                        using var server = NamedPipeServerStreamAcl.Create(
+                            pipeName: PipeName,
+                            direction: PipeDirection.In,
+                            maxNumberOfServerInstances: NamedPipeServerStream.MaxAllowedServerInstances,
+                            transmissionMode: PipeTransmissionMode.Message,
+                            options: PipeOptions.Asynchronous,
+                            inBufferSize: 0,
+                            outBufferSize: 0,
+                            pipeSecurity: pipeSecurity);   // ← Hier wird die Sicherheit gesetzt
+
+                        server.WaitForConnection();
+
+                        using var reader = new StreamReader(server, Encoding.UTF8);
+                        string filePath;
+                        while ((filePath = reader.ReadLine()) != null)
                         {
-                            server.WaitForConnection();
-                            using (var reader = new StreamReader(server, Encoding.UTF8))
+                            if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
                             {
-                                string filePath;
-                                while ((filePath = reader.ReadLine()) != null)
+                                DataManager.OpenFile(filePath, (content, path) =>
                                 {
-                                    if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
+                                    mainWindow.Dispatcher.Invoke(() =>
                                     {
-                                        DataManager.OpenFile(filePath, (content, path) =>
-                                        {
-                                            mainWindow.Dispatcher.Invoke(() =>
-                                            {
-                                                mainWindow.OpenFileInNewTab(content, path);
-                                            });
-                                        });
-                                    }
-                                }
+                                        mainWindow.OpenFileInNewTab(content, path);
+                                    });
+                                });
                             }
                         }
                     }
@@ -235,9 +247,11 @@ namespace Skriptorium
                 ApplyAvalonDockTheme("Light");
                 return;
             }
+
             ApplyAvalonDockTheme(currentTheme.BaseColorScheme);
         }
 
+        #region
         private void ApplyAvalonDockTheme(string baseTheme)
         {
             var themeDictionary = Current.Resources.MergedDictionaries
@@ -261,7 +275,6 @@ namespace Skriptorium
                     Source = new Uri(string.Format(ThemePathTemplate, baseTheme), UriKind.Relative)
                 });
 
-                // Wähle das passende ResourceDictionary für die Brushes
                 var resources = Application.Current.Resources;
                 var themeBrushes = baseTheme == "Dark"
                     ? (ResourceDictionary)resources["DarkThemeBrushes"]
@@ -282,7 +295,6 @@ namespace Skriptorium
                    themeBrushes[ResourceKeys.DocumentWellTabButtonSelectedActivePressedBackground];
                 resources[ResourceKeys.DocumentWellTabButtonSelectedActivePressedBorder] =
                    themeBrushes[ResourceKeys.DocumentWellTabButtonSelectedActivePressedBorder];
-
                 resources[ResourceKeys.DocumentWellTabUnselectedHoveredBackground] =
                    themeBrushes[ResourceKeys.DocumentWellTabUnselectedHoveredBackground];
                 resources[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonHoveredBackground] =
@@ -295,7 +307,6 @@ namespace Skriptorium
                    themeBrushes[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBackground];
                 resources[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBorder] =
                    themeBrushes[ResourceKeys.DocumentWellTabButtonUnselectedTabHoveredButtonPressedBorder];
-
                 resources[ResourceKeys.ToolWindowCaptionActiveBackground] =
                    themeBrushes[ResourceKeys.ToolWindowCaptionActiveBackground];
                 resources[ResourceKeys.ToolWindowCaptionActiveGrip] =
@@ -308,7 +319,6 @@ namespace Skriptorium
                    themeBrushes[ResourceKeys.ToolWindowCaptionButtonActivePressedBackground];
                 resources[ResourceKeys.ToolWindowCaptionButtonActivePressedBorder] =
                    themeBrushes[ResourceKeys.ToolWindowCaptionButtonActivePressedBorder];
-
                 resources[ResourceKeys.ToolWindowTabSelectedActiveBackground] =
                    themeBrushes[ResourceKeys.ToolWindowTabSelectedActiveBackground];
                 resources[ResourceKeys.ToolWindowTabSelectedActiveText] =
@@ -317,7 +327,6 @@ namespace Skriptorium
                    themeBrushes[ResourceKeys.ToolWindowTabSelectedInactiveText];
                 resources[ResourceKeys.ToolWindowTabUnselectedHoveredText] =
                    themeBrushes[ResourceKeys.ToolWindowTabUnselectedHoveredText];
-
                 resources[ResourceKeys.DockingButtonForegroundBrushKey] =
                   themeBrushes[ResourceKeys.DockingButtonForegroundBrushKey];
                 resources[ResourceKeys.PreviewBoxBackgroundBrushKey] =
@@ -331,5 +340,6 @@ namespace Skriptorium
                     "Theme-Ladefehler", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        #endregion
     }
 }
