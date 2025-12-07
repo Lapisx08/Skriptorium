@@ -107,6 +107,9 @@ namespace Skriptorium.UI.Views.Tools
 
             var sb = new StringBuilder();
 
+            // Kommentare Laden
+            string cStrengthComment = TryFindResource("Comment_AttributeStrength") as string;
+
             // Instance-Name
             string nameSafe = nameEntry.Text.Replace(" ", "_");
 
@@ -126,7 +129,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             sb.AppendLine("    // ------ Attribute ------");
-            sb.AppendLine($"    attribute[ATR_STRENGTH]       =  80;{(includeComments ? " // +ca. 50-80 Waffe, mindestens 100 wegen Ausrüstung der Waffe" : "" )} ");
+            sb.AppendLine($"    attribute[ATR_STRENGTH]       =  80;{(includeComments ? $" // {cStrengthComment}" : "")}");
             sb.AppendLine("    attribute[ATR_DEXTERITY]      =  80;");
             sb.AppendLine("    attribute[ATR_HITPOINTS_MAX]  =  225;");
             sb.AppendLine("    attribute[ATR_HITPOINTS]      =  225;");
@@ -163,7 +166,7 @@ namespace Skriptorium.UI.Views.Tools
 
             sb.AppendLine("    // ------ Aussehen ------");
             sb.AppendLine("    Mdl_SetVisual (self, \"Orc.mds\");");
-            sb.AppendLine("    //                       Body-Mesh          Body-Tex Skin-Color   Head-MMS     Head-Tex  Teeth-Tex  ARMOR");
+            sb.AppendLine("    //                       Body-Mesh        Body-Tex Skin-Color   Head-MMS     Head-Tex  Teeth-Tex  ARMOR");
             sb.AppendLine($"    Mdl_SetVisualBody (self, \"{((ComboBoxItem)bodyMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, \"{((ComboBoxItem)headMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, NO_ARMOR);");
             sb.AppendLine("    Mdl_SetModelFatness (self, 0);");
             sb.AppendLine();

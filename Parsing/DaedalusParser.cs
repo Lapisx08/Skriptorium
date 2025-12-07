@@ -390,14 +390,20 @@ namespace Skriptorium.Parsing
             }
 
             Consume(TokenType.CloseParenthesis, "')' nach Parametern erwartet");
-            Consume(TokenType.OpenBracket, "'{' vor Funktionsrumpf erwartet");
-            while (!Check(TokenType.CloseBracket) && !IsAtEnd())
+            // Funktionsbody ist optional (für Prototypen)
+            if (Check(TokenType.OpenBracket))
             {
-                var stmt = ParseStatement();
-                if (stmt != null) func.Body.Add(stmt);
-                else Advance();
+                Consume(TokenType.OpenBracket, "'{' vor Funktionsrumpf erwartet");
+                while (!Check(TokenType.CloseBracket) && !IsAtEnd())
+                {
+                    var stmt = ParseStatement();
+                    if (stmt != null) func.Body.Add(stmt);
+                    else Advance();
+                }
+                Consume(TokenType.CloseBracket, "'}' nach Funktionsrumpf erwartet");
             }
-            Consume(TokenType.CloseBracket, "'}' nach Funktionsrumpf erwartet");
+
+            // Optionales Semicolon (für Prototypen oder nach Body)
             if (Match(TokenType.Semicolon)) Advance();
 
             return func;
@@ -485,24 +491,7 @@ namespace Skriptorium.Parsing
                     else
                     {
                         var expr = ParseExpression();
-                        if (expr is LiteralExpression literal)
-                        {
-                            value = literal.Value;
-                        }
-                        else if (expr is VariableExpression variable)
-                        {
-                            value = variable.Name;
-                        }
-                        else if (expr is BinaryExpression binary &&
-                                 (binary.Operator == "<<" || binary.Operator == ">>" || binary.Operator == "+" || binary.Operator == "/") &&
-                                 binary.Left is LiteralExpression left && binary.Right is LiteralExpression right)
-                        {
-                            value = $"{left.Value} {binary.Operator} {right.Value}";
-                        }
-                        else
-                        {
-                            throw new ParseException("Konstantenwert (Literal, Identifier oder binärer Ausdruck mit <<, >>, + oder /) erwartet", Current());
-                        }
+                        value = ExpressionToString(expr);
                     }
                 }
 
@@ -1070,18 +1059,44 @@ namespace Skriptorium.Parsing
 
         private int GetPrecedence(DaedalusToken token)
         {
-            if (token == null) return 0;
-            return token.Type switch
+            if (token?.Type != TokenType.Operator) return 0;
+            switch (token.Value)
             {
-                TokenType.Operator when token.Value == "||" => 1,
-                TokenType.Operator when token.Value == "&&" => 2,
-                TokenType.Operator when token.Value == "==" || token.Value == "!=" => 3,
-                TokenType.Operator when token.Value == "<" || token.Value == ">" || token.Value == "<=" || token.Value == ">=" => 4,
-                TokenType.Operator when token.Value == "+" || token.Value == "-" => 5,
-                TokenType.Operator when token.Value == "*" || token.Value == "/" || token.Value == "%" => 6,
-                TokenType.Operator when token.Value == "<<" || token.Value == ">>" => 7,
-                _ => 0
-            };
+                case "||": return 5;
+                case "&&": return 6;
+                case "|": return 7;
+                case "^": return 8;
+                case "&": return 9;
+                case "==":
+                case "!=": return 10;
+                case "<":
+                case ">":
+                case "<=":
+                case ">=": return 11;
+                case "<<":
+                case ">>": return 12;
+                case "+":
+                case "-": return 13;
+                case "*":
+                case "/":
+                case "%": return 14;
+                default: return 0;
+            }
+        }
+
+        private string ExpressionToString(Expression expr)
+        {
+            if (expr is LiteralExpression lit)
+                return lit.Value;
+            if (expr is VariableExpression var)
+                return var.Name;
+            if (expr is BinaryExpression bin &&
+                (bin.Operator == "<<" || bin.Operator == ">>" || bin.Operator == "+" ||
+                 bin.Operator == "/" || bin.Operator == "|"))
+            {
+                return $"{ExpressionToString(bin.Left)} {bin.Operator} {ExpressionToString(bin.Right)}";
+            }
+            throw new ParseException("Ungültiger Ausdruck für Konstantenwert (nur Literale, Identifier oder binäre Ausdrücke mit <<, >>, +, /, | erlaubt)", new DaedalusToken(TokenType.EOF, "", expr.Line, expr.Column));
         }
 
         private bool Match(TokenType type)

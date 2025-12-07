@@ -25,6 +25,8 @@ namespace Skriptorium.UI
         private readonly SearchManager _searchManager;
         private readonly DataMenuManager _dataMenuManager;
         private ScriptEditor? _currentScriptEditor;
+        private NPCGenerator? _npcGenerator;
+        private OrcGenerator? _orcGenerator;
         private DialogGenerator? _dialogGenerator;
 
         public double GlobalZoom { get; set; } = 1.0;
@@ -610,16 +612,36 @@ namespace Skriptorium.UI
 
         private void MenuNPCGenerator_Click(object sender, RoutedEventArgs e)
         {
-            var npcGenerator = new NPCGenerator();
-            npcGenerator.Owner = this;
-            npcGenerator.Show();
+            if (_npcGenerator == null || !_npcGenerator.IsVisible)
+            {
+                _npcGenerator = new NPCGenerator
+                {
+                    Owner = this
+                };
+                _npcGenerator.Closed += (s, args) => _npcGenerator = null;
+                _npcGenerator.Show();
+            }
+            else
+            {
+                _npcGenerator.Focus();
+            }
         }
 
         private void MenuOrcGenerator_Click(object sender, RoutedEventArgs e)
         {
-            var orcGenerator = new OrcGenerator();
-            orcGenerator.Owner = this;
-            orcGenerator.Show();
+            if (_orcGenerator == null || !_orcGenerator.IsVisible)
+            {
+                _orcGenerator = new OrcGenerator
+                {
+                    Owner = this
+                };
+                _orcGenerator.Closed += (s, args) => _orcGenerator = null;
+                _orcGenerator.Show();
+            }
+            else
+            {
+                _orcGenerator.Focus();
+            }
         }
 
         private void MenuDialogGenerator_Click(object sender, RoutedEventArgs e)

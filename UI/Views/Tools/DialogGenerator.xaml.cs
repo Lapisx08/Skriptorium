@@ -333,7 +333,7 @@ namespace Skriptorium.UI.Views.Tools
 
             sb.AppendLine($"func int DIA_{dialogInstance}_Condition ()");
             sb.AppendLine("{");
-            sb.AppendLine("    return TRUE; //Bedingungen manuell eingeben");
+            sb.AppendLine("    return TRUE;");
             sb.AppendLine("};");
             sb.AppendLine();
 

@@ -200,6 +200,21 @@ namespace Skriptorium.UI.Views.Tools
 
             var sb = new StringBuilder();
 
+            // Kommentare laden
+            string cSetAttributesChapter = TryFindResource("Comment_SetAttributesChapter") as string;
+            string cEquipItem = TryFindResource("Comment_EquipItem") as string;
+            string cCreateAmbientInv = TryFindResource("Comment_CreateAmbientInv") as string;
+            string cNpcVisual = TryFindResource("Comment_NpcVisual") as string;
+            string cFightSkills = TryFindResource("Comment_FightSkills") as string;
+            string cDailyRoutine = TryFindResource("Comment_DailyRoutine") as string;
+            string cAivToughGuy = TryFindResource("Comment_AIV_ToughGuy") as string;
+            string cAivIgnoresFakeGuild = TryFindResource("Comment_AIV_IgnoresFakeGuild") as string;
+            string cAivIgnoresArmor = TryFindResource("Comment_AIV_IgnoresArmor") as string;
+            string cAivNpcIsRanger = TryFindResource("Comment_AIV_NPCIsRanger") as string;
+            string cAivNoFightParker = TryFindResource("Comment_AIV_NoFightParker") as string;
+            string cAivMagicUser = TryFindResource("Comment_AIV_MagicUser") as string;
+            string cDeleteUnusedAIV = TryFindResource("Comment_DeleteUnusedAIV") as string;
+
             // NSC
             string guildText;
 
@@ -235,18 +250,18 @@ namespace Skriptorium.UI.Views.Tools
             {
                 // AIVARS
                 sb.AppendLine("    // ------ AIVARS ------");
-                sb.AppendLine($"    aivar[AIV_ToughGuy]              =  TRUE;{(includeComments ? " // Jubelt beim Kampf, hat keine Neuigkeiten bei Attack (kann über AIV_LastFightAgainstPlayer reagieren)" : "")}");
+                sb.AppendLine($"    aivar[AIV_ToughGuy]              =  TRUE;{(includeComments && cAivToughGuy != null ? $" // {cAivToughGuy}" : "")}");
                 sb.AppendLine($"    aivar[AIV_ToughGuyNewsOverride]  =  TRUE;{(includeComments ? "" : "")}");
                 sb.AppendLine($"    aivar[AIV_IGNORE_Murder]         =  TRUE;{(includeComments ? "" : "")}");
                 sb.AppendLine($"    aivar[AIV_IGNORE_Theft]          =  TRUE;{(includeComments ? "" : "")}");
                 sb.AppendLine($"    aivar[AIV_IGNORE_Sheepkiller]    =  TRUE;{(includeComments ? "" : "")}");
-                sb.AppendLine($"    aivar[AIV_IgnoresFakeGuild]      =  TRUE;{(includeComments ? " // Ignoriert die falsche Gilde, die durch die Rüstung erzeugt wird" : "")}");
-                sb.AppendLine($"    aivar[AIV_IgnoresArmor]          =  TRUE;{(includeComments ? " // Keine Reaktion oder Konsequenzen auf die Rüstung des Helden" : "")}");
-                sb.AppendLine($"    aivar[AIV_NPCIsRanger]           =  TRUE;{(includeComments ? " // NPC gehört zum Ring des Wassers" : "")}");
-                sb.AppendLine($"    aivar[AIV_NoFightParker]         =  TRUE;{(includeComments ? " // NPC wird weder angegriffen, noch greift er selbst welche an" : "")}");
+                sb.AppendLine($"    aivar[AIV_IgnoresFakeGuild]      =  TRUE;{(includeComments && cAivIgnoresFakeGuild != null ? $" // {cAivIgnoresFakeGuild}" : "")}");
+                sb.AppendLine($"    aivar[AIV_IgnoresArmor]          =  TRUE;{(includeComments && cAivIgnoresArmor != null ? $" // {cAivIgnoresArmor}" : "")}");
+                sb.AppendLine($"    aivar[AIV_NPCIsRanger]           =  TRUE;{(includeComments && cAivNpcIsRanger != null ? $" // {cAivNpcIsRanger}" : "")}");
+                sb.AppendLine($"    aivar[AIV_NoFightParker]         =  TRUE;{(includeComments && cAivNoFightParker != null ? $" // {cAivNoFightParker}" : "")}");
                 sb.AppendLine($"    aivar[AIV_EnemyOverride]         =  TRUE;{(includeComments ? "" : "")}");
-                sb.AppendLine($"    aivar[AIV_MagicUser]             =  MAGIC_ALWAYS;{(includeComments ? " // Setzt immer Magie beim Kämpfen ein" : "")}");
-                sb.AppendLine($"    // Lösche die AIV, die nicht benötigt werden{(includeComments ? "" : "")}");
+                sb.AppendLine($"    aivar[AIV_MagicUser]             =  MAGIC_ALWAYS;{(includeComments && cAivMagicUser != null ? $" // {cAivMagicUser}" : "")}");
+                sb.AppendLine($"    // {(includeComments && cDeleteUnusedAIV != null ? cDeleteUnusedAIV : "Lösche die AIV, die nicht benötigt werden")}");
                 sb.AppendLine();
             }
 
@@ -257,7 +272,7 @@ namespace Skriptorium.UI.Views.Tools
             if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() !=
                 (Application.Current.TryFindResource("Yes") as string))
             {
-                sb.AppendLine($"    B_SetAttributesToChapter (self, 1);{(includeComments ? " // Setzt Attribute und Level entsprechend des angegebenen Kapitels (1-6)" : "")}");
+                sb.AppendLine($"    B_SetAttributesToChapter (self, 1);{(includeComments ? $" // {cSetAttributesChapter}" : "")}");
                 sb.AppendLine();
             }
 
@@ -279,17 +294,17 @@ namespace Skriptorium.UI.Views.Tools
 
             // Ausgerüstete Waffen
             sb.AppendLine("    // ------ Ausgerüstete Waffen ------");
-            sb.AppendLine($"    EquipItem (self, ItMw_1h_Bau_Mace);{(includeComments ? " // Ersetze die Iteminstanz durch die gewünschte Waffe / Munition wird automatisch generiert, darf aber angegeben werden" : "")}");
+            sb.AppendLine($"    EquipItem (self, ItMw_1h_Bau_Mace);{(includeComments ? $" // {cEquipItem}" : "")}");
             sb.AppendLine();
 
             // Inventar
             sb.AppendLine("    // ------ Inventar ------");
-            sb.AppendLine($"    B_CreateAmbientInv (self);{(includeComments ? " // Stattet NPC mit entsprechendem Standardinventar aus" : "")}");
+            sb.AppendLine($"    B_CreateAmbientInv (self);{(includeComments ? $" // {cCreateAmbientInv}" : "")}");
             sb.AppendLine();
 
             // Aussehen
             sb.AppendLine("    // ------ Aussehen ------");
-            sb.AppendLine($"    {GenerateNpcVisual()};{(includeComments ? " // Ersetze NO_ARMOR durch die gewünschte Rüstungsinstanz / Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird" : "")}");
+            sb.AppendLine($"    {GenerateNpcVisual()};{(includeComments ? $" // {cNpcVisual}" : "")}");
             sb.AppendLine($"    Mdl_SetModelFatness (self, 0);{(includeComments ? " // -1 / 0 / 1 / 2" : "")}");
             sb.AppendLine($"    Mdl_ApplyOverlayMds (self, \"Humans_Tired.mds\");{(includeComments ? " // Tired / Militia / Mage / Arrogance / Relaxed" : "")}");
             sb.AppendLine();
@@ -306,7 +321,7 @@ namespace Skriptorium.UI.Views.Tools
             if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() !=
                 (Application.Current.TryFindResource("Yes") as string))
             {
-                sb.AppendLine($"    B_SetFightSkills (self, 10);{(includeComments ? " // Grenzen für Talent-Level liegen bei 30 und 60 / Der enthaltene B_AddFightSkill setzt alle Kampftalente gleichhoch" : "")}");
+                sb.AppendLine($"    B_SetFightSkills (self, 10);{(includeComments ? $" // {cFightSkills}" : "")}");
                 sb.AppendLine();
             }
 
@@ -326,7 +341,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             // Tagesroutine-Funktion
-            sb.AppendLine($"func void Rtn_Start_{idEntry.Text} (){(includeComments ? " // Tages-Routine muss insgesamt immer 24 h ergeben und sie muss mindestens zwei Tagesabläufe umfassen" : "")}");
+            sb.AppendLine($"func void Rtn_Start_{idEntry.Text} (){(includeComments && cDailyRoutine != null ? $" // {cDailyRoutine}" : "")}");
             sb.AppendLine("{");
             sb.AppendLine("    TA_Stand_ArmsCrossed (08,00,20,00,\"WP_Platzhalter\");");
             sb.AppendLine("    TA_Stand_ArmsCrossed (20,00,08,00,\"WP_Platzhalter\");");

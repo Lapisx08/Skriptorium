@@ -58,7 +58,7 @@ namespace Skriptorium.Managers
             }
             else
             {
-                // Neue Datei oder Encoding unbekannt → UTF-8 Standard (ohne BOM)
+                // Neue Datei oder Encoding unbekannt → UTF-8 ohne BOM
                 encodingToUse = new UTF8Encoding(false);
             }
 

@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+    <!-- Region: UI -->
     <!-- Skriptorium -->
     <sys:String x:Key="AboutSkriptorium">Über Skriptorium</sys:String>
     <sys:String x:Key="CtrlI">Strg + I</sys:String>
@@ -196,4 +197,25 @@
     <sys:String x:Key="MsgScriptModified">Dieses Skript wurde geändert. Möchtest du es speichern?</sys:String>
     <sys:String x:Key="MsgSaveChangesTitle">Änderungen speichern?</sys:String>
     <sys:String x:Key="MsgUnsaved">Nicht gespeichert</sys:String>
+    <!-- Endregion: UI -->
+
+    <!-- Region: Comments -->
+    <!-- NPC Generator -->
+    <sys:String x:Key="Comment_SetAttributesChapter">Setzt Attribute und Level entsprechend des angegebenen Kapitels (1-6)</sys:String>
+    <sys:String x:Key="Comment_EquipItem">Ersetze die Iteminstanz durch die gewünschte Waffe / Munition wird automatisch generiert, darf aber angegeben werden</sys:String>
+    <sys:String x:Key="Comment_CreateAmbientInv">Stattet NPC mit entsprechendem Standardinventar aus</sys:String>
+    <sys:String x:Key="Comment_NpcVisual">Ersetze NO_ARMOR durch die gewünschte Rüstungsinstanz / Muss nach Attributen kommen, weil in B_SetNpcVisual die Breite abh. v. d. Stärke skaliert wird</sys:String>
+    <sys:String x:Key="Comment_FightSkills">Grenzen für Talent-Level liegen bei 30 und 60 / Der enthaltene B_AddFightSkill setzt alle Kampftalente gleichhoch</sys:String>
+    <sys:String x:Key="Comment_DailyRoutine">Tages-Routine muss insgesamt immer 24 h ergeben und sie muss mindestens zwei Tagesabläufe umfassen</sys:String>
+    <sys:String x:Key="Comment_AIV_ToughGuy">Jubelt beim Kampf, hat keine Neuigkeiten bei Attack</sys:String>
+    <sys:String x:Key="Comment_AIV_IgnoresFakeGuild">Ignoriert die falsche Gilde, die durch die Rüstung erzeugt wird</sys:String>
+    <sys:String x:Key="Comment_AIV_IgnoresArmor">Keine Reaktion oder Konsequenzen auf die Rüstung des Helden</sys:String>
+    <sys:String x:Key="Comment_AIV_NPCIsRanger">NPC gehört zum Ring des Wassers</sys:String>
+    <sys:String x:Key="Comment_AIV_NoFightParker">NPC wird weder angegriffen, noch greift er selbst welche an</sys:String>
+    <sys:String x:Key="Comment_AIV_MagicUser">Setzt immer Magie beim Kämpfen ein</sys:String>
+    <sys:String x:Key="Comment_DeleteUnusedAIV">Lösche die AIVs, die nicht benötigt werden</sys:String>
+
+    <!-- Orc Generator -->
+    <sys:String x:Key="Comment_AttributeStrength">ca. 50-80 Waffe, mindestens 100 wegen Ausrüstung der Waffe</sys:String>
+    <!-- Endregion: Comments -->
 </ResourceDictionary>

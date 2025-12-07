@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+    <!-- Region: UI -->
     <!-- Skriptorium -->
     <sys:String x:Key="AboutSkriptorium">O Skriptorium</sys:String>
     <sys:String x:Key="CtrlI">Ctrl + I</sys:String>
@@ -196,4 +197,26 @@
     <sys:String x:Key="MsgScriptModified">Ten skrypt został zmieniony. Czy chcesz go zapisać?</sys:String>
     <sys:String x:Key="MsgSaveChangesTitle">Zapisać zmiany?</sys:String>
     <sys:String x:Key="MsgUnsaved">Nie zapisano</sys:String>
+    <!-- Endregion: UI -->
+
+    <!-- Region: Comments -->
+    <!-- NPC Generator -->
+    <sys:String x:Key="Comment_SetAttributesChapter">Ustawia atrybuty i poziomy zgodnie z określonym rozdziałem (1-6)</sys:String>
+    <sys:String x:Key="Comment_EquipItem">Zastąp instancję przedmiotu żądaną bronią / amunicją generowaną automatycznie, ale można ją określić</sys:String>
+    <sys:String x:Key="Comment_CreateAmbientInv">Wyposaż NPC w odpowiedni standardowy ekwipunek</sys:String>
+    <sys:String x:Key="Comment_NpcVisual">Zastąp NO_ARMOR żądaną instancją pancerza / Musi znajdować się po atrybutach, ponieważ w B_SetNpcVisual szerokość jest skalowana w zależności od siły</sys:String>
+    <sys:String x:Key="Comment_FightSkills">Limity poziomu talentów wynoszą 30 i 60 / Dołączony zestaw B_AddFightSkill ustawia wszystkie talenty bojowe na ten sam poziom</sys:String>
+    <sys:String x:Key="Comment_DailyRoutine">Codzienna rutyna musi zawsze sumować się do 24 godzin i musi obejmować co najmniej dwa harmonogramy dzienne</sys:String>
+    <sys:String x:Key="Comment_AIV_ToughGuy">Oklaski podczas walki, brak wiadomości podczas ataku</sys:String>
+    <sys:String x:Key="Comment_AIV_IgnoresFakeGuild">Ignoruje nieprawidłową gildię wygenerowaną przez zbroję</sys:String>
+    <sys:String x:Key="Comment_AIV_IgnoresArmor">Brak reakcji lub konsekwencji dla zbroi bohatera</sys:String>
+    <sys:String x:Key="Comment_AIV_NPCIsRanger">NPC należy do Pierścienia Wody</sys:String>
+    <sys:String x:Key="Comment_AIV_NoFightParker">Postacie niezależne nie są atakowane ani same nie atakują innych</sys:String>
+    <sys:String x:Key="Comment_AIV_MagicUser">Zawsze używa magii podczas walki</sys:String>
+    <sys:String x:Key="Comment_DeleteUnusedAIV">Usuń niepotrzebne pliki AIV</sys:String>
+
+    <!-- Orc Generator -->
+    <sys:String x:Key="Comment_AttributeStrength">Około 50–80 sztuk broni, co najmniej 100 ze względu na wyposażenie w broń</sys:String>
+
+    <!-- Endregion: Comments -->
 </ResourceDictionary>
