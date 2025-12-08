@@ -226,73 +226,76 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
+                    // Ersetze den gesamten identifier-Block durch diesen hier:
                     if (identifier.IsMatch(remaining))
                     {
                         var match = identifier.Match(remaining);
                         var val = match.Value;
-                        TokenType type = TokenType.Unknown;
+                        TokenType type = TokenType.Identifier; // Standard: Identifier
 
-                        if (val.Equals("Npc_Default", StringComparison.OrdinalIgnoreCase))
+                        // 1. Spezielle Keywords (self, other, slf, hero, ...)
+                        if (specialKeywords.TryGetValue(val, out var specialType))
                         {
-                            type = TokenType.Identifier;
+                            type = specialType;
                         }
-                        else
+                        // 2. Echte Daedalus-Keywords (func, var, int, if, ...)
+                        else if (keywordsMap.TryGetValue(val, out var keywordType))
+                        {
+                            type = keywordType;
+                            if (type == TokenType.InstanceKeyword)
+                                _expectInstanceName = true;
+                        }
+                        // 3. Kontextuelle Sonderfälle
+                        else if (val.Equals("C_NPC", StringComparison.OrdinalIgnoreCase) &&
+                                 tokens.Count > 0 &&
+                                 (tokens[tokens.Count - 1].Value.Equals("var", StringComparison.OrdinalIgnoreCase) ||
+                                  tokens[tokens.Count - 1].Value.Equals("instance", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            type = TokenType.TypeKeyword;
+                        }
+                        else if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
+                            type = TokenType.AiVariable;
+                        else if (val.Equals("MALE", StringComparison.Ordinal) || val.Equals("FEMALE", StringComparison.Ordinal))
+                            type = TokenType.SexConstant;
+                        else if (val.EndsWith("_ZEN", StringComparison.OrdinalIgnoreCase))
+                            type = TokenType.ZENConstant;
+                        else if (OtherFunctions.Contains(val))
+                            type = TokenType.EquipFunction;
+
+                        // WICHTIG: Prefix-Erkennung (Npc_, Info_, B_, etc.) NUR WENN ES KEIN FUNKTIONNAME IST!
+                        // Das wird später im Post-Processing korrigiert → wir lassen es erstmal als Identifier!
+                        else if (_expectInstanceName)
+                        {
+                            type = TokenType.InstanceName;
+                            _expectInstanceName = false;
+                        }
+
+                        // Prefix-Typen erst am Ende – und nur, wenn es wirklich KEIN Funktionsname ist!
+                        bool isFunctionContext = false;
+                        if (tokens.Count >= 2)
+                        {
+                            var prev = tokens[tokens.Count - 1];
+                            var prevPrev = tokens.Count >= 2 ? tokens[tokens.Count - 2] : null;
+                            isFunctionContext = prevPrev != null &&
+                                               prevPrev.Type == TokenType.FuncKeyword &&
+                                               prev.Type == TokenType.TypeKeyword;
+                        }
+
+                        if (!isFunctionContext)
                         {
                             foreach (var prefix in prefixTokenTypes)
                             {
-                                if (val.StartsWith(prefix.Key, StringComparison.Ordinal))
+                                if (prefix.Key != "Npc_" && val.StartsWith(prefix.Key, StringComparison.Ordinal))
                                 {
                                     type = prefix.Value;
                                     break;
                                 }
                             }
                         }
-
-                        if (specialKeywords.TryGetValue(val, out var keywordType))
-                        {
-                            type = keywordType;
-                        }
-
-                        if (type == TokenType.Unknown)
-                        {
-                            if (val.Equals("C_NPC", StringComparison.OrdinalIgnoreCase) &&
-                                tokens.Count > 0 &&
-                                (tokens[tokens.Count - 1].Value.Equals("var", StringComparison.OrdinalIgnoreCase) ||
-                                 tokens[tokens.Count - 1].Value.Equals("int", StringComparison.OrdinalIgnoreCase)))
-                            {
-                                type = TokenType.TypeKeyword;
-                            }
-                            else if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
-                                type = TokenType.AiVariable;
-                            else if (val.Equals("MALE", StringComparison.Ordinal) || val.Equals("FEMALE", StringComparison.Ordinal))
-                                type = TokenType.SexConstant;
-                            else if (val.EndsWith("_ZEN", StringComparison.OrdinalIgnoreCase))
-                                type = TokenType.ZENConstant;
-                            else if (val.Equals("ZS_Talk", StringComparison.OrdinalIgnoreCase))
-                                type = TokenType.REALConstant;
-                            else if (OtherFunctions.Contains(val))
-                                type = TokenType.EquipFunction;
-                            else if (keywordsMap.TryGetValue(val, out var kwType))
-                            {
-                                type = kwType;
-                                if (type == TokenType.InstanceKeyword)
-                                    _expectInstanceName = true;
-                            }
-                            else if (_expectInstanceName)
-                            {
-                                type = TokenType.InstanceName;
-                                _expectInstanceName = false;
-                            }
-                            else
-                            {
-                                type = TokenType.Identifier;
-                            }
-                        }
+                        // Sonst bleibt es Identifier → wird später zu FunctionName gemacht!
 
                         if (type != TokenType.InstanceKeyword)
-                        {
                             _expectInstanceName = false;
-                        }
 
                         tokens.Add(new DaedalusToken(type, val, line + 1, column + 1));
                         column += match.Length;
@@ -315,6 +318,22 @@ namespace Skriptorium.Parsing
             tokens.Add(new DaedalusToken(TokenType.EOF, "", lines.Length, 0));
 
             // Nachbearbeitung: Korrigiere Token-Typen basierend auf Kontext
+            for (int i = 1; i < tokens.Count; i++)
+            {
+                if (tokens[i].Type == TokenType.FuncKeyword)
+                {
+                    var prevType = tokens[i - 1].Type;
+                    if (prevType == TokenType.FuncKeyword ||
+                        prevType == TokenType.VarKeyword ||
+                        prevType == TokenType.OpenParenthesis ||
+                        prevType == TokenType.Comma)
+                    {
+                        tokens[i].Type = TokenType.TypeKeyword;
+                    }
+                }
+            }
+
+            // Existing post-processing
             for (int i = 0; i < tokens.Count - 1; i++)
             {
                 // Schritt 1: Direkt nach FUNC kommt jetzt TypeKeyword
@@ -326,13 +345,11 @@ namespace Skriptorium.Parsing
                         next.Type = TokenType.TypeKeyword; // Direkt nach FUNC -> TypeKeyword
                     }
                 }
-
                 // Schritt 2: Funktionsname nach Typ + FUNC
                 if (tokens[i].Type == TokenType.TypeKeyword)
                 {
                     var prev = tokens[i - 1];
                     var next = tokens[i + 1];
-
                     if (prev.Type == TokenType.FuncKeyword)
                     {
                         if (next.Type == TokenType.Identifier ||
@@ -352,7 +369,6 @@ namespace Skriptorium.Parsing
                             next.Type = TokenType.FunctionName; // Nächster Token ist Funktionsname
                         }
                     }
-
                     // Auch bei VAR oder CONST: nächste Variable als Identifier
                     if (prev.Type == TokenType.VarKeyword || prev.Type == TokenType.ConstKeyword)
                     {

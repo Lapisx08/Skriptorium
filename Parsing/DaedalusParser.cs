@@ -206,11 +206,102 @@ namespace Skriptorium.Parsing
         {
             if (Match(TokenType.InstanceKeyword)) return new InstanceDeclaration();
             if (Match(TokenType.FuncKeyword)) return ParseFunction();
-            if (Match(TokenType.VarKeyword)) return ParseVarDeclaration();
+
+            // NEU: Wenn eine "VAR" - Deklaration wie "VAR <Type> <Name> (" aussieht,
+            // dann handelt es sich um eine Funktions-/Prototyp-Signatur mit führendem VAR.
+            if (Match(TokenType.VarKeyword))
+            {
+                var t1 = Peek(1);
+                var t2 = Peek(2);
+                var t3 = Peek(3);
+                if ((t1.Type == TokenType.TypeKeyword || t1.Type == TokenType.Identifier) &&
+                    (t2.Type == TokenType.FunctionName || t2.Type == TokenType.Identifier) &&
+                    t3.Type == TokenType.OpenParenthesis)
+                {
+                    return ParseFunctionWithVarPrefix();
+                }
+
+                return ParseVarDeclaration();
+            }
+
             if (Match(TokenType.ConstKeyword)) return ParseConstDeclaration();
             if (Match(TokenType.ClassKeyword) && Peek(1).Type == TokenType.Identifier) return ParseClass();
             if (Match(TokenType.PrototypeKeyword)) return ParsePrototype();
             return null;
+        }
+
+        // NEU: Parst Funktionsdeklarationen, die mit "VAR <Type> <Name>(...)" beginnen.
+        private FunctionDeclaration ParseFunctionWithVarPrefix()
+        {
+            var startToken = Current();
+            Advance(); // consume VAR
+
+            var returnToken = (Current().Type == TokenType.TypeKeyword || Current().Type == TokenType.Identifier)
+                ? AdvanceAndGet()
+                : throw new ParseException("Rückgabetyp erwartet", Current());
+
+            var func = new FunctionDeclaration
+            {
+                ReturnType = returnToken.Value,
+                Line = startToken.Line,
+                Column = startToken.Column
+            };
+
+            // Funktionsname kann als FunctionName oder Identifier tokenisiert sein.
+            DaedalusToken nameToken;
+            if (Current().Type == TokenType.FunctionName || Current().Type == TokenType.Identifier)
+                nameToken = AdvanceAndGet();
+            else
+                throw new ParseException("Funktionsname erwartet", Current());
+
+            func.Name = nameToken.Value;
+
+            Consume(TokenType.OpenParenthesis, "'(' erwartet");
+
+            if (!Check(TokenType.CloseParenthesis))
+            {
+                while (true)
+                {
+                    bool isVar = false;
+                    if (Match(TokenType.VarKeyword))
+                    {
+                        isVar = true;
+                        Advance();
+                    }
+
+                    if (!(Current().Type == TokenType.TypeKeyword || Current().Type == TokenType.Identifier))
+                        throw new ParseException("Parametertyp erwartet", Current());
+
+                    var typeToken = AdvanceAndGet();
+                    var paramName = Consume(TokenType.Identifier, "Parametername erwartet").Value;
+                    func.Parameters.Add($"{(isVar ? "var " : "")}{typeToken.Value} {paramName}");
+
+                    if (Match(TokenType.Comma))
+                        Advance();
+                    else
+                        break;
+                }
+            }
+
+            Consume(TokenType.CloseParenthesis, "')' nach Parametern erwartet");
+
+            // Funktionsrumpf optional (Prototypen)
+            if (Check(TokenType.OpenBracket))
+            {
+                Consume(TokenType.OpenBracket, "'{' vor Funktionsrumpf erwartet");
+                while (!Check(TokenType.CloseBracket) && !IsAtEnd())
+                {
+                    var stmt = ParseStatement();
+                    if (stmt != null) func.Body.Add(stmt);
+                    else Advance();
+                }
+                Consume(TokenType.CloseBracket, "'}' nach Funktionsrumpf erwartet");
+            }
+
+            // optionales Semikolon (Prototyp)
+            if (Match(TokenType.Semicolon)) Advance();
+
+            return func;
         }
 
         private List<InstanceDeclaration> ParseInstanceDeclaration()

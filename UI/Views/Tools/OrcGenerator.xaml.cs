@@ -166,7 +166,6 @@ namespace Skriptorium.UI.Views.Tools
 
             sb.AppendLine("    // ------ Aussehen ------");
             sb.AppendLine("    Mdl_SetVisual (self, \"Orc.mds\");");
-            sb.AppendLine("    //                       Body-Mesh        Body-Tex Skin-Color   Head-MMS     Head-Tex  Teeth-Tex  ARMOR");
             sb.AppendLine($"    Mdl_SetVisualBody (self, \"{((ComboBoxItem)bodyMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, \"{((ComboBoxItem)headMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, NO_ARMOR);");
             sb.AppendLine("    Mdl_SetModelFatness (self, 0);");
             sb.AppendLine();
