@@ -48,22 +48,13 @@ namespace Skriptorium.Managers
             }
         }
 
-        // Speichert Datei und behält die ursprüngliche Kodierung bei
+        // Speichert Datei
         private static void WriteFileAutoEncoding(string filePath, string content)
         {
-            Encoding encodingToUse;
-            if (fileEncodings.TryGetValue(filePath, out var detected))
-            {
-                encodingToUse = detected;
-            }
-            else
-            {
-                // Neue Datei oder Encoding unbekannt → UTF-8 ohne BOM
-                encodingToUse = new UTF8Encoding(false);
-            }
-
             try
             {
+                // Immer Latin-1 verwenden
+                Encoding encodingToUse = Encoding.GetEncoding("ISO-8859-1");
                 File.WriteAllText(filePath, content, encodingToUse);
             }
             catch (Exception ex)

@@ -73,6 +73,8 @@
                 <ComboBoxItem Content="28"/>
                 <ComboBoxItem Content="29"/>
                 <ComboBoxItem Content="30"/>
+                <ComboBoxItem Content="997"/>
+                <ComboBoxItem Content="998"/>
                 <ComboBoxItem Content="999"/>
             </ComboBox>
 

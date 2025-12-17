@@ -284,7 +284,7 @@ namespace Skriptorium.UI.Views.Tools
                 return;
             }
 
-            string dialogNumber = (dialogNumberDropdown.SelectedIndex + 1).ToString();
+            string dialogNumber = (dialogNumberDropdown.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "1";
             string important = importantDropdown.Text == Application.Current.TryFindResource("Yes") as string ? "TRUE" : "FALSE";
             string permanent = permanentDropdown.Text == Application.Current.TryFindResource("Yes") as string ? "TRUE" : "FALSE";
 
