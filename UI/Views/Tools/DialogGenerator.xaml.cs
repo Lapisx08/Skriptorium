@@ -162,7 +162,14 @@ namespace Skriptorium.UI.Views.Tools
             panel.Children.Add(itemQuantityLabel);
             panel.Children.Add(itemQuantityEntry);
 
-            var minusButton = new Button { Content = "-", Width = 20, Height = 20, Margin = new Thickness(5, 0, 0, 0) };
+            var minusButton = new Button
+            {
+                Content = "-",
+                Width = 24,
+                Height = 24,
+                Margin = new Thickness(5, 0, 0, 0)
+            };
+
             minusButton.Click += (s, e) =>
             {
                 if (dialogLines.Count <= 1)

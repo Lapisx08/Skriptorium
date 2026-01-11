@@ -316,9 +316,9 @@ namespace Skriptorium.Parsing
             {
                 var nameToken = Current();
                 if (!(Match(TokenType.InstanceName) || Match(TokenType.SelfKeyword) ||
-                      Match(TokenType.OtherKeyword) || Match(TokenType.SlfKeyword)))
+                      Match(TokenType.OtherKeyword) || Match(TokenType.SlfKeyword) || Match(TokenType.OthKeyword)))
                 {
-                    throw new ParseException("Instanzname oder spezielles Schlüsselwort (self, other, hero, slf) erwartet", nameToken, "instance name");
+                    throw new ParseException("Instanzname oder spezielles Schlüsselwort (self, other, hero, slf, oth) erwartet", nameToken, "instance name");
                 }
                 names.Add((nameToken.Value, nameToken.Line, nameToken.Column));
                 Advance();
@@ -513,6 +513,7 @@ namespace Skriptorium.Parsing
                 var nameToken = Consume(TokenType.Identifier, "Konstantenname erwartet");
                 string arraySize = null;
 
+                // Arraygröße optional
                 if (Match(TokenType.OpenSquareBracket))
                 {
                     Advance();
@@ -536,7 +537,8 @@ namespace Skriptorium.Parsing
                         sizeToken.Type == TokenType.MAXConstant ||
                         sizeToken.Type == TokenType.PROTConstant ||
                         sizeToken.Type == TokenType.DAMConstant ||
-                        sizeToken.Type == TokenType.ITMConstant)
+                        sizeToken.Type == TokenType.ITMConstant ||
+                        sizeToken.Type == TokenType.Identifier)
                     {
                         arraySize = sizeToken.Value;
                         Advance();
@@ -549,24 +551,37 @@ namespace Skriptorium.Parsing
                 }
 
                 string value = null;
+
+                // Initialisierung optional
                 if (Match(TokenType.Assignment))
                 {
                     Advance();
                     if (Match(TokenType.OpenBracket))
                     {
                         var initializer = new List<string>();
-                        Advance(); // consume {
+                        Advance(); // consume '{'
+
                         while (!Check(TokenType.CloseBracket) && !IsAtEnd())
                         {
                             var expr = ParseExpression();
-                            if (expr is LiteralExpression literal)
+
+                            switch (expr)
                             {
-                                initializer.Add(literal.Value);
+                                case LiteralExpression lit:
+                                    initializer.Add(lit.Value);
+                                    break;
+
+                                case VariableExpression varExpr:
+                                    initializer.Add(varExpr.Name); // Konstanten wie ATT_NEUTRAL akzeptieren
+                                    break;
+
+                                default:
+                                    throw new ParseException(
+                                        "Array-Initialisierer muss Literale oder Konstanten enthalten",
+                                        Current()
+                                    );
                             }
-                            else
-                            {
-                                throw new ParseException("Array-Initialisierer muss Literale enthalten", Current());
-                            }
+
                             if (Match(TokenType.Comma))
                             {
                                 Advance();
@@ -576,6 +591,7 @@ namespace Skriptorium.Parsing
                                 throw new ParseException("Komma oder '}' erwartet", Current());
                             }
                         }
+
                         Consume(TokenType.CloseBracket, "'}' nach Array-Initialisierer erwartet");
                         value = "{" + string.Join(", ", initializer) + "}";
                     }
@@ -601,15 +617,14 @@ namespace Skriptorium.Parsing
                     Advance();
                     continue;
                 }
+
                 break;
             }
 
             Consume(TokenType.Semicolon, "';' nach Konstantendeklaration erwartet");
 
             if (declarations.Count == 1)
-            {
                 return declarations[0];
-            }
 
             return new MultiConstDeclaration
             {
@@ -711,22 +726,37 @@ namespace Skriptorium.Parsing
             {
                 var lhs = ParseExpression();
 
-                if (Match(TokenType.Assignment))
+                if (Match(TokenType.Assignment) ||
+                    (Match(TokenType.Operator) && Current().Value == "-="))
                 {
                     var assignToken = Current();
+                    bool isMinusAssign = assignToken.Type == TokenType.Operator;
+
                     Advance();
+
                     var rhs = ParseExpression();
                     Consume(TokenType.Semicolon, "';' nach Zuweisung erwartet");
 
-                    var assignment = new Assignment
+                    if (isMinusAssign)
+                    {
+                        // a -= b  →  a = a - b
+                        rhs = new BinaryExpression
+                        {
+                            Left = lhs,
+                            Operator = "-",
+                            Right = rhs,
+                            Line = assignToken.Line,
+                            Column = assignToken.Column
+                        };
+                    }
+
+                    return new Assignment
                     {
                         Left = lhs,
                         Right = rhs,
                         Line = assignToken.Line,
-                        Column = assignToken.Line
+                        Column = assignToken.Column
                     };
-
-                    return assignment;
                 }
 
                 _position = startPos;
@@ -808,19 +838,32 @@ namespace Skriptorium.Parsing
                     Column = nameToken.Column
                 };
 
-                if (Match(TokenType.Assignment))
+                if (Match(TokenType.Assignment) ||
+                    (Match(TokenType.Operator) && Current().Value == "-="))
                 {
                     var assignToken = Current();
+                    bool isMinusAssign = assignToken.Type == TokenType.Operator;
+
                     Advance();
                     var rhs = ParseExpression();
                     Consume(TokenType.Semicolon, "';' nach Zuweisung erwartet");
 
-                    multiVarStmt.Declarations.Add(new VarDeclarationStatement
+                    if (isMinusAssign)
                     {
-                        Declaration = varDeclaration,
-                        Line = startToken.Line,
-                        Column = startToken.Column
-                    });
+                        rhs = new BinaryExpression
+                        {
+                            Left = new VariableExpression
+                            {
+                                Name = nameToken.Value,
+                                Line = nameToken.Line,
+                                Column = nameToken.Column
+                            },
+                            Operator = "-",
+                            Right = rhs,
+                            Line = assignToken.Line,
+                            Column = assignToken.Column
+                        };
+                    }
 
                     return new Assignment
                     {
@@ -887,10 +930,7 @@ namespace Skriptorium.Parsing
                 {
                     var opToken = Current();
                     Advance();
-                    Consume(TokenType.OpenParenthesis, "'(' nach logischem Operator erwartet");
                     var rightCondition = ParseExpression();
-                    Consume(TokenType.CloseParenthesis, "')' nach Bedingung erwartet");
-
                     condition = new BinaryExpression
                     {
                         Left = condition,
@@ -1055,13 +1095,13 @@ namespace Skriptorium.Parsing
 
             if (Match(TokenType.Identifier) || Match(TokenType.AiVariable) ||
                 Match(TokenType.SelfKeyword) || Match(TokenType.OtherKeyword) ||
-                Match(TokenType.SlfKeyword) || Match(TokenType.BuiltInFunction) ||
-                Match(TokenType.MdlFunction) || Match(TokenType.AIFunction) ||
-                Match(TokenType.NpcFunction) || Match(TokenType.InfoFunction) ||
-                Match(TokenType.CreateFunction) || Match(TokenType.WldFunction) ||
-                Match(TokenType.LogFunction) || Match(TokenType.HlpFunction) ||
-                Match(TokenType.SndFunction) || Match(TokenType.TAFunction) ||
-                Match(TokenType.EquipFunction))
+                Match(TokenType.SlfKeyword) || Match(TokenType.OthKeyword) ||
+                Match(TokenType.BuiltInFunction) || Match(TokenType.MdlFunction) || 
+                Match(TokenType.AIFunction) || Match(TokenType.NpcFunction) ||
+                Match(TokenType.InfoFunction) || Match(TokenType.CreateFunction) ||
+                Match(TokenType.WldFunction) || Match(TokenType.LogFunction) ||
+                Match(TokenType.HlpFunction) || Match(TokenType.SndFunction) ||
+                Match(TokenType.TAFunction) || Match(TokenType.EquipFunction))
             {
                 Advance();
                 Expression expr = new VariableExpression
@@ -1183,7 +1223,7 @@ namespace Skriptorium.Parsing
                 return var.Name;
             if (expr is BinaryExpression bin &&
                 (bin.Operator == "<<" || bin.Operator == ">>" || bin.Operator == "+" ||
-                 bin.Operator == "/" || bin.Operator == "|"))
+                 bin.Operator == "-" || bin.Operator == "/" || bin.Operator == "*" || bin.Operator == "|"))
             {
                 return $"{ExpressionToString(bin.Left)} {bin.Operator} {ExpressionToString(bin.Right)}";
             }

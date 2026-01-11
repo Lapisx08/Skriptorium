@@ -90,6 +90,8 @@
     <sys:String x:Key="CtrlShiftG">Strg + Shift + G</sys:String>
     <sys:String x:Key="DialogGenerator">Dialog Generator</sys:String>
     <sys:String x:Key="CtrlAltG">Strg + Alt + G</sys:String>
+    <sys:String x:Key="QuestGenerator">Quest Generator</sys:String>
+    <sys:String x:Key="CtrlShiftAltG">Strg + Shift + Alt + G</sys:String>
 
     <!-- Code Structure -->
     <sys:String x:Key="Instances">Instanzen</sys:String>
@@ -157,6 +159,27 @@
     <sys:String x:Key="Replace">Ersetzen</sys:String>
     <sys:String x:Key="ReplaceAll">Alles ersetzen</sys:String>
 
+    <!-- Quest Generator -->
+    <sys:String x:Key="QuestDefinition">Quest Definition</sys:String>
+    <sys:String x:Key="InternalName">Interner Name:</sys:String>
+    <sys:String x:Key="DisplayName">Anzeigename:</sys:String>
+    <sys:String x:Key="StartChapter">Start-Kapitel:</sys:String>
+    <sys:String x:Key="EndChapter">End-Kapitel:</sys:String>
+    <sys:String x:Key="MandatoryLogEntries">Pflicht-Logeinträge</sys:String>
+    <sys:String x:Key="StartLogText">Start-Logtext</sys:String>
+    <sys:String x:Key="QuestStartText">Text beim Start der Quest</sys:String>
+    <sys:String x:Key="SuccessLogText">Erfolg-Logtext</sys:String>
+    <sys:String x:Key="QuestSuccessText">Text bei erfolgreichem Abschluss</sys:String>
+    <sys:String x:Key="AbortLogText">Abbruch-Logtext</sys:String>
+    <sys:String x:Key="QuestAbortText">Text bei Abbruch oder Scheitern</sys:String>
+    <sys:String x:Key="FurtherLogEntries">Weitere Logeinträge</sys:String>
+    <sys:String x:Key="AddLogEntry">+ Logeintrag hinzufügen</sys:String>
+    <sys:String x:Key="NewLogEntry">Neuer Logeintrag</sys:String>
+    <sys:String x:Key="OutputFiles">Ausgabedateien</sys:String>
+    <sys:String x:Key="LogConstants">Log_Constants.d        Einzufügen in Content\Story\Log-Entries\Log-Constants_*</sys:String>
+    <sys:String x:Key="BCloseTopics">B_CloseTopics.d        Einzufügen in Content\Story\Log-Entries\B_CloseTopics_*</sys:String>
+    <sys:String x:Key="QuestDialogFuc">QuestDialogfuc.d     Einzufügen in den entsprechenden Dialogen oder Funktionen</sys:String>
+    
     <!-- AboutSkriptorium -->
     <sys:String x:Key="Version">Version: 1.0</sys:String>
     <sys:String x:Key="Developer">Entwickler: Lapis, Nemora26</sys:String>

@@ -28,6 +28,7 @@ namespace Skriptorium.UI
         private NPCGenerator? _npcGenerator;
         private OrcGenerator? _orcGenerator;
         private DialogGenerator? _dialogGenerator;
+        private QuestGenerator? _questGenerator;
 
         public double GlobalZoom { get; set; } = 1.0;
 
@@ -103,15 +104,17 @@ namespace Skriptorium.UI
             _shortcutManager.Register(Key.E, ModifierKeys.Control | ModifierKeys.Shift,
                                       () => MenuToolsFileExplorer_Click(null, null));
             _shortcutManager.Register(Key.F, ModifierKeys.Control | ModifierKeys.Shift,
-                          () => MenuToolsSearchExplorer_Click(null, null));
+                                      () => MenuToolsSearchExplorer_Click(null, null));
             _shortcutManager.Register(Key.C, ModifierKeys.Control | ModifierKeys.Shift,
                                       () => MenuToolsCodeStructure_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control,
                                       () => MenuNPCGenerator_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift,
-                          () => MenuOrcGenerator_Click(null, null));
+                                      () => MenuOrcGenerator_Click(null, null));
             _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Alt,
                                       () => MenuDialogGenerator_Click(null, null));
+            _shortcutManager.Register(Key.G, ModifierKeys.Control | ModifierKeys.Shift | ModifierKeys.Alt,
+                                      () => MenuQuestGenerator_Click(null, null));
 
             // 3. AvalonDock-Ereignisse
             dockingManager.ActiveContentChanged += DockingManager_ActiveContentChanged;
@@ -142,8 +145,6 @@ namespace Skriptorium.UI
                     _tabManager.AddNewTab(tab.Content);
                 }
             }
-
-            _tabManager.AddNewTab();
         }
 
         // Handler-Methode für Sprachänderungen
@@ -614,10 +615,7 @@ namespace Skriptorium.UI
         {
             if (_npcGenerator == null || !_npcGenerator.IsVisible)
             {
-                _npcGenerator = new NPCGenerator
-                {
-                    Owner = this
-                };
+                _npcGenerator = new NPCGenerator();
                 _npcGenerator.Closed += (s, args) => _npcGenerator = null;
                 _npcGenerator.Show();
             }
@@ -631,10 +629,7 @@ namespace Skriptorium.UI
         {
             if (_orcGenerator == null || !_orcGenerator.IsVisible)
             {
-                _orcGenerator = new OrcGenerator
-                {
-                    Owner = this
-                };
+                _orcGenerator = new OrcGenerator();
                 _orcGenerator.Closed += (s, args) => _orcGenerator = null;
                 _orcGenerator.Show();
             }
@@ -648,16 +643,27 @@ namespace Skriptorium.UI
         {
             if (_dialogGenerator == null || !_dialogGenerator.IsVisible)
             {
-                _dialogGenerator = new DialogGenerator
-                {
-                    Owner = this
-                };
+                _dialogGenerator = new DialogGenerator();
                 _dialogGenerator.Closed += (s, args) => _dialogGenerator = null; // Referenz zurücksetzen
                 _dialogGenerator.Show();
             }
             else
             {
                 _dialogGenerator.Focus();
+            }
+        }
+
+        private void MenuQuestGenerator_Click(object sender, RoutedEventArgs e)
+        {
+            if (_questGenerator == null || !_questGenerator.IsVisible)
+            {
+                _questGenerator = new QuestGenerator();
+                _questGenerator.Closed += (s, args) => _questGenerator = null; // Referenz zurücksetzen
+                _questGenerator.Show();
+            }
+            else
+            {
+                _questGenerator.Focus();
             }
         }
 

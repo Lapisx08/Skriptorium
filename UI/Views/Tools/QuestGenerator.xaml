@@ -1,12 +1,192 @@
-﻿<Window x:Class="Skriptorium.UI.Views.Tools.QuestGenerator"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Skriptorium.UI.Views.Tools"
-        mc:Ignorable="d"
-        Title="QuestGenerator" Height="450" Width="800">
-    <Grid>
-        
+﻿<mah:MetroWindow x:Class="Skriptorium.UI.Views.Tools.QuestGenerator"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                 Title="{DynamicResource QuestGenerator}" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
+                 Width="700"
+                 Height="880">
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Quest Definition -->
+            <RowDefinition Height="Auto"/>
+            <!-- Pflicht Logs -->
+            <RowDefinition Height="130"/>
+            <!-- Freie Logs -->
+            <RowDefinition Height="Auto"/>
+            <!-- Buttons -->
+            <RowDefinition Height="Auto"/>
+            <!-- Output -->
+        </Grid.RowDefinitions>
+
+        <!-- QUEST DEFINITION -->
+        <GroupBox Header="{DynamicResource QuestDefinition}" Grid.Row="0" Margin="0,0,0,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="{DynamicResource InternalName}" Grid.Row="0" Grid.Column="0" Margin="5,2,5,2" VerticalAlignment="Center"/>
+                <TextBox x:Name="QuestIdBox" Grid.Row="0" Grid.Column="1" Margin="5,2,5,2"/>
+
+                <TextBlock Text="{DynamicResource DisplayName}" Grid.Row="1" Grid.Column="0" Margin="5,2,5,2" VerticalAlignment="Center"/>
+                <TextBox x:Name="QuestTitleBox" Grid.Row="1" Grid.Column="1" Margin="5,2,5,2"/>
+
+                <TextBlock Text="{DynamicResource StartChapter}" Grid.Row="2" Grid.Column="0" Margin="5,2,5,2" VerticalAlignment="Center"/>
+                <TextBox x:Name="StartChapterBox" Grid.Row="2" Grid.Column="1" Margin="5,2,5,2" Text="1"/>
+
+                <TextBlock Text="{DynamicResource EndChapter}" Grid.Row="3" Grid.Column="0" Margin="5,2,5,2" VerticalAlignment="Center"/>
+                <TextBox x:Name="EndChapterBox" Grid.Row="3" Grid.Column="1" Margin="5,2,5,2" Text="6"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- PFLICHT LOGS -->
+        <GroupBox Header="{DynamicResource MandatoryLogEntries}" Grid.Row="1" Margin="0,0,0,5">
+            <StackPanel>
+
+                <!-- Start -->
+                <TextBlock Text="{DynamicResource StartLogText}" Margin="5,-2,5,2" FontWeight="SemiBold"/>
+                <TextBox x:Name="LogStartBox"
+                 Height="45"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5,0,5,5"
+                 mah:TextBoxHelper.Watermark="{DynamicResource QuestStartText}"/>
+
+                <!-- Erfolg -->
+                <TextBlock Text="{DynamicResource StartLogText}" Margin="5,-2,5,2" FontWeight="SemiBold"/>
+                <TextBox x:Name="LogSuccessBox"
+                 Height="45"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5,0,5,5"
+                 mah:TextBoxHelper.Watermark="{DynamicResource QuestSuccessText}"/>
+
+                <!-- Abbruch -->
+                <TextBlock Text="{DynamicResource AbortLogText}" Margin="5,-2,5,2" FontWeight="SemiBold"/>
+                <TextBox x:Name="LogFailBox"
+                 Height="45"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5,0,5,5"
+                 mah:TextBoxHelper.Watermark="{DynamicResource QuestAbortText}"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- FREIE LOGS -->
+        <GroupBox Header="{DynamicResource FurtherLogEntries}" Grid.Row="2" Margin="0,0,0,0">
+            <DockPanel>
+                <Button Click="AddFreeLog" DockPanel.Dock="Top" Margin="0">
+                    <TextBlock Text="{DynamicResource AddLogEntry}"/>
+                </Button>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="FreeLogContainer" Margin="5"/>
+                </ScrollViewer>
+            </DockPanel>
+        </GroupBox>
+
+        <!-- BUTTONS -->
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,0">
+
+            <Button Click="Generate" Margin="5">
+                <TextBlock Text="{DynamicResource Generate}"/>
+            </Button>
+            <Button Click="ResetFields" Margin="5">
+                <TextBlock Text="{DynamicResource Reset}"/>
+            </Button>
+        </StackPanel>
+
+        <!-- OUTPUT -->
+        <GroupBox Header="{DynamicResource OutputFiles}" Grid.Row="4">
+            <StackPanel>
+
+                <!-- Log_Constants -->
+                <Grid Margin="5,0,5,-3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{DynamicResource LogConstants}"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center"/>
+
+                    <Button Grid.Column="1"
+                    Margin="5,0,0,0"
+                    Tag="{Binding ElementName=OutConstantsBox}"
+                    Click="CopyToClipboard_Click">
+                        <TextBlock Text="{DynamicResource Copy}"/>
+                    </Button>
+                </Grid>
+
+                <TextBox x:Name="OutConstantsBox"
+                 Height="45"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5"/>
+
+                <!-- B_CloseTopics -->
+                <Grid Margin="5,0,5,-3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{DynamicResource BCloseTopics}"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center"/>
+
+                    <Button Grid.Column="1"
+                    Margin="5,0,0,0"
+                    Tag="{Binding ElementName=OutCloseBox}"
+                    Click="CopyToClipboard_Click">
+                        <TextBlock Text="{DynamicResource Copy}"/>
+                    </Button>
+                </Grid>
+
+                <TextBox x:Name="OutCloseBox"
+                 Height="45"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5"/>
+
+                <!-- QuestDialog -->
+                <Grid Margin="5,0,5,-3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{DynamicResource QuestDialogFuc}"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center"/>
+
+                    <Button Grid.Column="1"
+                    Margin="5,0,0,0"
+                    Tag="{Binding ElementName=OutDialogBox}"
+                    Click="CopyToClipboard_Click">
+                        <TextBlock Text="{DynamicResource Copy}"/>
+                    </Button>
+                </Grid>
+
+                <TextBox x:Name="OutDialogBox"
+                 Height="45"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5"/>
+            </StackPanel>
+        </GroupBox>
     </Grid>
-</Window>
+</mah:MetroWindow>

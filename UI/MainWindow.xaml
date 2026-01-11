@@ -150,15 +150,6 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE932;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="{DynamicResource Comments}">
-                    <MenuItem.Icon>
-                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="14"/>
-                    </MenuItem.Icon>
-                    <MenuItem Header="{DynamicResource BlockComment}" InputGestureText="{DynamicResource CtrlK}" Click="Blockkommentar_Click"/>
-                    <MenuItem Header="{DynamicResource SmallCommentField}" InputGestureText="{DynamicResource CtrlShiftK}" Click="KleinesKommentarfeld_Click"/>
-                    <MenuItem Header="{DynamicResource MiddleCommentField}" InputGestureText="{DynamicResource CtrlAltK}" Click="MittleresKommentarfeld_Click"/>
-                    <MenuItem Header="{DynamicResource BigCommentField}" InputGestureText="{DynamicResource CtrlShiftAltK}" Click="GroßesKommentarfeld_Click"/>
-                </MenuItem>
                 <MenuItem Header="{DynamicResource CollapseAndExpandFoldings}" InputGestureText="{DynamicResource CtrlM}" Click="ToggleFoldings_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="14"/>
@@ -168,6 +159,15 @@
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="14"/>
                     </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource Comments}">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="14"/>
+                    </MenuItem.Icon>
+                    <MenuItem Header="{DynamicResource BlockComment}" InputGestureText="{DynamicResource CtrlK}" Click="Blockkommentar_Click"/>
+                    <MenuItem Header="{DynamicResource SmallCommentField}" InputGestureText="{DynamicResource CtrlShiftK}" Click="KleinesKommentarfeld_Click"/>
+                    <MenuItem Header="{DynamicResource MiddleCommentField}" InputGestureText="{DynamicResource CtrlAltK}" Click="MittleresKommentarfeld_Click"/>
+                    <MenuItem Header="{DynamicResource BigCommentField}" InputGestureText="{DynamicResource CtrlShiftAltK}" Click="GroßesKommentarfeld_Click"/>
                 </MenuItem>
                 <MenuItem Header="{DynamicResource CheckSyntax}" InputGestureText="F5" Click="SyntaxCheckButton_Click">
                     <MenuItem.Icon>
@@ -190,6 +190,7 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
+                <Separator/>
                 <MenuItem Header="{DynamicResource NPCGenerator}" InputGestureText="{DynamicResource CtrlG}" Click="MenuNPCGenerator_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="14"/>
@@ -203,6 +204,11 @@
                 <MenuItem Header="{DynamicResource DialogGenerator}" InputGestureText="{DynamicResource CtrlAltG}" Click="MenuDialogGenerator_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource QuestGenerator}" InputGestureText="{DynamicResource CtrlShiftAltG}" Click="MenuQuestGenerator_Click">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE736;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
@@ -222,16 +228,22 @@
             <Button ToolTip="{DynamicResource SaveAll}" Click="MenuDateiAllesSpeichern_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEA35;" FontSize="12"/>
             </Button>
-            <Separator />
+            <Separator/>
             <Button ToolTip="{DynamicResource Undo}" Click="MenuBearbeitenRueckgaengig_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A7;" FontSize="12"/>
             </Button>
             <Button ToolTip="{DynamicResource Redo}" Click="MenuBearbeitenWiederholen_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" FontSize="12"/>
             </Button>
-            <Separator />
+            <Separator/>
             <Button ToolTip="{DynamicResource SearchAndReplace}" Click="FindInEditor_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE721;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="{DynamicResource CollapseAndExpandFoldings}" Click="ToggleFoldings_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="{DynamicResource IndentText}" Click="MenuCodeFormatieren_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="12"/>
             </Button>
             <Button ToolTip="{DynamicResource Comments}" Click="KommentareButton_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xED63;" FontSize="12"/>
@@ -244,13 +256,10 @@
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
-            <Button ToolTip="{DynamicResource CollapseAndExpandFoldings}" Click="ToggleFoldings_Click">
-                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xF168;" FontSize="12"/>
+            <Button ToolTip="{DynamicResource CheckSyntax}" Click="SyntaxCheckButton_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE768;" FontSize="12"/>
             </Button>
-            <Button ToolTip="{DynamicResource IndentText}" Click="MenuCodeFormatieren_Click">
-                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="12"/>
-            </Button>
-            <Separator />
+            <Separator/>
             <Button ToolTip="{DynamicResource FileExplorer}" Click="MenuToolsFileExplorer_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC50;" FontSize="12"/>
             </Button>
@@ -260,6 +269,7 @@
             <Button ToolTip="{DynamicResource CodeStructure}" Click="MenuToolsCodeStructure_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="12"/>
             </Button>
+            <Separator/>
             <Button ToolTip="{DynamicResource NPCGenerator}" Click="MenuNPCGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="12"/>
             </Button>
@@ -268,6 +278,9 @@
             </Button>
             <Button ToolTip="{DynamicResource DialogGenerator}" Click="MenuDialogGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="12"/>
+            </Button>
+            <Button ToolTip="Quest Generator" Click="MenuQuestGenerator_Click">
+                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE736;" FontSize="12"/>
             </Button>
         </ToolBar>
 

@@ -65,6 +65,7 @@ namespace Skriptorium.Parsing
         SelfKeyword,            // self
         OtherKeyword,           // other
         SlfKeyword,             // slf
+        OthKeyword,             // oth
 
         // Operatoren
         Operator,          // +, -, *, /, %, <, >, !, &&, ||

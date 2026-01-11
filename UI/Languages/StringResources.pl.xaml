@@ -90,6 +90,8 @@
     <sys:String x:Key="CtrlShiftG">Ctrl + Shift + G</sys:String>
     <sys:String x:Key="DialogGenerator">Generator dialogów</sys:String>
     <sys:String x:Key="CtrlAltG">Ctrl + Alt + G</sys:String>
+    <sys:String x:Key="QuestGenerator">Generator Zadań</sys:String>
+    <sys:String x:Key="CtrlShiftAltG">Ctrl + Shift + Alt + G</sys:String>
 
     <!-- Code Structure -->
     <sys:String x:Key="Instances">Instancja</sys:String>
@@ -156,6 +158,27 @@
     <sys:String x:Key="MatchWholeWord">Wyszukaj tylko całe słowo</sys:String>
     <sys:String x:Key="Replace">Zastąp</sys:String>
     <sys:String x:Key="ReplaceAll">Zastąp wszystko</sys:String>
+
+    <!-- Quest Generator -->
+    <sys:String x:Key="QuestDefinition">Definicja zadania</sys:String>
+    <sys:String x:Key="InternalName">Nazwa wewnętrzna:</sys:String>
+    <sys:String x:Key="DisplayName">Wyświetlana nazwa:</sys:String>
+    <sys:String x:Key="StartChapter">Rozpocznij rozdział:</sys:String>
+    <sys:String x:Key="EndChapter">Koniec rozdziału:</sys:String>
+    <sys:String x:Key="MandatoryLogEntries">Obowiązkowe wpisy do dziennika</sys:String>
+    <sys:String x:Key="StartLogText">Rozpocznij tekst dziennika</sys:String>
+    <sys:String x:Key="QuestStartText">Tekst na początku zadania</sys:String>
+    <sys:String x:Key="SuccessLogText">Tekst dziennika sukcesów</sys:String>
+    <sys:String x:Key="QuestSuccessText">Tekst dotyczący pomyślnego ukończenia</sys:String>
+    <sys:String x:Key="AbortLogText">Tekst dziennika przerwania</sys:String>
+    <sys:String x:Key="QuestAbortText">Tekst w przypadku wypowiedzenia lub niepowodzenia</sys:String>
+    <sys:String x:Key="FurtherLogEntries">Dalsze wpisy do dziennika</sys:String>
+    <sys:String x:Key="AddLogEntry">+ Dodaj wpis do dziennika</sys:String>
+    <sys:String x:Key="NewLogEntry">Nowy wpis w dzienniku</sys:String>
+    <sys:String x:Key="OutputFiles">Pliki wyjściowe</sys:String>
+    <sys:String x:Key="LogConstants">Log_Constants.d        Wstaw do Content\Story\Log-Entries\Log-Constants_*</sys:String>
+    <sys:String x:Key="BCloseTopics">B_CloseTopics.d        Wstaw do Content\Story\Log-Entries\B_CloseTopics_*</sys:String>
+    <sys:String x:Key="QuestDialogFuc">QuestDialogfuc.d     Wstaw do odpowiednich okien dialogowych lub funkcji</sys:String>
 
     <!-- AboutSkriptorium -->
     <sys:String x:Key="Version">Wersja: 1.0</sys:String>

@@ -114,6 +114,7 @@ public class DaedalusSyntaxHighlightingLightmode
         { TokenType.SelfKeyword,            (SyntaxColor.Identifier, Colors.LimeGreen) },
         { TokenType.OtherKeyword,           (SyntaxColor.Identifier, Colors.LimeGreen) },
         { TokenType.SlfKeyword,             (SyntaxColor.Identifier, Colors.LimeGreen) },
+        { TokenType.OthKeyword,             (SyntaxColor.Identifier, Colors.LimeGreen) },
 
         // Kommentare
         { TokenType.Comment,            (SyntaxColor.Comment, Colors.Gray) },

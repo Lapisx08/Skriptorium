@@ -90,6 +90,8 @@
     <sys:String x:Key="CtrlShiftG">Ctrl + Shift + G</sys:String>
     <sys:String x:Key="DialogGenerator">Dialog Generator</sys:String>
     <sys:String x:Key="CtrlAltG">Ctrl + Alt + G</sys:String>
+    <sys:String x:Key="QuestGenerator">Quest Generator</sys:String>
+    <sys:String x:Key="CtrlShiftAltG">Ctrl + Shift + Alt + G</sys:String>
 
     <!-- Code Structure -->
     <sys:String x:Key="Instances">Instances</sys:String>
@@ -156,6 +158,27 @@
     <sys:String x:Key="MatchWholeWord">Match Whole Word</sys:String>
     <sys:String x:Key="Replace">Replace</sys:String>
     <sys:String x:Key="ReplaceAll">Replace All</sys:String>
+
+    <!-- Quest Generator -->
+    <sys:String x:Key="QuestDefinition">Quest Definition</sys:String>
+    <sys:String x:Key="InternalName">Internal Name:</sys:String>
+    <sys:String x:Key="DisplayName">Display Name:</sys:String>
+    <sys:String x:Key="StartChapter">Start Chapter:</sys:String>
+    <sys:String x:Key="EndChapter">End Chapter:</sys:String>
+    <sys:String x:Key="MandatoryLogEntries">Mandatory Log Entries</sys:String>
+    <sys:String x:Key="StartLogText">Start Log Text</sys:String>
+    <sys:String x:Key="QuestStartText">Text at the start of the quest</sys:String>
+    <sys:String x:Key="SuccessLogText">Success Log Text</sys:String>
+    <sys:String x:Key="QuestSuccessText">Text for successful completion</sys:String>
+    <sys:String x:Key="AbortLogText">Abort Log Text</sys:String>
+    <sys:String x:Key="QuestAbortText">Text in case of termination or failure</sys:String>
+    <sys:String x:Key="FurtherLogEntries">Further Log Entries</sys:String>
+    <sys:String x:Key="AddLogEntry">+ Add Log Entry</sys:String>
+    <sys:String x:Key="NewLogEntry">New Log Entry</sys:String>
+    <sys:String x:Key="OutputFiles">Output Files</sys:String>
+    <sys:String x:Key="LogConstants">Log_Constants.d        Insert into Content\Story\Log-Entries\Log-Constants_*</sys:String>
+    <sys:String x:Key="BCloseTopics">B_CloseTopics.d        Insert into Content\Story\Log-Entries\B_CloseTopics_*</sys:String>
+    <sys:String x:Key="QuestDialogFuc">QuestDialogfuc.d     Insert into the corresponding dialogs or functions</sys:String>
 
     <!-- AboutSkriptorium -->
     <sys:String x:Key="Version">Version: 1.0</sys:String>
