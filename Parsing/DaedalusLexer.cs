@@ -87,7 +87,7 @@ namespace Skriptorium.Parsing
 
         private static readonly HashSet<string> multiCharOperators = new()
         {
-            "==", "!=", "<=", ">=", "-=", "&&", "||", "<<" , ">>"
+            "==", "!=", "<=", ">=", "-=", "+=", "&&", "||", "<<", ">>"
         };
 
         private static readonly Regex identifier = new(@"^[\p{L}_][\p{L}\p{Nd}_]*", RegexOptions.Compiled);
@@ -142,8 +142,7 @@ namespace Skriptorium.Parsing
 
                     if (lineComment.IsMatch(remaining))
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Comment,
-                            remaining, line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.Comment, remaining, line + 1, column + 1));
                         break;
                     }
 
@@ -170,8 +169,7 @@ namespace Skriptorium.Parsing
                     if (strLiteral.IsMatch(remaining))
                     {
                         var match = strLiteral.Match(remaining);
-                        tokens.Add(new DaedalusToken(TokenType.StringLiteral,
-                            match.Value, line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.StringLiteral, match.Value, line + 1, column + 1));
                         column += match.Length;
                         continue;
                     }
@@ -179,8 +177,7 @@ namespace Skriptorium.Parsing
                     if (floatLiteral.IsMatch(remaining))
                     {
                         var match = floatLiteral.Match(remaining);
-                        tokens.Add(new DaedalusToken(TokenType.FloatLiteral,
-                            match.Value, line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.FloatLiteral, match.Value, line + 1, column + 1));
                         column += match.Length;
                         continue;
                     }
@@ -188,13 +185,13 @@ namespace Skriptorium.Parsing
                     if (intLiteral.IsMatch(remaining))
                     {
                         var match = intLiteral.Match(remaining);
-                        tokens.Add(new DaedalusToken(TokenType.IntegerLiteral,
-                            match.Value, line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.IntegerLiteral, match.Value, line + 1, column + 1));
                         column += match.Length;
                         continue;
                     }
 
                     char current = text[column];
+
                     if (char.IsWhiteSpace(current))
                     {
                         column++;
@@ -221,73 +218,100 @@ namespace Skriptorium.Parsing
 
                     if (singleCharOperators.Contains(current))
                     {
-                        tokens.Add(new DaedalusToken(TokenType.Operator,
-                            current.ToString(), line + 1, column + 1));
+                        tokens.Add(new DaedalusToken(TokenType.Operator, current.ToString(), line + 1, column + 1));
                         column++;
                         continue;
                     }
 
+                    // =============================================
+                    //               Wichtigster Teil: Identifier
+                    // =============================================
                     if (identifier.IsMatch(remaining))
                     {
                         var match = identifier.Match(remaining);
                         var val = match.Value;
                         TokenType type = TokenType.Identifier;
 
-                        if (specialKeywords.TryGetValue(val, out var specialType))
-                        {
-                            type = specialType;
-                        }
-                        else if (keywordsMap.TryGetValue(val, out var keywordType))
-                        {
-                            type = keywordType;
-                            if (type == TokenType.InstanceKeyword)
-                                _expectInstanceName = true;
-                        }
-                        else if (val.Equals("C_NPC", StringComparison.OrdinalIgnoreCase) &&
-                                 tokens.Count > 0 &&
-                                 (tokens[tokens.Count - 1].Value.Equals("var", StringComparison.OrdinalIgnoreCase) ||
-                                  tokens[tokens.Count - 1].Value.Equals("instance", StringComparison.OrdinalIgnoreCase)))
-                        {
-                            type = TokenType.TypeKeyword;
-                        }
-                        else if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
-                            type = TokenType.AiVariable;
-                        else if (val.Equals("MALE", StringComparison.Ordinal) || val.Equals("FEMALE", StringComparison.Ordinal))
-                            type = TokenType.SexConstant;
-                        else if (val.EndsWith("_ZEN", StringComparison.OrdinalIgnoreCase))
-                            type = TokenType.ZENConstant;
-                        else if (OtherFunctions.Contains(val))
-                            type = TokenType.EquipFunction;
-                        else if (_expectInstanceName)
+                        // 1. Höchste Priorität: Wir erwarten gerade einen Instanznamen
+                        if (_expectInstanceName)
                         {
                             type = TokenType.InstanceName;
                             _expectInstanceName = false;
                         }
-
-                        bool isFunctionContext = false;
-                        if (tokens.Count >= 2)
+                        else
                         {
-                            var prev = tokens[tokens.Count - 1];
-                            var prevPrev = tokens.Count >= 2 ? tokens[tokens.Count - 2] : null;
-                            isFunctionContext = prevPrev != null &&
-                                               prevPrev.Type == TokenType.FuncKeyword &&
-                                               prev.Type == TokenType.TypeKeyword;
-                        }
+                            // Normale Erkennung nur, wenn kein Instanzname erwartet wird
 
-                        if (!isFunctionContext)
-                        {
-                            foreach (var prefix in prefixTokenTypes)
+                            // Spezielle Keywords (self, other, slf, oth...)
+                            if (specialKeywords.TryGetValue(val, out var specialType))
                             {
-                                if (prefix.Key != "Npc_" && val.StartsWith(prefix.Key, StringComparison.Ordinal))
+                                type = specialType;
+                            }
+                            // Sprachelemente (func, var, instance, int, string, ...)
+                            else if (keywordsMap.TryGetValue(val, out var keywordType))
+                            {
+                                type = keywordType;
+                                if (type == TokenType.InstanceKeyword)
                                 {
-                                    type = prefix.Value;
-                                    break;
+                                    _expectInstanceName = true;
+                                }
+                            }
+                            // Kontextabhängige Typen
+                            else if (val.Equals("C_NPC", StringComparison.OrdinalIgnoreCase) &&
+                                     tokens.Count > 0 &&
+                                     (tokens[tokens.Count - 1].Value.Equals("var", StringComparison.OrdinalIgnoreCase) ||
+                                      tokens[tokens.Count - 1].Value.Equals("instance", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                type = TokenType.TypeKeyword;
+                            }
+                            else if (val.Equals("aivar", StringComparison.OrdinalIgnoreCase))
+                            {
+                                type = TokenType.AiVariable;
+                            }
+                            else if (val.Equals("MALE", StringComparison.Ordinal) || val.Equals("FEMALE", StringComparison.Ordinal))
+                            {
+                                type = TokenType.SexConstant;
+                            }
+                            else if (val.EndsWith("_ZEN", StringComparison.OrdinalIgnoreCase))
+                            {
+                                type = TokenType.ZENConstant;
+                            }
+                            else if (OtherFunctions.Contains(val))
+                            {
+                                type = TokenType.EquipFunction;
+                            }
+                            else
+                            {
+                                // Prefix-Prüfung (TA_, AI_, Npc_, etc.) nur wenn nichts anderes gepasst hat
+                                bool isFunctionContext = false;
+                                if (tokens.Count >= 2)
+                                {
+                                    var prev = tokens[tokens.Count - 1];
+                                    var prevPrev = tokens.Count >= 2 ? tokens[tokens.Count - 2] : null;
+                                    isFunctionContext = prevPrev != null &&
+                                                       prevPrev.Type == TokenType.FuncKeyword &&
+                                                       prev.Type == TokenType.TypeKeyword;
+                                }
+
+                                if (!isFunctionContext)
+                                {
+                                    foreach (var prefix in prefixTokenTypes)
+                                    {
+                                        if (prefix.Key != "Npc_" && val.StartsWith(prefix.Key, StringComparison.Ordinal))
+                                        {
+                                            type = prefix.Value;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         }
 
+                        // Flag zurücksetzen, außer es war gerade das Keyword "instance"
                         if (type != TokenType.InstanceKeyword)
+                        {
                             _expectInstanceName = false;
+                        }
 
                         tokens.Add(new DaedalusToken(type, val, line + 1, column + 1));
                         column += match.Length;
@@ -301,23 +325,22 @@ namespace Skriptorium.Parsing
                         continue;
                     }
 
-                    tokens.Add(new DaedalusToken(TokenType.Unknown,
-                        current.ToString(), line + 1, column + 1));
+                    tokens.Add(new DaedalusToken(TokenType.Unknown, current.ToString(), line + 1, column + 1));
                     column++;
                 }
             }
 
             tokens.Add(new DaedalusToken(TokenType.EOF, "", lines.Length, 0));
 
-            // Post-Processing: Typen nach func, var/const etc.
+            // ==================== POST-PROCESSING ====================
+
+            // func → Rückgabetyp → Funktionsname
             for (int i = 0; i < tokens.Count - 1; i++)
             {
-                // FUNC → Typ → Funktionsname
                 if (tokens[i].Type == TokenType.FuncKeyword)
                 {
-                    var next = tokens[i + 1];
-                    if (next.Type == TokenType.Identifier)
-                        next.Type = TokenType.TypeKeyword;
+                    if (i + 1 < tokens.Count && tokens[i + 1].Type == TokenType.Identifier)
+                        tokens[i + 1].Type = TokenType.TypeKeyword;
 
                     if (i + 2 < tokens.Count)
                     {
@@ -341,7 +364,7 @@ namespace Skriptorium.Parsing
                     }
                 }
 
-                // VAR / CONST → Typ → Variablenname
+                // var/const → Typ → Variablenname
                 if (tokens[i].Type == TokenType.VarKeyword || tokens[i].Type == TokenType.ConstKeyword)
                 {
                     if (i + 1 < tokens.Count && identifier.IsMatch(tokens[i + 1].Value))
@@ -349,6 +372,44 @@ namespace Skriptorium.Parsing
 
                     if (i + 2 < tokens.Count && identifier.IsMatch(tokens[i + 2].Value))
                         tokens[i + 2].Type = TokenType.Identifier;
+                }
+            }
+
+            // instance ... (BaseClass) → BaseClass zu Identifier machen, wenn es eine Konstante war
+            for (int i = 0; i < tokens.Count - 2; i++)
+            {
+                if (tokens[i].Type == TokenType.InstanceKeyword)
+                {
+                    int j = i + 1;
+                    while (j < tokens.Count && (tokens[j].Type == TokenType.InstanceName || tokens[j].Type == TokenType.Comma))
+                        j++;
+
+                    if (j < tokens.Count && tokens[j].Type == TokenType.OpenParenthesis)
+                    {
+                        int baseIdx = j + 1;
+                        if (baseIdx < tokens.Count)
+                        {
+                            var baseToken = tokens[baseIdx];
+                            if (baseToken.Type == TokenType.NPC_Constant ||
+                                baseToken.Type == TokenType.AIVConstant ||
+                                baseToken.Type == TokenType.ATRConstant ||
+                                baseToken.Type == TokenType.PLAYERConstant ||
+                                baseToken.Type == TokenType.ZENConstant ||
+                                baseToken.Type == TokenType.SexConstant ||
+                                baseToken.Type == TokenType.MAXConstant ||
+                                baseToken.Type == TokenType.PROTConstant ||
+                                baseToken.Type == TokenType.DAMConstant ||
+                                baseToken.Type == TokenType.ITMConstant)
+                            {
+                                tokens[baseIdx] = new DaedalusToken(
+                                    TokenType.Identifier,
+                                    baseToken.Value,
+                                    baseToken.Line,
+                                    baseToken.Column
+                                );
+                            }
+                        }
+                    }
                 }
             }
 

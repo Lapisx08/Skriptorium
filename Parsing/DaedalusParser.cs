@@ -61,6 +61,9 @@ namespace Skriptorium.Parsing
     public class PrototypeDeclaration : Declaration
     {
         public string Signature { get; set; }
+
+        // Optional: Body, falls Prototyp einen Block hat
+        public List<Statement> Body { get; set; } = null;
     }
 
     public abstract class Statement
@@ -425,15 +428,55 @@ namespace Skriptorium.Parsing
         {
             var startToken = Current();
             Advance();
-            var signature = Consume(TokenType.Identifier, "Prototyp-Signatur erwartet").Value;
-            Consume(TokenType.Semicolon, "';' nach Prototyp erwartet");
+
+            var signatureToken = Consume(TokenType.Identifier, "Prototyp-Signatur erwartet");
+            string signature = signatureToken.Value;
+
+            // Optional: Basisklasse in Klammern
+            if (Match(TokenType.OpenParenthesis))
+            {
+                Advance();
+                var baseToken = Consume(TokenType.Identifier, "Basisklasse erwartet");
+                signature += $"({baseToken.Value})";
+                Consume(TokenType.CloseParenthesis, "')' nach Basisklasse erwartet");
+            }
+
+            // Entweder Semikolon oder Block
+            List<Statement> body = null;
+            if (Match(TokenType.Semicolon))
+            {
+                Advance(); // Einfache Prototyp-Signatur
+            }
+            else if (Match(TokenType.OpenBracket))
+            {
+                Advance(); // '{'
+                body = new List<Statement>();
+
+                while (!Check(TokenType.CloseBracket) && !IsAtEnd())
+                {
+                    var stmt = ParseStatement();
+                    if (stmt != null)
+                        body.Add(stmt);
+                    else
+                        Advance();
+                }
+
+                Consume(TokenType.CloseBracket, "'}' nach Prototyp-Block erwartet");
+            }
+            else
+            {
+                throw new ParseException("';' oder '{' nach Prototyp-Signatur erwartet", Current());
+            }
+
             return new PrototypeDeclaration
             {
                 Signature = signature,
+                Body = body,
                 Line = startToken.Line,
                 Column = startToken.Column
             };
         }
+
 
         private FunctionDeclaration ParseFunction()
         {
@@ -727,23 +770,24 @@ namespace Skriptorium.Parsing
                 var lhs = ParseExpression();
 
                 if (Match(TokenType.Assignment) ||
-                    (Match(TokenType.Operator) && Current().Value == "-="))
+                (Match(TokenType.Operator) && (Current().Value == "-=" || Current().Value == "+=")))
+
                 {
                     var assignToken = Current();
-                    bool isMinusAssign = assignToken.Type == TokenType.Operator;
+                    bool isCompoundAssign = assignToken.Type == TokenType.Operator;
+                    string compoundOp = assignToken.Value;
 
                     Advance();
 
                     var rhs = ParseExpression();
                     Consume(TokenType.Semicolon, "';' nach Zuweisung erwartet");
 
-                    if (isMinusAssign)
+                    if (isCompoundAssign)
                     {
-                        // a -= b  →  a = a - b
                         rhs = new BinaryExpression
                         {
                             Left = lhs,
-                            Operator = "-",
+                            Operator = compoundOp == "-=" ? "-" : "+",
                             Right = rhs,
                             Line = assignToken.Line,
                             Column = assignToken.Column
@@ -1032,43 +1076,52 @@ namespace Skriptorium.Parsing
         private Expression ParsePrimary()
         {
             DaedalusToken tok = Current();
+            Expression expr;
 
-            if (Match(TokenType.Operator) && (Current().Value == "!" || Current().Value == "-"))
+            // ---------- Unäre Operatoren
+            if (Match(TokenType.Operator) && (tok.Value == "!" || tok.Value == "-" || tok.Value == "+"))
             {
                 Advance();
-                if (tok.Value == "-" && (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral)))
+
+                // -42 oder +42
+                if ((tok.Value == "-" || tok.Value == "+") &&
+                    (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral)))
                 {
                     var literalToken = Current();
                     Advance();
-                    return new LiteralExpression
+                    expr = new LiteralExpression
                     {
-                        Value = "-" + literalToken.Value,
+                        Value = tok.Value == "-" ? "-" + literalToken.Value : literalToken.Value,
                         Line = tok.Line,
                         Column = tok.Column
                     };
+                    return expr;
                 }
-                else if (tok.Value == "!")
+
+                // unäres +X → einfach X
+                if (tok.Value == "+")
+                    return ParsePrimary();
+
+                // !X oder -X
+                return new UnaryExpression
                 {
-                    var operand = ParsePrimary();
-                    return new UnaryExpression
-                    {
-                        Operator = tok.Value,
-                        Operand = operand,
-                        Line = tok.Line,
-                        Column = tok.Column
-                    };
-                }
-                throw new ParseException($"Unerwarteter Operanden nach unärem Operator '{tok.Value}'", Current());
+                    Operator = tok.Value,
+                    Operand = ParsePrimary(),
+                    Line = tok.Line,
+                    Column = tok.Column
+                };
             }
 
+            // ---------- Klammern
             if (Match(TokenType.OpenParenthesis))
             {
                 Advance();
-                var expr = ParseExpression();
+                expr = ParseExpression();
                 Consume(TokenType.CloseParenthesis, "')' nach geklammertem Ausdruck erwartet");
                 return expr;
             }
 
+            // ---------- Literale, Konstanten, Variablen, Schlüsselwörter
             if (Match(TokenType.IntegerLiteral) || Match(TokenType.FloatLiteral) ||
                 Match(TokenType.StringLiteral) || Match(TokenType.BoolLiteral) ||
                 Match(TokenType.GuildConstant) || Match(TokenType.NPC_Constant) ||
@@ -1078,25 +1131,13 @@ namespace Skriptorium.Parsing
                 Match(TokenType.FONTConstant) || Match(TokenType.REALConstant) ||
                 Match(TokenType.ATRConstant) || Match(TokenType.ARConstant) ||
                 Match(TokenType.PLAYERConstant) || Match(TokenType.ZENConstant) ||
-                Match(TokenType.SexConstant) ||
-                Match(TokenType.MAXConstant) ||
-                Match(TokenType.PROTConstant) ||
-                Match(TokenType.DAMConstant) ||
-                Match(TokenType.ITMConstant))
-            {
-                Advance();
-                return new LiteralExpression
-                {
-                    Value = tok.Value,
-                    Line = tok.Line,
-                    Column = tok.Column
-                };
-            }
-
-            if (Match(TokenType.Identifier) || Match(TokenType.AiVariable) ||
+                Match(TokenType.SexConstant) || Match(TokenType.MAXConstant) ||
+                Match(TokenType.PROTConstant) || Match(TokenType.DAMConstant) ||
+                Match(TokenType.ITMConstant) ||
+                Match(TokenType.Identifier) || Match(TokenType.AiVariable) ||
                 Match(TokenType.SelfKeyword) || Match(TokenType.OtherKeyword) ||
                 Match(TokenType.SlfKeyword) || Match(TokenType.OthKeyword) ||
-                Match(TokenType.BuiltInFunction) || Match(TokenType.MdlFunction) || 
+                Match(TokenType.BuiltInFunction) || Match(TokenType.MdlFunction) ||
                 Match(TokenType.AIFunction) || Match(TokenType.NpcFunction) ||
                 Match(TokenType.InfoFunction) || Match(TokenType.CreateFunction) ||
                 Match(TokenType.WldFunction) || Match(TokenType.LogFunction) ||
@@ -1104,20 +1145,35 @@ namespace Skriptorium.Parsing
                 Match(TokenType.TAFunction) || Match(TokenType.EquipFunction))
             {
                 Advance();
-                Expression expr = new VariableExpression
+                expr = new VariableExpression
                 {
                     Name = tok.Value,
                     Line = tok.Line,
                     Column = tok.Column
                 };
+            }
+            else
+            {
+                throw new ParseException("Unerwartetes Token in Ausdruck", tok);
+            }
 
-                while (Match(TokenType.Dot))
+            // ---------- POSTFIX-KETTE: Member, Indexer, Funktionsaufrufe
+            while (true)
+            {
+                if (Match(TokenType.Dot))
                 {
                     Advance();
-                    if (!(Match(TokenType.Identifier) || Match(TokenType.AiVariable)))
+                    // ALLE gültigen Token nach '.' erlauben (Identifier, AiVariable, Konstanten)
+                    if (!(Match(TokenType.Identifier) || Match(TokenType.AiVariable) ||
+                          Match(TokenType.PLAYERConstant) || Match(TokenType.AIVConstant) ||
+                          Match(TokenType.ATRConstant) || Match(TokenType.NPC_Constant) ||
+                          Match(TokenType.ZENConstant) || Match(TokenType.SexConstant) ||
+                          Match(TokenType.MAXConstant) || Match(TokenType.DAMConstant) ||
+                          Match(TokenType.ITMConstant)))
                     {
-                        throw new ParseException("Membername (Identifier oder AiVariable) nach '.' erwartet", Current());
+                        throw new ParseException("Membername nach '.' erwartet", Current());
                     }
+
                     var memberToken = AdvanceAndGet();
                     expr = new MemberExpression
                     {
@@ -1127,8 +1183,21 @@ namespace Skriptorium.Parsing
                         Column = memberToken.Column
                     };
                 }
+                else if (Match(TokenType.OpenSquareBracket))
+                {
+                    Advance();
+                    var idx = ParseExpression();
+                    Consume(TokenType.CloseSquareBracket, "']' nach Index erwartet");
 
-                if (Match(TokenType.OpenParenthesis))
+                    expr = new IndexExpression
+                    {
+                        Target = expr,
+                        Index = idx,
+                        Line = tok.Line,
+                        Column = tok.Column
+                    };
+                }
+                else if (Match(TokenType.OpenParenthesis))
                 {
                     Advance();
                     var args = new List<Expression>();
@@ -1138,54 +1207,27 @@ namespace Skriptorium.Parsing
                         while (true)
                         {
                             args.Add(ParseExpression());
-                            if (Match(TokenType.Comma))
-                                Advance();
-                            else
-                                break;
+                            if (Match(TokenType.Comma)) Advance();
+                            else break;
                         }
                     }
 
                     Consume(TokenType.CloseParenthesis, "')' nach Argumenten erwartet");
-                    if (expr is MemberExpression memberExpr)
-                    {
-                        expr = new FunctionCallExpression
-                        {
-                            FunctionName = memberExpr.MemberName,
-                            Arguments = args,
-                            Line = tok.Line,
-                            Column = tok.Column
-                        };
-                    }
-                    else
-                    {
-                        expr = new FunctionCallExpression
-                        {
-                            FunctionName = ((VariableExpression)expr).Name,
-                            Arguments = args,
-                            Line = tok.Line,
-                            Column = tok.Column
-                        };
-                    }
-                }
 
-                while (Match(TokenType.OpenSquareBracket))
-                {
-                    Advance();
-                    var idx = ParseExpression();
-                    Consume(TokenType.CloseSquareBracket, "']' nach Index erwartet");
-                    expr = new IndexExpression
+                    expr = new FunctionCallExpression
                     {
-                        Target = expr,
-                        Index = idx,
+                        FunctionName = expr is MemberExpression m
+                            ? m.MemberName
+                            : ((VariableExpression)expr).Name,
+                        Arguments = args,
                         Line = tok.Line,
                         Column = tok.Column
                     };
                 }
-
-                return expr;
+                else break;
             }
 
-            throw new ParseException("Unerwartetes Token in Ausdruck", tok);
+            return expr;
         }
 
         private int GetPrecedence(DaedalusToken token)
