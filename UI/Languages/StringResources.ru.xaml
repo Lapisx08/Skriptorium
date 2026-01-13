@@ -1,0 +1,244 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Region: UI -->
+    <!-- Skriptorium -->
+    <sys:String x:Key="AboutSkriptorium">О Skriptorium</sys:String>
+    <sys:String x:Key="CtrlI">Ctrl + I</sys:String>
+    <sys:String x:Key="Settings">Настройки</sys:String>
+    <sys:String x:Key="CtrlComma">Ctrl + ,</sys:String>
+    <sys:String x:Key="Exit">Exit</sys:String>
+
+    <!-- File -->
+    <sys:String x:Key="File">Файл</sys:String>
+    <sys:String x:Key="New">Новое</sys:String>
+    <sys:String x:Key="CtrlN">Ctrl + N</sys:String>
+    <sys:String x:Key="Open">Открыть</sys:String>
+    <sys:String x:Key="CtrlO">Ctrl + O</sys:String>
+    <sys:String x:Key="LastOpened">Последнее открытие</sys:String>
+    <sys:String x:Key="Save">Сохранить</sys:String>
+    <sys:String x:Key="CtrlS">Ctrl + S</sys:String>
+    <sys:String x:Key="SaveAs">Сохранить как...</sys:String>
+    <sys:String x:Key="CtrlShiftS">Ctrl+ Shift + S</sys:String>
+    <sys:String x:Key="SaveAll">Сохранить все</sys:String>
+    <sys:String x:Key="CtrlAltS">Ctrl + Alt + S</sys:String>
+    <sys:String x:Key="Close">Закрыть</sys:String>
+    <sys:String x:Key="CtrlW">Ctrl + W</sys:String>
+
+    <!-- Edit -->
+    <sys:String x:Key="Edit">Редактировать</sys:String>
+    <sys:String x:Key="Undo">Отменить</sys:String>
+    <sys:String x:Key="CtrlZ">Ctrl + Z</sys:String>
+    <sys:String x:Key="Redo">Повторить</sys:String>
+    <sys:String x:Key="CtrlY">Ctrl + Y</sys:String>
+    <sys:String x:Key="Cut">Срез</sys:String>
+    <sys:String x:Key="CtrlX">Ctrl + X</sys:String>
+    <sys:String x:Key="Copy">Копировать</sys:String>
+    <sys:String x:Key="CtrlC">Ctrl + C</sys:String>
+    <sys:String x:Key="Paste">Вставить</sys:String>
+    <sys:String x:Key="CtrlV">Ctrl + V</sys:String>
+    <sys:String x:Key="Duplicate">Дубликат</sys:String>
+    <sys:String x:Key="CtrlD">Ctrl + D</sys:String>
+    <sys:String x:Key="SelectAll">выбрать все</sys:String>
+    <sys:String x:Key="CtrlA">Ctrl + A</sys:String>
+
+    <!-- Search -->
+    <sys:String x:Key="Search">Поиск</sys:String>
+    <sys:String x:Key="SearchAndReplace">Поиск и замена</sys:String>
+    <sys:String x:Key="CtrlF">Ctrl + F</sys:String>
+
+    <!-- Bookmarks -->
+    <sys:String x:Key="Bookmarks">Закладки</sys:String>
+    <sys:String x:Key="AddAndRemove">Добавить и удалить</sys:String>
+    <sys:String x:Key="Next">Next</sys:String>
+    <sys:String x:Key="CtrlF2">Ctrl + F2</sys:String>
+    <sys:String x:Key="Previous">Предыдущий</sys:String>
+    <sys:String x:Key="CtrlShiftF2">Ctrl+ Shift + F2</sys:String>
+    <sys:String x:Key="RemoveAll">Удалить все</sys:String>
+    <sys:String x:Key="CtrlAltF2">Ctrl + Alt + F2</sys:String>
+
+    <!-- Tools -->
+    <sys:String x:Key="Tools">Инструменты</sys:String>
+    <sys:String x:Key="ToggleSyntax-Highlighting">Включить/выключить подсветку синтаксиса</sys:String>
+    <sys:String x:Key="CtrlH">Ctrl + H</sys:String>
+    <sys:String x:Key="ToggleAutocompletion">Включить/выключить автозаполнение</sys:String>
+    <sys:String x:Key="CtrlShiftA">Ctrl + Shift + A</sys:String>
+    <sys:String x:Key="Comments">Комментарии</sys:String>
+    <sys:String x:Key="BlockComment">Блок комментариев</sys:String>
+    <sys:String x:Key="CtrlK">Ctrl + K</sys:String>
+    <sys:String x:Key="SmallCommentField">Небольшое поле для комментариев</sys:String>
+    <sys:String x:Key="CtrlShiftK">Ctrl + Shift + K</sys:String>
+    <sys:String x:Key="MiddleCommentField">Поле для комментариев</sys:String>
+    <sys:String x:Key="CtrlAltK">Ctrl + Alt + K</sys:String>
+    <sys:String x:Key="BigCommentField">Большое поле для комментариев</sys:String>
+    <sys:String x:Key="CtrlShiftAltK">Ctrl + Shift + Alt + K</sys:String>
+    <sys:String x:Key="CollapseAndExpandFoldings">Свернуть и развернуть Складки</sys:String>
+    <sys:String x:Key="CtrlM">Ctrl + M</sys:String>
+    <sys:String x:Key="IndentText">Отступ текста</sys:String>
+    <sys:String x:Key="CtrlE">Ctrl + E</sys:String>
+    <sys:String x:Key="CheckSyntax">Проверить синтаксис</sys:String>
+    <sys:String x:Key="FileExplorer">Проводник</sys:String>
+    <sys:String x:Key="CtrlShiftE">Ctrl + Shift + E</sys:String>
+    <sys:String x:Key="SearchExplorer">Поисковая система Explorer</sys:String>
+    <sys:String x:Key="CtrlShiftF">Ctrl + Shift + F</sys:String>
+    <sys:String x:Key="CodeStructure">Структура кода</sys:String>
+    <sys:String x:Key="CtrlShiftC">Ctrl + Shift + C</sys:String>
+    <sys:String x:Key="NPCGenerator">Генератор NPC</sys:String>
+    <sys:String x:Key="CtrlG">Ctrl + G</sys:String>
+    <sys:String x:Key="OrcGenerator">Генератор орков</sys:String>
+    <sys:String x:Key="CtrlShiftG">Ctrl + Shift + G</sys:String>
+    <sys:String x:Key="DialogGenerator">Генератор диалогов</sys:String>
+    <sys:String x:Key="CtrlAltG">Ctrl + Alt + G</sys:String>
+    <sys:String x:Key="QuestGenerator">Генератор квестов</sys:String>
+    <sys:String x:Key="CtrlShiftAltG">Ctrl + Shift + Alt + G</sys:String>
+
+    <!-- Code Structure -->
+    <sys:String x:Key="Instances">Примеры</sys:String>
+    <sys:String x:Key="Functions">Функции</sys:String>
+    <sys:String x:Key="Variables">Переменные</sys:String>
+    <sys:String x:Key="Constants">Константы</sys:String>
+    <sys:String x:Key="Name">Имя</sys:String>
+    <sys:String x:Key="Type">Тип</sys:String>
+    <sys:String x:Key="Value">Ценность</sys:String>
+    <sys:String x:Key="Line">Линия</sys:String>
+
+    <!-- Dialog Generator -->
+    <sys:String x:Key="DialogInstance">Экземпляр диалога:</sys:String>
+    <sys:String x:Key="NPCInstance">Инстанс NPC:</sys:String>
+    <sys:String x:Key="Description">Описание:</sys:String>
+    <sys:String x:Key="DialogNumber">Номер диалога:</sys:String>
+    <sys:String x:Key="Important">Важно:</sys:String>
+    <sys:String x:Key="Permanent">Постоянный:</sys:String>
+    <sys:String x:Key="AddLine">Добавить строку</sys:String>
+    <sys:String x:Key="Generate">Генерировать</sys:String>
+    <sys:String x:Key="Reset">Сброс</sys:String>
+    <sys:String x:Key="Yes">Да</sys:String>
+    <sys:String x:Key="No">Нет</sys:String>
+    <sys:String x:Key="Dialog">Диалог</sys:String>
+    <sys:String x:Key="GiveXP">Дать XP</sys:String>
+    <sys:String x:Key="GiveItem">Отдать предмет</sys:String>
+    <sys:String x:Key="EndDialog">Завершить диалог</sys:String>
+    <sys:String x:Key="Hero">Герой</sys:String>
+    <sys:String x:Key="NPC">NPC</sys:String>
+    <sys:String x:Key="ItemInstance">Экземпляр элемента:</sys:String>
+    <sys:String x:Key="Number">Номер:</sys:String>
+
+    <!-- File Explorer -->
+    <sys:String x:Key="NewScript">Новый сценарий</sys:String>
+    <sys:String x:Key="NewFolder">Новая папка</sys:String>
+    <sys:String x:Key="CollapseAll">Свернуть все</sys:String>
+    <sys:String x:Key="RefreshFileExplorer">Обновить проводник</sys:String>
+    <sys:String x:Key="OpenInExplorer">Открыть в проводнике</sys:String>
+    <sys:String x:Key="Rename">Переименовать</sys:String>
+    <sys:String x:Key="Delete">Удалить</sys:String>
+    <sys:String x:Key="NewName">Новое имя:</sys:String>
+
+    <!-- NPC Generator -->
+    <sys:String x:Key="Name2">Имя:</sys:String>
+    <sys:String x:Key="Guild">Гильдия:</sys:String>
+    <sys:String x:Key="ID">ID:</sys:String>
+    <sys:String x:Key="Voice">Голос:</sys:String>
+    <sys:String x:Key="Flags">Флаги:</sys:String>
+    <sys:String x:Key="NPCType">Тип NPC:</sys:String>
+    <sys:String x:Key="AIVARs">AIVARs:</sys:String>
+    <sys:String x:Key="IndividualAttributes">Индивидуальные атрибуты:</sys:String>
+    <sys:String x:Key="IndividualFightTalents">Индивидуальные боевые таланты:</sys:String>
+    <sys:String x:Key="Gender">Гендер:</sys:String>
+    <sys:String x:Key="Male">Мужчина</sys:String>
+    <sys:String x:Key="Female">Женский</sys:String>
+    <sys:String x:Key="Comments2">Комментарии:</sys:String>
+
+    <!-- Orc Generator -->
+    <sys:String x:Key="Level">Уровень:</sys:String>
+
+    <!-- Search Explorer -->
+    <sys:String x:Key="Search2">Поиск</sys:String>
+    <sys:String x:Key="CaseSensitive">С учетом регистра</sys:String>
+    <sys:String x:Key="MatchWholeWord">Соответствие целому слову</sys:String>
+    <sys:String x:Key="Replace">Заменить</sys:String>
+    <sys:String x:Key="ReplaceAll">Заменить все</sys:String>
+
+    <!-- Quest Generator -->
+    <sys:String x:Key="QuestDefinition">Определение квеста</sys:String>
+    <sys:String x:Key="InternalName">Внутреннее название:</sys:String>
+    <sys:String x:Key="DisplayName">Отображаемое имя:</sys:String>
+    <sys:String x:Key="StartChapter">Начать главу:</sys:String>
+    <sys:String x:Key="EndChapter">Конец главы:</sys:String>
+    <sys:String x:Key="MandatoryLogEntries">Обязательные записи в журнале</sys:String>
+    <sys:String x:Key="StartLogText">Начать журнал Текст</sys:String>
+    <sys:String x:Key="QuestStartText">Текст в начале квеста</sys:String>
+    <sys:String x:Key="SuccessLogText">Текст журнала успехов</sys:String>
+    <sys:String x:Key="QuestSuccessText">Текст для успешного завершения</sys:String>
+    <sys:String x:Key="AbortLogText">Текст журнала прерывания</sys:String>
+    <sys:String x:Key="QuestAbortText">Текст в случае прекращения или сбоя</sys:String>
+    <sys:String x:Key="FurtherLogEntries">Дальнейшие записи в журнале</sys:String>
+    <sys:String x:Key="AddLogEntry">+ Добавить запись в журнал</sys:String>
+    <sys:String x:Key="NewLogEntry">Новая запись в журнале</sys:String>
+    <sys:String x:Key="OutputFiles">Выходные файлы</sys:String>
+    <sys:String x:Key="LogConstants">Log_Constants.d        Вставить в Content\Story\Log-Entries\Log-Constants_*</sys:String>
+    <sys:String x:Key="BCloseTopics">B_CloseTopics.d        Вставить в Content\Story\Log-Entries\B_CloseTopics_*</sys:String>
+    <sys:String x:Key="QuestDialogFuc">QuestDialogfuc.d     Вставить в соответствующие диалоговые окна или функции</sys:String>
+
+    <!-- AboutSkriptorium -->
+    <sys:String x:Key="Version">Version: 1.0</sys:String>
+    <sys:String x:Key="Developer">Разработчик: Lapis, Nemora26</sys:String>
+    <sys:String x:Key="Date">Дата:</sys:String>
+    <sys:String x:Key="Licensing">Лицензировано в соответствии с GNU General Public License Version 3</sys:String>
+    <sys:String x:Key="ViewLicense">Просмотреть лицензию</sys:String>
+
+    <!-- Search and Replace -->
+    <sys:String x:Key="Search3">Поиск:</sys:String>
+    <sys:String x:Key="ReplaceWith">Заменить на:</sys:String>
+    <sys:String x:Key="SearchIn">Поиск в:</sys:String>
+    <sys:String x:Key="InAllOpenScripts">Во всех открытых скриптах</sys:String>
+    <sys:String x:Key="InTheSelectedDirectory">В выбранном каталоге</sys:String>
+    <sys:String x:Key="OnlySelectedText">Только выделенный текст</sys:String>
+
+    <!-- Search Results -->
+    <sys:String x:Key="SearchResults">Результаты поиска</sys:String>
+    <sys:String x:Key="NavigateToMatch">Перейти к матчу</sys:String>
+
+    <!-- Settings -->
+    <sys:String x:Key="General">Общее</sys:String>
+    <sys:String x:Key="Theme">Тема:</sys:String>
+    <sys:String x:Key="LightMode">Светлый режим</sys:String>
+    <sys:String x:Key="DarkMode">Темный режим</sys:String>
+    <sys:String x:Key="Language">Язык:</sys:String>
+    <sys:String x:Key="Paths">Пути</sys:String>
+    <sys:String x:Key="PathToGothicScripts">Путь к готическим шрифтам:</sys:String>
+    <sys:String x:Key="SelectTheScriptFolder">Выберите папку со сценариями</sys:String>
+
+    <!-- Data Manager -->
+    <sys:String x:Key="TextFiles">Текстовые файлы (*.txt)|*.txt</sys:String>
+    <sys:String x:Key="DaedalusFiles">Файлы Дедала (*.d)|*.d</sys:String>
+    <sys:String x:Key="SourceFiles">Исходные файлы (*.src)|*.src</sys:String>
+    <sys:String x:Key="AllSupported">Все поддерживаемые файлы (*.d;*.txt;*.src)|*.d;*.txt;*.src</sys:String>
+
+    <!-- Script Tabmanager -->
+    <sys:String x:Key="NewScriptName">Новое</sys:String>
+    <sys:String x:Key="MsgScriptModified">Этот скрипт был изменен. Хотите сохранить его?</sys:String>
+    <sys:String x:Key="MsgSaveChangesTitle">Сохранить изменения?</sys:String>
+    <sys:String x:Key="MsgUnsaved">Не сохранен</sys:String>
+    <!-- Endregion: UI -->
+
+    <!-- Region: Comments -->
+    <!-- NPC Generator -->
+    <sys:String x:Key="Comment_SetAttributesChapter">Устанавливает атрибуты и уровни в соответствии с указанной главой (1-6)</sys:String>
+    <sys:String x:Key="Comment_EquipItem">Заменить экземпляр предмета на желаемое оружие / боеприпасы генерируется автоматически, но может быть указано</sys:String>
+    <sys:String x:Key="Comment_CreateAmbientInv">Оснастить NPC соответствующим стандартным инвентарем</sys:String>
+    <sys:String x:Key="Comment_NpcVisual">Замените NO_ARMOR на желаемый экземпляр брони / Должно идти после атрибутов, потому что в B_SetNpcVisual ширина масштабируется в зависимости от силы</sys:String>
+    <sys:String x:Key="Comment_FightSkills">Пределы уровня талантов составляют 30 и 60 / Включенный B_AddFightSkill устанавливает все боевые таланты на один и тот же уровень.</sys:String>
+    <sys:String x:Key="Comment_DailyRoutine">Ежедневный распорядок должен всегда составлять 24 часа и включать как минимум два ежедневных графика.</sys:String>
+    <sys:String x:Key="Comment_AIV_ToughGuy">Приветствует во время боя, не сообщает новостей во время атаки</sys:String>
+    <sys:String x:Key="Comment_AIV_IgnoresFakeGuild">Игнорирует неверную гильдию, сгенерированную доспехами.</sys:String>
+    <sys:String x:Key="Comment_AIV_IgnoresArmor">Никакой реакции или последствий на доспехах героя</sys:String>
+    <sys:String x:Key="Comment_AIV_NPCIsRanger">NPC принадлежит Кольцу Воды</sys:String>
+    <sys:String x:Key="Comment_AIV_NoFightParker">NPC не подвергаются нападениям и сами не нападают на других.</sys:String>
+    <sys:String x:Key="Comment_AIV_MagicUser">Всегда использует магию в бою</sys:String>
+    <sys:String x:Key="Comment_DeleteUnusedAIV">Удалите ненужные AIV-файлы</sys:String>
+
+    <!-- Orc Generator -->
+    <sys:String x:Key="Comment_AttributeStrength">Примерно 50-80 единиц оружия, не менее 100 единиц с учетом вооружения</sys:String>
+    <!-- Endregion: Comments -->
+</ResourceDictionary>
