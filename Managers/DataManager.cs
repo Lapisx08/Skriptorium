@@ -251,14 +251,20 @@ namespace Skriptorium.Managers
 
         public static void LoadRecentFiles()
         {
+            const int MaxRecentFiles = 30; // Maximale Anzahl an zuletzt geöffneten Dateien
+
             if (File.Exists(RecentFilesPath))
             {
                 try
                 {
                     var content = ReadFileAutoEncoding(RecentFilesPath);
                     var lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+                    // Liste zurücksetzen und nur die ersten MaxRecentFiles gültigen Dateien hinzufügen
                     recentFiles.Clear();
-                    recentFiles.AddRange(lines.Where(File.Exists));
+                    recentFiles.AddRange(lines
+                        .Where(File.Exists)
+                        .Take(MaxRecentFiles));
                 }
                 catch (Exception ex)
                 {

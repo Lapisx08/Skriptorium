@@ -524,6 +524,7 @@ namespace Skriptorium.Parsing
             }
 
             Consume(TokenType.CloseParenthesis, "')' nach Parametern erwartet");
+
             // Funktionsbody ist optional (für Prototypen)
             if (Check(TokenType.OpenBracket))
             {
@@ -562,6 +563,7 @@ namespace Skriptorium.Parsing
                     Advance();
                     var sizeToken = Current();
                     if (sizeToken.Type == TokenType.IntegerLiteral ||
+                        sizeToken.Type == TokenType.Identifier ||
                         sizeToken.Type == TokenType.ATRConstant ||
                         sizeToken.Type == TokenType.GuildConstant ||
                         sizeToken.Type == TokenType.NPC_Constant ||
@@ -706,6 +708,7 @@ namespace Skriptorium.Parsing
                     Advance();
                     var sizeToken = Current();
                     if (sizeToken.Type == TokenType.IntegerLiteral ||
+                        sizeToken.Type == TokenType.Identifier ||
                         sizeToken.Type == TokenType.ATRConstant ||
                         sizeToken.Type == TokenType.GuildConstant ||
                         sizeToken.Type == TokenType.NPC_Constant ||
@@ -1079,7 +1082,7 @@ namespace Skriptorium.Parsing
             Expression expr;
 
             // ---------- Unäre Operatoren
-            if (Match(TokenType.Operator) && (tok.Value == "!" || tok.Value == "-" || tok.Value == "+"))
+            if (Match(TokenType.Operator) && (tok.Value == "!" || tok.Value == "-" || tok.Value == "+" || tok.Value == "~"))
             {
                 Advance();
 
@@ -1110,6 +1113,7 @@ namespace Skriptorium.Parsing
                     Line = tok.Line,
                     Column = tok.Column
                 };
+
             }
 
             // ---------- Klammern

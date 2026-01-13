@@ -82,7 +82,7 @@ namespace Skriptorium.Parsing
 
         private static readonly HashSet<char> singleCharOperators = new()
         {
-            '+', '-', '*', '/', '%', '<', '>', '!', '&', '|'
+            '+', '-', '*', '/', '%', '<', '>', '!', '&', '|', '~'
         };
 
         private static readonly HashSet<string> multiCharOperators = new()
@@ -91,8 +91,8 @@ namespace Skriptorium.Parsing
         };
 
         private static readonly Regex identifier = new(@"^[\p{L}_][\p{L}\p{Nd}_]*", RegexOptions.Compiled);
-        private static readonly Regex floatLiteral = new(@"^\d+\.\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-        private static readonly Regex intLiteral = new(@"^\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex floatLiteral = new(@"^\d+\.\d+([eE][+-]?\d+)?", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex intLiteral = new(@"^\d+\.?", RegexOptions.Compiled | RegexOptions.CultureInvariant);
         private static readonly Regex strLiteral = new(@"^""(?:\\.|[^""])*""", RegexOptions.Compiled | RegexOptions.CultureInvariant);
         private static readonly Regex lineComment = new(@"^//.*", RegexOptions.Compiled | RegexOptions.CultureInvariant);
         private static readonly Regex blockCommentStart = new(@"^/\*", RegexOptions.Compiled | RegexOptions.CultureInvariant);
@@ -104,6 +104,7 @@ namespace Skriptorium.Parsing
         };
 
         private bool _expectInstanceName = false;
+        private bool _inInstanceBaseContext = false;
 
         public List<DaedalusToken> Tokenize(string[] lines)
         {
@@ -237,6 +238,14 @@ namespace Skriptorium.Parsing
                         {
                             type = TokenType.InstanceName;
                             _expectInstanceName = false;
+
+                            // ⚡ Prüfen, ob direkt nach dem Instanznamen '(' kommt → Base-Klasse folgt
+                            int lookaheadIndex = column + match.Length;
+                            string restOfLine = text.Substring(lookaheadIndex).TrimStart();
+                            if (restOfLine.StartsWith("("))
+                            {
+                                _inInstanceBaseContext = true;
+                            }
                         }
                         else
                         {
@@ -297,12 +306,20 @@ namespace Skriptorium.Parsing
                                 {
                                     foreach (var prefix in prefixTokenTypes)
                                     {
-                                        if (prefix.Key != "Npc_" && val.StartsWith(prefix.Key, StringComparison.Ordinal))
+                                        // ⚡ Npc_ nur ignorieren, wenn wir gerade die Base-Klasse einer Instance parsen
+                                        if (_inInstanceBaseContext && prefix.Key == "Npc_")
+                                            continue;
+
+                                        if (val.StartsWith(prefix.Key, StringComparison.Ordinal))
                                         {
                                             type = prefix.Value;
                                             break;
                                         }
                                     }
+
+                                    // ⚡ Base-Klasse Flag direkt nach dem ersten Base-Token zurücksetzen
+                                    if (_inInstanceBaseContext)
+                                        _inInstanceBaseContext = false;
                                 }
                             }
                         }
