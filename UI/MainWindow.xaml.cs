@@ -499,7 +499,6 @@ namespace Skriptorium.UI
             => _editMenuManager.SelectAll();
         #endregion
 
-        #region Menü "Suchen"
         private void FindInEditor_Click(object sender, RoutedEventArgs e)
         {
             var editor = _tabManager.GetActiveScriptEditor();
@@ -509,18 +508,6 @@ namespace Skriptorium.UI
                 editor.SearchPanel.OpenSearchPanel(editor);
             }
         }
-
-        private void ReplaceInEditor_Click(object sender, RoutedEventArgs e)
-        {
-            var ed = _tabManager.GetActiveScriptEditor();
-            if (ed != null)
-            {
-                var dialog = new SearchReplaceScriptView(ed, _tabManager, dockingManager);
-                dialog.Owner = this;
-                dialog.Show();
-            }
-        }
-        #endregion
 
         #region Menü "Lesezeichen"
         private ScriptEditor? GetActiveScriptEditor()

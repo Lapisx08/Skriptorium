@@ -192,18 +192,6 @@
     <sys:String x:Key="Licensing">Licencjonowane na podstawie licencji GNU General Public License wersja 3.</sys:String>
     <sys:String x:Key="ViewLicense">Pokaż licencję</sys:String>
 
-    <!-- Search and Replace -->
-    <sys:String x:Key="Search3">Szukaj:</sys:String>
-    <sys:String x:Key="ReplaceWith">Zastąpić przez:</sys:String>
-    <sys:String x:Key="SearchIn">Szukaj w:</sys:String>
-    <sys:String x:Key="InAllOpenScripts">We wszystkich otwartych skryptach</sys:String>
-    <sys:String x:Key="InTheSelectedDirectory">W ustalonym katalogu</sys:String>
-    <sys:String x:Key="OnlySelectedText">Tylko zaznaczony tekst</sys:String>
-
-    <!-- Search Results -->
-    <sys:String x:Key="SearchResults">Wyniki wyszukiwania</sys:String>
-    <sys:String x:Key="NavigateToMatch">Przejdź do wyniku</sys:String>
-
     <!-- Settings -->
     <sys:String x:Key="General">Ogólne</sys:String>
     <sys:String x:Key="Theme">Tryb wyświetlania:</sys:String>

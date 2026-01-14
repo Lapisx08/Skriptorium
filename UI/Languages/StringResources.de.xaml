@@ -43,7 +43,7 @@
     <sys:String x:Key="SelectAll">Alles auswählen</sys:String>
     <sys:String x:Key="CtrlA">Strg + A</sys:String>
 
-    <!-- Search -->
+    <!-- Search And Replace -->
     <sys:String x:Key="Search">Suche</sys:String>
     <sys:String x:Key="SearchAndReplace">Suchen und Ersetzen</sys:String>
     <sys:String x:Key="CtrlF">Strg + F</sys:String>
@@ -191,18 +191,6 @@
     <sys:String x:Key="Date">Datum:</sys:String>
     <sys:String x:Key="Licensing">Lizenziert unter GNU General Public License Version 3</sys:String>
     <sys:String x:Key="ViewLicense">Lizenz anzeigen</sys:String>
-
-    <!-- Search and Replace -->
-    <sys:String x:Key="Search3">Suchen:</sys:String>
-    <sys:String x:Key="ReplaceWith">Ersetzen durch:</sys:String>
-    <sys:String x:Key="SearchIn">Suchen in:</sys:String>
-    <sys:String x:Key="InAllOpenScripts">In allen offenen Skripten</sys:String>
-    <sys:String x:Key="InTheSelectedDirectory">Im gesetzten Verzeichnis</sys:String>
-    <sys:String x:Key="OnlySelectedText">Nur markierter Text</sys:String>
-
-    <!-- Search Results -->
-    <sys:String x:Key="SearchResults">Suchergebnisse</sys:String>
-    <sys:String x:Key="NavigateToMatch">Zum Treffer navigieren</sys:String>
 
     <!-- Settings -->
     <sys:String x:Key="General">Allgemein</sys:String>

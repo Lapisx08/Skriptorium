@@ -192,18 +192,6 @@
     <sys:String x:Key="Licensing">Лицензировано в соответствии с GNU General Public License Version 3</sys:String>
     <sys:String x:Key="ViewLicense">Просмотреть лицензию</sys:String>
 
-    <!-- Search and Replace -->
-    <sys:String x:Key="Search3">Поиск:</sys:String>
-    <sys:String x:Key="ReplaceWith">Заменить на:</sys:String>
-    <sys:String x:Key="SearchIn">Поиск в:</sys:String>
-    <sys:String x:Key="InAllOpenScripts">Во всех открытых скриптах</sys:String>
-    <sys:String x:Key="InTheSelectedDirectory">В выбранном каталоге</sys:String>
-    <sys:String x:Key="OnlySelectedText">Только выделенный текст</sys:String>
-
-    <!-- Search Results -->
-    <sys:String x:Key="SearchResults">Результаты поиска</sys:String>
-    <sys:String x:Key="NavigateToMatch">Перейти к матчу</sys:String>
-
     <!-- Settings -->
     <sys:String x:Key="General">Общее</sys:String>
     <sys:String x:Key="Theme">Тема:</sys:String>
