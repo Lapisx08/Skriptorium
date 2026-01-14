@@ -54,6 +54,9 @@ namespace Skriptorium
             // AvalonDock Theme anpassen
             ApplyAvalonDockThemeFromMahApps();
 
+            // SearchMatchInfoForeground an Theme anpassen
+            UpdateSearchMatchInfoForegroundForTheme();
+
             // ToggleButton ActiveBackground an Theme anpassen
             UpdateToggleButtonBackgroundForTheme();
 
@@ -61,6 +64,7 @@ namespace Skriptorium
             ThemeManager.Current.ThemeChanged += (_, __) =>
             {
                 ApplyAvalonDockThemeFromMahApps();
+                UpdateSearchMatchInfoForegroundForTheme();
                 UpdateToggleButtonBackgroundForTheme();
             };
 
@@ -139,6 +143,16 @@ namespace Skriptorium
 
             mainWindow.Loaded += onLoaded;
             mainWindow.Show();
+        }
+
+        private void UpdateSearchMatchInfoForegroundForTheme()
+        {
+            var currentTheme = ThemeManager.Current.DetectTheme(this);
+            bool isDark = currentTheme?.BaseColorScheme == "Dark";
+            Application.Current.Resources["SearchMatchInfoForeground"] =
+                isDark
+                    ? Application.Current.Resources["SearchMatchInfoForegroundDark"]
+                    : Application.Current.Resources["SearchMatchInfoForegroundLight"];
         }
 
         private void UpdateToggleButtonBackgroundForTheme()

@@ -1,7 +1,8 @@
 ﻿using AvalonDock;
-using AvalonDock.Layout;
 using AvalonDock.Controls;
+using AvalonDock.Layout;
 using MahApps.Metro.Controls;
+using Skriptorium.Common;
 using Skriptorium.Managers;
 using Skriptorium.Parsing;
 using Skriptorium.UI.Views;
@@ -70,7 +71,14 @@ namespace Skriptorium.UI
             _shortcutManager.Register(Key.A, ModifierKeys.Control,
                                       () => _editMenuManager.SelectAll());
             _shortcutManager.Register(Key.F, ModifierKeys.Control,
-                                      () => FindInEditor_Click(null, null));
+                                      () =>
+                                      {
+                                          var editor = _tabManager.GetActiveScriptEditor();
+                                          if (editor != null)
+                                          {
+                                                editor.SearchPanel.OpenSearchPanel(editor);
+                                          }
+                                      });
 
             // Lesezeichen-Shortcuts
             _shortcutManager.Register(Key.F2, ModifierKeys.None,
@@ -230,6 +238,16 @@ namespace Skriptorium.UI
                 _editMenuManager.Duplicate();
                 e.Handled = true; // verhindert Löschen!
             }
+
+            if (e.Key == Key.Escape)
+            {
+                var editor = _tabManager.GetActiveScriptEditor();
+                if (editor != null && editor.SearchPanel.Visibility == Visibility.Visible)
+                {
+                    editor.SearchPanel.CloseSearchPanel();  // Panel schließen
+                    e.Handled = true;                       // Event stoppt weitere Verarbeitung
+                }
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -280,11 +298,33 @@ namespace Skriptorium.UI
 
             if (_currentScriptEditor != null)
             {
+                // Bindet das SearchPanel an den aktiven Editor
+                _currentScriptEditor.SearchPanel.BindEditor(_currentScriptEditor);
+
+                // Globale Sichtbarkeit setzen
+                if (GlobalSearchReplaceState.IsSearchPanelOpen)
+                    _currentScriptEditor.SearchPanel.OpenSearchPanel(_currentScriptEditor);
+                else
+                    _currentScriptEditor.SearchPanel.CloseSearchPanel();
+
+                // Suchtext global setzen
+                _currentScriptEditor.SearchPanel.SetSearchText(GlobalSearchReplaceState.LastSearchText);
+
+                // Events abonnieren
+                _currentScriptEditor.SearchPanel.VisibilityChanged -= SearchPanel_VisibilityChanged;
+                _currentScriptEditor.SearchPanel.VisibilityChanged += SearchPanel_VisibilityChanged;
+
+                _currentScriptEditor.SearchPanel.SearchTextChanged -= SearchPanel_SearchTextChanged;
+                _currentScriptEditor.SearchPanel.SearchTextChanged += SearchPanel_SearchTextChanged;
+
+                // Text- und Caret-Events
                 _currentScriptEditor.TextChanged += ScriptEditor_TextChanged;
                 _currentScriptEditor.CaretPositionChanged += ScriptEditor_CaretPositionChanged;
+
                 _currentScriptEditor.ApplySyntaxHighlightingState();
                 UpdateStatusBar();
 
+                // Zoom einstellen
                 int zoomPercent = (int)(GlobalZoom * 100);
                 switch (zoomPercent)
                 {
@@ -300,7 +340,7 @@ namespace Skriptorium.UI
                     default: ZoomComboBox.SelectedIndex = 3; break;
                 }
 
-                // Neue Synchronisation: FileExplorer zur Datei springen
+                // Optional: FileExplorer synchronisieren
                 SyncFileExplorerToActiveScript();
             }
             else
@@ -462,12 +502,11 @@ namespace Skriptorium.UI
         #region Menü "Suchen"
         private void FindInEditor_Click(object sender, RoutedEventArgs e)
         {
-            var ed = _tabManager.GetActiveScriptEditor();
-            if (ed != null)
+            var editor = _tabManager.GetActiveScriptEditor();
+            if (editor != null)
             {
-                var dialog = new SearchReplaceScriptView(ed, _tabManager, dockingManager);
-                dialog.Owner = this;
-                dialog.Show();
+                // Inline-Panel öffnen
+                editor.SearchPanel.OpenSearchPanel(editor);
             }
         }
 
@@ -864,6 +903,41 @@ namespace Skriptorium.UI
                               UriKind.Absolute);
 
             dicts.Add(new ResourceDictionary { Source = uri });
+        }
+
+        private void SearchPanel_VisibilityChanged(object sender, EventArgs e)
+        {
+            if (_currentScriptEditor == null) return;
+
+            bool isVisible = _currentScriptEditor.SearchPanel.Visibility == Visibility.Visible;
+            GlobalSearchReplaceState.IsSearchPanelOpen = isVisible;
+
+            foreach (var editor in _tabManager.GetAllOpenEditors())
+            {
+                if (editor == _currentScriptEditor) continue;
+
+                if (isVisible)
+                    editor.SearchPanel.OpenSearchPanel(editor);
+                else
+                    editor.SearchPanel.CloseSearchPanel();
+
+                // ToggleButtons synchronisieren
+                editor.SearchPanel.BtnMatchCase.IsChecked = _currentScriptEditor?.SearchPanel.BtnMatchCase.IsChecked;
+                editor.SearchPanel.BtnWholeWord.IsChecked = _currentScriptEditor?.SearchPanel.BtnWholeWord.IsChecked;
+            }
+        }
+
+        private void SearchPanel_SearchTextChanged(object sender, EventArgs e)
+        {
+            if (_currentScriptEditor == null) return;
+
+            GlobalSearchReplaceState.LastSearchText = _currentScriptEditor.SearchPanel.SearchText;
+
+            foreach (var editor in _tabManager.GetAllOpenEditors())
+            {
+                if (editor == _currentScriptEditor) continue;
+                editor.SearchPanel.SetSearchText(GlobalSearchReplaceState.LastSearchText);
+            }
         }
     }
 }

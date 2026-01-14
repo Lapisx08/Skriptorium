@@ -3,12 +3,30 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+             xmlns:views="clr-namespace:Skriptorium.UI.Views"
              Height="Auto" Width="Auto">
     <Grid>
-        <avalonedit:TextEditor Name="avalonEditor"
+
+        <!-- 1. Zeilen definieren: SearchPanel fix, Editor scrollable -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Search Panel -->
+            <RowDefinition Height="*"/>
+            <!-- TextEditor -->
+        </Grid.RowDefinitions>
+
+        <!-- 2. Search Panel oben -->
+        <views:SearchInlinePanel x:Name="SearchPanel"
+                                 Grid.Row="0"
+                                 HorizontalAlignment="Right"
+                                 VerticalAlignment="Top"
+                                 Visibility="Collapsed"/>
+
+        <!-- 3. AvalonEdit Editor -->
+        <avalonedit:TextEditor x:Name="avalonEditor"
+                               Grid.Row="1"
                                ShowLineNumbers="True"
                                FontFamily="Consolas"
-                               FontSize="{Binding ElementName=root, Path=EffectiveFontSize}"
-                               PreviewMouseWheel="AvalonEditor_PreviewMouseWheel"/>
+                               FontSize="{Binding ElementName=root, Path=EffectiveFontSize}"/>
     </Grid>
 </UserControl>

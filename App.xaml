@@ -85,12 +85,17 @@
                 <SolidColorBrush x:Key="{x:Static avalonThemes:ResourceKeys.PreviewBoxBorderBrushKey}" Color="Gray" />
             </ResourceDictionary>
 
+            <!-- Search Match Info Foreground -->
+            <SolidColorBrush x:Key="SearchMatchInfoForeground" Color="{Binding Color, Source={StaticResource SearchMatchInfoForegroundDark}}"/>
+            
+            <SolidColorBrush x:Key="SearchMatchInfoForegroundLight" Color="DarkSlateGray"/>
+            <SolidColorBrush x:Key="SearchMatchInfoForegroundDark" Color="LightGray"/>
+
             <!-- ToggleButton Active Background Brushes -->
+            <SolidColorBrush x:Key="ToggleButtonActiveBackground" Color="{Binding Color, Source={StaticResource ToggleButtonActiveBackgroundDark}}"/>
+            
             <SolidColorBrush x:Key="ToggleButtonActiveBackgroundLight" Color="LightGray"/>
             <SolidColorBrush x:Key="ToggleButtonActiveBackgroundDark" Color="#FF444444"/>
-
-            <!-- Dynamische Ressource für ToggleButton -->
-            <SolidColorBrush x:Key="ToggleButtonActiveBackground" Color="{Binding Color, Source={StaticResource ToggleButtonActiveBackgroundDark}}"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

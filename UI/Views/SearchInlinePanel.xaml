@@ -1,0 +1,242 @@
+﻿<UserControl x:Class="Skriptorium.UI.Views.SearchInlinePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Skriptorium.UI.Views"
+             Width="450" Height="Auto">
+
+    <Border Padding="5" Background="{DynamicResource MahApps.Brushes.Control.Background}">
+        <StackPanel Orientation="Vertical">
+
+            <!-- Suchleiste mit Togglebuttons rechts -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Toggle Replace -->
+                    <ColumnDefinition Width="150"/>
+                    <!-- TextBox -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Match Case -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Whole Word -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Trefferanzeige -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Rückwärts -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Vorwärts -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- In Auswahl -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Schließen -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Ausklapp-Pfeil für Ersetzen -->
+                <ToggleButton x:Name="BtnToggleReplace"
+                              Grid.Column="0"
+                              Width="26" Height="26"
+                              Click="BtnToggleReplace_Click"
+                              VerticalAlignment="Center"
+                              ToolTip="Ersetzen umschalten">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <TextBlock x:Name="ArrowIcon"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           Text="&#xE76C;"
+                                           FontSize="12"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="ArrowIcon" Property="Text" Value="&#xE70D;"/>
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ToggleButtonActiveBackground}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
+
+                <!-- Suchfeld mit Wasserzeichen -->
+                <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,5,0">
+                    <TextBox x:Name="TxtSearch" TextChanged="TxtSearch_TextChanged" VerticalAlignment="Center"/>
+                    <TextBlock Text="{DynamicResource Search}" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text.Length, ElementName=TxtSearch}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Match Case ToggleButton -->
+                <ToggleButton x:Name="BtnMatchCase" Grid.Column="2" Width="26" Height="26" Click="BtnMatchCase_Click" ToolTip="{DynamicResource CaseSensitive}">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ToggleButtonActiveBackground}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8E9;" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </ToggleButton>
+
+                <!-- Whole Word ToggleButton -->
+                <ToggleButton x:Name="BtnWholeWord" Grid.Column="3" Width="26" Height="26" Click="BtnWholeWord_Click" ToolTip="{DynamicResource MatchWholeWord}">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ToggleButtonActiveBackground}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8AC;" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </ToggleButton>
+
+                <!-- Trefferanzeige -->
+                <TextBlock x:Name="TxtMatchInfo" Grid.Column="4" VerticalAlignment="Center" Width="100" Margin="5,0,5,0" Foreground="{DynamicResource SearchMatchInfoForeground}" Text="{DynamicResource NoResults}"/>
+
+                <!-- Rückwärts suchen Button -->
+                <Button x:Name="BtnFindPrevious" Grid.Column="5" Width="26" Height="26" VerticalAlignment="Center" Click="BtnFindPrevious_Click" ToolTip="{DynamicResource PreviousMatch}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74A;" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+
+                <!-- Vorwärts suchen Button -->
+                <Button x:Name="BtnFindNext" Grid.Column="6" Width="26" Height="26" VerticalAlignment="Center" Click="BtnFindNext_Click" ToolTip="{DynamicResource NextMatch}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74B;" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+
+                <!-- In Auswahl suchen ToggleButton -->
+                <ToggleButton x:Name="BtnFindInSelection" Grid.Column="7" Width="26" Height="26" VerticalAlignment="Center" Click="BtnFindInSelection_Click" ToolTip="{DynamicResource SearchInSelection}" Margin="2,0,0,0">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ToggleButtonActiveBackground}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8E4;" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </ToggleButton>
+
+                <!-- Schließen Button -->
+                <Button x:Name="BtnClose" Grid.Column="8" Width="26" Height="26" VerticalAlignment="Center" Click="BtnClose_Click" ToolTip="{DynamicResource Close2}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE711;" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+            </Grid>
+
+            <!-- Ersetzen-Bereich bündig unter Suchfeld -->
+            <Grid x:Name="ReplacePanel" Visibility="Collapsed" Margin="0,5,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="26"/>
+                    <!-- Platz für Toggle Replace -->
+                    <ColumnDefinition Width="145"/>
+                    <!-- TextBox -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Replace Button -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Replace All Button -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Ersetzen TextBox mit Wasserzeichen -->
+                <Grid Grid.Column="1">
+                    <TextBox x:Name="TxtReplace" VerticalAlignment="Center"/>
+                    <TextBlock Text="{DynamicResource Replace}" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text.Length, ElementName=TxtReplace}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Replace Button -->
+                <Button x:Name="BtnReplace" Grid.Column="2" Width="26" Height="26" VerticalAlignment="Center" Click="BtnReplace_Click" ToolTip="{DynamicResource Replace}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MahApps.Brushes.Control.MouseOver}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MahApps.Brushes.Control.Pressed}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE929;" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+
+                <!-- Replace All Button -->
+                <Button x:Name="BtnReplaceAll" Grid.Column="3" Width="26" Height="26" VerticalAlignment="Center" Click="BtnReplaceAll_Click" ToolTip="{DynamicResource ReplaceAll}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MahApps.Brushes.Control.MouseOver}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MahApps.Brushes.Control.Pressed}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE70F;" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+
+            </Grid>
+
+        </StackPanel>
+    </Border>
+</UserControl>

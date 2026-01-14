@@ -47,6 +47,11 @@
     <sys:String x:Key="Search">Поиск</sys:String>
     <sys:String x:Key="SearchAndReplace">Поиск и замена</sys:String>
     <sys:String x:Key="CtrlF">Ctrl + F</sys:String>
+    <sys:String x:Key="NoResults">Нет результатов</sys:String>
+    <sys:String x:Key="PreviousMatch">Предыдущий матч (Shift + Enter)</sys:String>
+    <sys:String x:Key="NextMatch">Следующий матч (Enter)</sys:String>
+    <sys:String x:Key="SearchInSelection">Поиск в выделенном фрагменте</sys:String>
+    <sys:String x:Key="Close2">Закрыть (Esc)</sys:String>
 
     <!-- Bookmarks -->
     <sys:String x:Key="Bookmarks">Закладки</sys:String>
