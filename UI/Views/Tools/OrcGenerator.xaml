@@ -73,8 +73,8 @@
                     <ComboBoxItem Content="ORC_BODYWARRIOR2"/>
                     <ComboBoxItem Content="ORC_BODYWARRIOR3"/>
                     <ComboBoxItem Content="Orc_BodyHeavy"/>
-                    <ComboBoxItem Content="Orc_BodyElite"/>
                     <ComboBoxItem Content="Orc_BodyWarrior"/>
+                    <ComboBoxItem Content="Orc_BodyElite"/>
                     <ComboBoxItem Content="ORC_MYRTANABODYELITE"/>
                     <ComboBoxItem Content="Orc_BodyShaman"/>
                     <ComboBoxItem Content="Orc_Body_Highshaman"/>
