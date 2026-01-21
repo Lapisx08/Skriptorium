@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -133,6 +134,7 @@ namespace Skriptorium.UI
             this.Loaded += MainWindow_FirstLoaded;
 
             LanguageManager.LanguageChanged += OnLanguageChanged;
+            LanguageManager.LanguageChanged += (s, e) => UpdateStatusBar();
         }
 
         private void MainWindow_FirstLoaded(object sender, RoutedEventArgs e)
@@ -345,8 +347,8 @@ namespace Skriptorium.UI
             }
             else
             {
-                StatusPositionText.Text = "Zeile 1, Spalte 1";
-                StatusCharCountText.Text = "0 Zeichen";
+                StatusPositionText.Text = Application.Current.TryFindResource("StatusPositionDefault") as string;
+                StatusCharCountText.Text = Application.Current.TryFindResource("StatusCharCountEmpty") as string;
             }
         }
 
@@ -606,10 +608,6 @@ namespace Skriptorium.UI
             {
                 editor.FormatCode();
             }
-            else
-            {
-                MessageBox.Show("Kein aktiver Editor gefunden.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
         }
 
         private void SyntaxCheckButton_Click(object sender, RoutedEventArgs e)
@@ -617,8 +615,13 @@ namespace Skriptorium.UI
             var editor = _tabManager.GetActiveScriptEditor();
             if (editor == null)
             {
-                MessageBox.Show("Kein aktives Skript geöffnet.", "Hinweis",
-                                MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    Application.Current.FindResource("MsgNoActiveScript") as string
+                        ?? "Kein aktives Skript geöffnet.",
+                    Application.Current.FindResource("CaptionHint") as string
+                        ?? "Hinweis",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
                 return;
             }
 
@@ -626,14 +629,22 @@ namespace Skriptorium.UI
 
             if (errors.Count > 0)
             {
-                MessageBox.Show(string.Join(Environment.NewLine, errors),
-                                "Fehler gefunden",
-                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(
+                    string.Join(Environment.NewLine, errors),
+                    Application.Current.FindResource("CaptionErrorsFound") as string
+                        ?? "Fehler gefunden",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
             else
             {
-                MessageBox.Show("Keine Fehler gefunden.", "Prüfung erfolgreich",
-                                MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    Application.Current.FindResource("MsgNoErrors") as string
+                        ?? "Keine Fehler gefunden.",
+                    Application.Current.FindResource("CaptionCheckSuccessful") as string
+                        ?? "Prüfung erfolgreich",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
         }
 
@@ -847,13 +858,38 @@ namespace Skriptorium.UI
             if (_currentScriptEditor?.Avalon.Document != null)
             {
                 var caret = _currentScriptEditor.Avalon.TextArea.Caret;
-                StatusPositionText.Text = $"Zeile {caret.Line}, Spalte {caret.Column}";
-                StatusCharCountText.Text = $"{_currentScriptEditor.Avalon.Document.TextLength} Zeichen";
+
+                var posFormat =
+                    Application.Current.TryFindResource("StatusPosition") as string;
+
+                if (posFormat != null)
+                {
+                    StatusPositionText.Text =
+                        string.Format(posFormat, caret.Line, caret.Column);
+                }
+
+                var countFormat =
+                    Application.Current.TryFindResource("StatusCharCount") as string;
+
+                if (countFormat != null)
+                {
+                    StatusCharCountText.Text =
+                        string.Format(countFormat,
+                            _currentScriptEditor.Avalon.Document.TextLength);
+                }
+
+                AutomationProperties.SetName(
+                    StatusPositionText, StatusPositionText.Text);
+                AutomationProperties.SetName(
+                    StatusCharCountText, StatusCharCountText.Text);
             }
             else
             {
-                StatusPositionText.Text = "Zeile 1, Spalte 1";
-                StatusCharCountText.Text = "0 Zeichen";
+                StatusPositionText.Text =
+                    Application.Current.TryFindResource("StatusPositionDefault") as string;
+
+                StatusCharCountText.Text =
+                    Application.Current.TryFindResource("StatusCharCountEmpty") as string;
             }
         }
 

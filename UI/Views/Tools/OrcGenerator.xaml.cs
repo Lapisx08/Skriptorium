@@ -99,7 +99,13 @@ namespace Skriptorium.UI.Views.Tools
                 guildEntry.SelectedItem == null ||
                 aivRealIdEntry.SelectedItem == null)
             {
-                MessageBox.Show("Bitte fülle alle Felder aus, bevor du den Code generierst.", "Fehlende Eingaben", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(
+                    Application.Current.TryFindResource("MsgFillAllFieldsBeforeGenerate") as string
+                        ?? "Bitte fülle alle Felder aus, bevor du den Code generierst.",
+                    Application.Current.TryFindResource("CaptionMissingInput") as string
+                        ?? "Fehlende Eingaben",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
@@ -186,14 +192,7 @@ namespace Skriptorium.UI.Views.Tools
 
         private void CopyToClipboard_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
                 Clipboard.SetText(outputText.Text);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Fehler beim Kopieren in die Zwischenablage: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         private void ResetFields_Click(object sender, RoutedEventArgs e)

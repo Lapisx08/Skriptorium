@@ -62,7 +62,7 @@
                  mah:TextBoxHelper.Watermark="{DynamicResource QuestStartText}"/>
 
                 <!-- Erfolg -->
-                <TextBlock Text="{DynamicResource StartLogText}" Margin="5,-2,5,2" FontWeight="SemiBold"/>
+                <TextBlock Text="{DynamicResource SuccessLogText}" Margin="5,-2,5,2" FontWeight="SemiBold"/>
                 <TextBox x:Name="LogSuccessBox"
                  Height="45"
                  AcceptsReturn="True"

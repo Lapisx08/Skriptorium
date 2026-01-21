@@ -9,6 +9,10 @@
     <sys:String x:Key="Settings">Ustawienia</sys:String>
     <sys:String x:Key="CtrlComma">Ctrl + ,</sys:String>
     <sys:String x:Key="Exit">Zakończ</sys:String>
+    <sys:String x:Key="StatusPositionDefault">Wiersz 1, Kolumna 1</sys:String>
+    <sys:String x:Key="StatusCharCountEmpty">0 Znak</sys:String>
+    <sys:String x:Key="StatusPosition">Wiersz {0}, Kolumna {1}</sys:String>
+    <sys:String x:Key="StatusCharCount">{0} Znak</sys:String>
 
     <!-- File -->
     <sys:String x:Key="File">Plik</sys:String>
@@ -89,14 +93,6 @@
     <sys:String x:Key="CtrlShiftF">Ctrl + Shift + F</sys:String>
     <sys:String x:Key="CodeStructure">Struktura kodu</sys:String>
     <sys:String x:Key="CtrlShiftC">Ctrl + Shift + C</sys:String>
-    <sys:String x:Key="NPCGenerator">Generator NPC</sys:String>
-    <sys:String x:Key="CtrlG">Ctrl + G</sys:String>
-    <sys:String x:Key="OrcGenerator">Generator Orc</sys:String>
-    <sys:String x:Key="CtrlShiftG">Ctrl + Shift + G</sys:String>
-    <sys:String x:Key="DialogGenerator">Generator dialogów</sys:String>
-    <sys:String x:Key="CtrlAltG">Ctrl + Alt + G</sys:String>
-    <sys:String x:Key="QuestGenerator">Generator Zadań</sys:String>
-    <sys:String x:Key="CtrlShiftAltG">Ctrl + Shift + Alt + G</sys:String>
 
     <!-- Code Structure -->
     <sys:String x:Key="Instances">Instancja</sys:String>
@@ -107,6 +103,54 @@
     <sys:String x:Key="Type">Typ</sys:String>
     <sys:String x:Key="Value">Wartość</sys:String>
     <sys:String x:Key="Line">Wiersz</sys:String>
+
+    <!-- File Explorer -->
+    <sys:String x:Key="NewScript">Nowy skrypt</sys:String>
+    <sys:String x:Key="NewFolder">Nowy folder</sys:String>
+    <sys:String x:Key="CollapseAll">Zwiń wszystko</sys:String>
+    <sys:String x:Key="RefreshFileExplorer">Aktualizacja Eksploratora plików</sys:String>
+    <sys:String x:Key="OpenInExplorer">Otwórz w Eksploratorze</sys:String>
+    <sys:String x:Key="Rename">Zmiana nazwy</sys:String>
+    <sys:String x:Key="Delete">Usuń</sys:String>
+    <sys:String x:Key="NewName">Nowa nazwa:</sys:String>
+
+    <!-- Search Explorer -->
+    <sys:String x:Key="Search2">Szukaj</sys:String>
+    <sys:String x:Key="CaseSensitive">Zwracaj uwagę na wielkość liter</sys:String>
+    <sys:String x:Key="MatchWholeWord">Wyszukaj tylko całe słowo</sys:String>
+    <sys:String x:Key="Replace">Zastąp</sys:String>
+    <sys:String x:Key="ReplaceAll">Zastąp wszystko</sys:String>
+
+    <!-- Generators -->
+    <sys:String x:Key="Generators">Generatory</sys:String>
+    <sys:String x:Key="NPCGenerator">Generator NPC</sys:String>
+    <sys:String x:Key="CtrlG">Ctrl + G</sys:String>
+    <sys:String x:Key="OrcGenerator">Generator Orków</sys:String>
+    <sys:String x:Key="CtrlShiftG">Ctrl + Shift + G</sys:String>
+    <sys:String x:Key="DialogGenerator">Generator dialogów</sys:String>
+    <sys:String x:Key="CtrlAltG">Ctrl + Alt + G</sys:String>
+    <sys:String x:Key="QuestGenerator">Generator Zadań</sys:String>
+    <sys:String x:Key="CtrlShiftAltG">Ctrl + Shift + Alt + G</sys:String>
+
+    <!-- NPC Generator -->
+    <sys:String x:Key="Name2">Nazwa:</sys:String>
+    <sys:String x:Key="Guild">Gildia:</sys:String>
+    <sys:String x:Key="ID">ID:</sys:String>
+    <sys:String x:Key="Voice">Głos:</sys:String>
+    <sys:String x:Key="Flags">Flagi:</sys:String>
+    <sys:String x:Key="NPCType">Typ NPC:</sys:String>
+    <sys:String x:Key="AIVARs">AIVARs:</sys:String>
+    <sys:String x:Key="IndividualAttributes">Indywidualne atrybuty:</sys:String>
+    <sys:String x:Key="IndividualFightTalents">Indywidualne talenty bojowe:</sys:String>
+    <sys:String x:Key="Gender">Płeć:</sys:String>
+    <sys:String x:Key="Male">Męski</sys:String>
+    <sys:String x:Key="Female">Żeński</sys:String>
+    <sys:String x:Key="Comments2">Komentarze:</sys:String>
+    <sys:String x:Key="MsgFillAllFieldsBeforeGenerate">Przed wygenerowaniem kodu wypełnij wszystkie pola.</sys:String>
+    <sys:String x:Key="CaptionMissingInput">Brak danych</sys:String>
+
+    <!-- Orc Generator -->
+    <sys:String x:Key="Poziom">Level:</sys:String>
 
     <!-- Dialog Generator -->
     <sys:String x:Key="DialogInstance">Instancja dialogowa:</sys:String>
@@ -128,41 +172,12 @@
     <sys:String x:Key="NPC">NPC</sys:String>
     <sys:String x:Key="ItemInstance">Instancja elementu:</sys:String>
     <sys:String x:Key="Number">Liczba:</sys:String>
-
-    <!-- File Explorer -->
-    <sys:String x:Key="NewScript">Nowy skrypt</sys:String>
-    <sys:String x:Key="NewFolder">Nowy folder</sys:String>
-    <sys:String x:Key="CollapseAll">Zwiń wszystko</sys:String>
-    <sys:String x:Key="RefreshFileExplorer">Aktualizacja Eksploratora plików</sys:String>
-    <sys:String x:Key="OpenInExplorer">Otwórz w Eksploratorze</sys:String>
-    <sys:String x:Key="Rename">Zmiana nazwy</sys:String>
-    <sys:String x:Key="Delete">Usuń</sys:String>
-    <sys:String x:Key="NewName">Nowa nazwa:</sys:String>
-
-    <!-- NPC Generator -->
-    <sys:String x:Key="Name2">Nazwa:</sys:String>
-    <sys:String x:Key="Guild">Gildia:</sys:String>
-    <sys:String x:Key="ID">ID:</sys:String>
-    <sys:String x:Key="Voice">Głos:</sys:String>
-    <sys:String x:Key="Flags">Flagi:</sys:String>
-    <sys:String x:Key="NPCType">Typ NPC:</sys:String>
-    <sys:String x:Key="AIVARs">AIVARs:</sys:String>
-    <sys:String x:Key="IndividualAttributes">Indywidualne atrybuty:</sys:String>
-    <sys:String x:Key="IndividualFightTalents">Indywidualne talenty bojowe:</sys:String>
-    <sys:String x:Key="Gender">Płeć:</sys:String>
-    <sys:String x:Key="Male">Męski</sys:String>
-    <sys:String x:Key="Female">Żeński</sys:String>
-    <sys:String x:Key="Comments2">Komentarze:</sys:String>
-
-    <!-- Orc Generator -->
-    <sys:String x:Key="Poziom">Level:</sys:String>
-    
-    <!-- Search Explorer -->
-    <sys:String x:Key="Search2">Szukaj</sys:String>
-    <sys:String x:Key="CaseSensitive">Zwracaj uwagę na wielkość liter</sys:String>
-    <sys:String x:Key="MatchWholeWord">Wyszukaj tylko całe słowo</sys:String>
-    <sys:String x:Key="Replace">Zastąp</sys:String>
-    <sys:String x:Key="ReplaceAll">Zastąp wszystko</sys:String>
+    <sys:String x:Key="MsgFillAllDialogFields">Proszę wypełnić okno dialogowe, instancję NPC i opis!</sys:String>
+    <sys:String x:Key="CaptionError">Błąd</sys:String>
+    <sys:String x:Key="MsgDialogLineTextRequired">Wymagana jest co najmniej jedna linia dialogowa z tekstem!</sys:String>
+    <sys:String x:Key="MsgInvalidXpValue">Nieprawidłowa wartość XP w wierszu. Wprowadź liczbę całkowitą >= 0.</sys:String>
+    <sys:String x:Key="MsgItemInstanceRequired">Proszę podać instancję elementu.</sys:String>
+    <sys:String x:Key="MsgInvalidItemAmount">Proszę podać prawidłową liczbę pozycji (> 0).</sys:String>
 
     <!-- Quest Generator -->
     <sys:String x:Key="QuestDefinition">Definicja zadania</sys:String>
@@ -184,10 +199,11 @@
     <sys:String x:Key="LogConstants">Log_Constants.d        Wstaw do Content\Story\Log-Entries\Log-Constants_*</sys:String>
     <sys:String x:Key="BCloseTopics">B_CloseTopics.d        Wstaw do Content\Story\Log-Entries\B_CloseTopics_*</sys:String>
     <sys:String x:Key="QuestDialogFuc">QuestDialogfuc.d     Wstaw do odpowiednich okien dialogowych lub funkcji</sys:String>
+    <sys:String x:Key="MsgQuestNameRequired">Proszę podać wewnętrzną nazwę zadania.</sys:String>
 
     <!-- AboutSkriptorium -->
     <sys:String x:Key="Version">Wersja: 1.0</sys:String>
-    <sys:String x:Key="Developer">Programista: Lapis, Nemora26</sys:String>
+    <sys:String x:Key="Developer">Twórcy: Lapis, Nemora26</sys:String>
     <sys:String x:Key="Date">Data:</sys:String>
     <sys:String x:Key="Licensing">Licencjonowane na podstawie licencji GNU General Public License wersja 3.</sys:String>
     <sys:String x:Key="ViewLicense">Pokaż licencję</sys:String>
@@ -213,6 +229,16 @@
     <sys:String x:Key="MsgScriptModified">Ten skrypt został zmieniony. Czy chcesz go zapisać?</sys:String>
     <sys:String x:Key="MsgSaveChangesTitle">Zapisać zmiany?</sys:String>
     <sys:String x:Key="MsgUnsaved">Nie zapisano</sys:String>
+
+    <!-- Daedalus Parser -->
+    <sys:String x:Key="MsgNoActiveScript">Brak aktywnego skryptu otwartego.</sys:String>
+    <sys:String x:Key="CaptionHint">Uwaga</sys:String>
+    <sys:String x:Key="CaptionErrorsFound">Znaleziono błąd</sys:String>
+    <sys:String x:Key="MsgNoErrors">Nie znaleziono błędów..</sys:String>
+    <sys:String x:Key="CaptionCheckSuccessful">Prüfung erfolgreich</sys:String>
+    <sys:String x:Key="ErrSyntax">Syntax-Fehler: Wiersz {0}, Kolumna {1}. Oczekiwany: {2}, Znaleziono: '{3}'</sys:String>
+    <sys:String x:Key="ErrExpectedAny">&lt;dowolny&gt;</sys:String>
+    <sys:String x:Key="ErrTokenNull">&lt;null&gt;</sys:String>
     <!-- Endregion: UI -->
 
     <!-- Region: Comments -->

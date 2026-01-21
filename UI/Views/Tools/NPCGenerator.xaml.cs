@@ -191,7 +191,13 @@ namespace Skriptorium.UI.Views.Tools
                 attributesDropdown.SelectedItem == null ||
                 fightSkillsDropdown.SelectedItem == null)
             {
-                MessageBox.Show("Bitte fülle alle Felder aus, bevor du den Code generierst.", "Fehlende Eingaben", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(
+                    Application.Current.TryFindResource("MsgFillAllFieldsBeforeGenerate") as string
+                        ?? "Bitte fülle alle Felder aus, bevor du den Code generierst.",
+                    Application.Current.TryFindResource("CaptionMissingInput") as string
+                        ?? "Fehlende Eingaben",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 

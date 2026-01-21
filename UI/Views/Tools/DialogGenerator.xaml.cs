@@ -287,7 +287,13 @@ namespace Skriptorium.UI.Views.Tools
 
             if (string.IsNullOrEmpty(dialogInstance) || string.IsNullOrEmpty(npcInstance) || string.IsNullOrEmpty(description))
             {
-                MessageBox.Show("Bitte Dialoginstanz, NPC-Instanz und Beschreibung ausfüllen!", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    Application.Current.TryFindResource("MsgFillAllDialogFields") as string
+                        ?? "Bitte Dialoginstanz, NPC-Instanz und Beschreibung ausfüllen!",
+                    Application.Current.TryFindResource("CaptionError") as string
+                        ?? "Fehler",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
                 return;
             }
 
@@ -315,7 +321,13 @@ namespace Skriptorium.UI.Views.Tools
 
             if (hasDialogLine && !hasNonEmptyDialogText)
             {
-                MessageBox.Show("Mindestens eine Dialogzeile mit Text ist erforderlich!", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    Application.Current.TryFindResource("MsgDialogLineTextRequired") as string
+                        ?? "Mindestens eine Dialogzeile mit Text ist erforderlich!",
+                    Application.Current.TryFindResource("CaptionError") as string
+                        ?? "Fehler",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
                 return;
             }
 
@@ -385,8 +397,15 @@ namespace Skriptorium.UI.Views.Tools
                     }
                     else
                     {
-                        MessageBox.Show("Ungültiger XP-Wert in einer Zeile. Bitte gib eine ganze Zahl >= 0 ein.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(
+                            Application.Current.TryFindResource("MsgInvalidXpValue") as string
+                                ?? "Ungültiger XP-Wert in einer Zeile. Bitte gib eine ganze Zahl >= 0 ein.",
+                            Application.Current.TryFindResource("CaptionError") as string
+                                ?? "Fehler",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
                         return;
+
                     }
                 }
                 else if (type == "ITEM")
@@ -397,13 +416,26 @@ namespace Skriptorium.UI.Views.Tools
 
                     if (string.IsNullOrEmpty(itemName))
                     {
-                        MessageBox.Show("Bitte Iteminstanz angeben.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(
+                            Application.Current.TryFindResource("MsgItemInstanceRequired") as string
+                                ?? "Bitte Iteminstanz angeben.",
+                            Application.Current.TryFindResource("CaptionError") as string
+                                ?? "Fehler",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
                         return;
+
                     }
 
                     if (!int.TryParse(itemQuantityText, out int itemQuantity) || itemQuantity <= 0)
                     {
-                        MessageBox.Show("Bitte eine gültige Item-Anzahl (> 0) angeben.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(
+                            Application.Current.TryFindResource("MsgInvalidItemAmount") as string
+                                ?? "Bitte eine gültige Item-Anzahl (> 0) angeben.",
+                            Application.Current.TryFindResource("CaptionError") as string
+                                ?? "Fehler",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
                         return;
                     }
 

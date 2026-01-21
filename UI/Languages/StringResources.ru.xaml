@@ -9,6 +9,10 @@
     <sys:String x:Key="Settings">Настройки</sys:String>
     <sys:String x:Key="CtrlComma">Ctrl + ,</sys:String>
     <sys:String x:Key="Exit">Exit</sys:String>
+    <sys:String x:Key="StatusPositionDefault">строка 1, колонка 1</sys:String>
+    <sys:String x:Key="StatusCharCountEmpty">0 знак</sys:String>
+    <sys:String x:Key="StatusPosition">строка {0}, колонка {1}</sys:String>
+    <sys:String x:Key="StatusCharCount">{0} знак</sys:String>
 
     <!-- File -->
     <sys:String x:Key="File">Файл</sys:String>
@@ -89,14 +93,6 @@
     <sys:String x:Key="CtrlShiftF">Ctrl + Shift + F</sys:String>
     <sys:String x:Key="CodeStructure">Структура кода</sys:String>
     <sys:String x:Key="CtrlShiftC">Ctrl + Shift + C</sys:String>
-    <sys:String x:Key="NPCGenerator">Генератор NPC</sys:String>
-    <sys:String x:Key="CtrlG">Ctrl + G</sys:String>
-    <sys:String x:Key="OrcGenerator">Генератор орков</sys:String>
-    <sys:String x:Key="CtrlShiftG">Ctrl + Shift + G</sys:String>
-    <sys:String x:Key="DialogGenerator">Генератор диалогов</sys:String>
-    <sys:String x:Key="CtrlAltG">Ctrl + Alt + G</sys:String>
-    <sys:String x:Key="QuestGenerator">Генератор квестов</sys:String>
-    <sys:String x:Key="CtrlShiftAltG">Ctrl + Shift + Alt + G</sys:String>
 
     <!-- Code Structure -->
     <sys:String x:Key="Instances">Примеры</sys:String>
@@ -107,6 +103,54 @@
     <sys:String x:Key="Type">Тип</sys:String>
     <sys:String x:Key="Value">Ценность</sys:String>
     <sys:String x:Key="Line">Линия</sys:String>
+
+    <!-- File Explorer -->
+    <sys:String x:Key="NewScript">Новый сценарий</sys:String>
+    <sys:String x:Key="NewFolder">Новая папка</sys:String>
+    <sys:String x:Key="CollapseAll">Свернуть все</sys:String>
+    <sys:String x:Key="RefreshFileExplorer">Обновить проводник</sys:String>
+    <sys:String x:Key="OpenInExplorer">Открыть в проводнике</sys:String>
+    <sys:String x:Key="Rename">Переименовать</sys:String>
+    <sys:String x:Key="Delete">Удалить</sys:String>
+    <sys:String x:Key="NewName">Новое имя:</sys:String>
+
+    <!-- Search Explorer -->
+    <sys:String x:Key="Search2">Поиск</sys:String>
+    <sys:String x:Key="CaseSensitive">С учетом регистра</sys:String>
+    <sys:String x:Key="MatchWholeWord">Соответствие целому слову</sys:String>
+    <sys:String x:Key="Replace">Заменить</sys:String>
+    <sys:String x:Key="ReplaceAll">Заменить все</sys:String>
+
+    <!-- Generators -->
+    <sys:String x:Key="Generators">Генераторы</sys:String>
+    <sys:String x:Key="NPCGenerator">Генератор NPC</sys:String>
+    <sys:String x:Key="CtrlG">Ctrl + G</sys:String>
+    <sys:String x:Key="OrcGenerator">Генератор орков</sys:String>
+    <sys:String x:Key="CtrlShiftG">Ctrl + Shift + G</sys:String>
+    <sys:String x:Key="DialogGenerator">Генератор диалогов</sys:String>
+    <sys:String x:Key="CtrlAltG">Ctrl + Alt + G</sys:String>
+    <sys:String x:Key="QuestGenerator">Генератор квестов</sys:String>
+    <sys:String x:Key="CtrlShiftAltG">Ctrl + Shift + Alt + G</sys:String>
+
+    <!-- NPC Generator -->
+    <sys:String x:Key="Name2">Имя:</sys:String>
+    <sys:String x:Key="Guild">Гильдия:</sys:String>
+    <sys:String x:Key="ID">ID:</sys:String>
+    <sys:String x:Key="Voice">Голос:</sys:String>
+    <sys:String x:Key="Flags">Флаги:</sys:String>
+    <sys:String x:Key="NPCType">Тип NPC:</sys:String>
+    <sys:String x:Key="AIVARs">AIVARs:</sys:String>
+    <sys:String x:Key="IndividualAttributes">Индивидуальные атрибуты:</sys:String>
+    <sys:String x:Key="IndividualFightTalents">Индивидуальные боевые таланты:</sys:String>
+    <sys:String x:Key="Gender">Гендер:</sys:String>
+    <sys:String x:Key="Male">Мужчина</sys:String>
+    <sys:String x:Key="Female">Женский</sys:String>
+    <sys:String x:Key="Comments2">Комментарии:</sys:String>
+    <sys:String x:Key="MsgFillAllFieldsBeforeGenerate">Пожалуйста, заполните все поля, прежде чем генерировать код.</sys:String>
+    <sys:String x:Key="CaptionMissingInput">Отсутствующие данные</sys:String>
+
+    <!-- Orc Generator -->
+    <sys:String x:Key="Level">Уровень:</sys:String>
 
     <!-- Dialog Generator -->
     <sys:String x:Key="DialogInstance">Экземпляр диалога:</sys:String>
@@ -128,41 +172,12 @@
     <sys:String x:Key="NPC">NPC</sys:String>
     <sys:String x:Key="ItemInstance">Экземпляр элемента:</sys:String>
     <sys:String x:Key="Number">Номер:</sys:String>
-
-    <!-- File Explorer -->
-    <sys:String x:Key="NewScript">Новый сценарий</sys:String>
-    <sys:String x:Key="NewFolder">Новая папка</sys:String>
-    <sys:String x:Key="CollapseAll">Свернуть все</sys:String>
-    <sys:String x:Key="RefreshFileExplorer">Обновить проводник</sys:String>
-    <sys:String x:Key="OpenInExplorer">Открыть в проводнике</sys:String>
-    <sys:String x:Key="Rename">Переименовать</sys:String>
-    <sys:String x:Key="Delete">Удалить</sys:String>
-    <sys:String x:Key="NewName">Новое имя:</sys:String>
-
-    <!-- NPC Generator -->
-    <sys:String x:Key="Name2">Имя:</sys:String>
-    <sys:String x:Key="Guild">Гильдия:</sys:String>
-    <sys:String x:Key="ID">ID:</sys:String>
-    <sys:String x:Key="Voice">Голос:</sys:String>
-    <sys:String x:Key="Flags">Флаги:</sys:String>
-    <sys:String x:Key="NPCType">Тип NPC:</sys:String>
-    <sys:String x:Key="AIVARs">AIVARs:</sys:String>
-    <sys:String x:Key="IndividualAttributes">Индивидуальные атрибуты:</sys:String>
-    <sys:String x:Key="IndividualFightTalents">Индивидуальные боевые таланты:</sys:String>
-    <sys:String x:Key="Gender">Гендер:</sys:String>
-    <sys:String x:Key="Male">Мужчина</sys:String>
-    <sys:String x:Key="Female">Женский</sys:String>
-    <sys:String x:Key="Comments2">Комментарии:</sys:String>
-
-    <!-- Orc Generator -->
-    <sys:String x:Key="Level">Уровень:</sys:String>
-
-    <!-- Search Explorer -->
-    <sys:String x:Key="Search2">Поиск</sys:String>
-    <sys:String x:Key="CaseSensitive">С учетом регистра</sys:String>
-    <sys:String x:Key="MatchWholeWord">Соответствие целому слову</sys:String>
-    <sys:String x:Key="Replace">Заменить</sys:String>
-    <sys:String x:Key="ReplaceAll">Заменить все</sys:String>
+    <sys:String x:Key="MsgFillAllDialogFields">Пожалуйста, заполните диалоговое окно, NPC-инстанцию и описание!</sys:String>
+    <sys:String x:Key="CaptionError">ошибка</sys:String>
+    <sys:String x:Key="MsgDialogLineTextRequired">Требуется как минимум одна строка диалога с текстом!</sys:String>
+    <sys:String x:Key="MsgInvalidXpValue">Недопустимое значение XP в строке. Введите целое число >= 0.</sys:String>
+    <sys:String x:Key="MsgItemInstanceRequired">Укажите инстанцию элемента.</sys:String>
+    <sys:String x:Key="MsgInvalidItemAmount">Укажите действительное количество товаров (> 0).</sys:String>
 
     <!-- Quest Generator -->
     <sys:String x:Key="QuestDefinition">Определение квеста</sys:String>
@@ -184,6 +199,7 @@
     <sys:String x:Key="LogConstants">Log_Constants.d        Вставить в Content\Story\Log-Entries\Log-Constants_*</sys:String>
     <sys:String x:Key="BCloseTopics">B_CloseTopics.d        Вставить в Content\Story\Log-Entries\B_CloseTopics_*</sys:String>
     <sys:String x:Key="QuestDialogFuc">QuestDialogfuc.d     Вставить в соответствующие диалоговые окна или функции</sys:String>
+    <sys:String x:Key="MsgQuestNameRequired">Укажите внутреннее название квеста.</sys:String>
 
     <!-- AboutSkriptorium -->
     <sys:String x:Key="Version">Version: 1.0</sys:String>
@@ -213,6 +229,16 @@
     <sys:String x:Key="MsgScriptModified">Этот скрипт был изменен. Хотите сохранить его?</sys:String>
     <sys:String x:Key="MsgSaveChangesTitle">Сохранить изменения?</sys:String>
     <sys:String x:Key="MsgUnsaved">Не сохранен</sys:String>
+
+    <!-- Daedalus Parser -->
+    <sys:String x:Key="MsgNoActiveScript">Нет открытых активных скриптов.</sys:String>
+    <sys:String x:Key="CaptionHint">Примечание</sys:String>
+    <sys:String x:Key="CaptionErrorsFound">Найдена ошибка</sys:String>
+    <sys:String x:Key="MsgNoErrors">Ошибок не обнаружено.</sys:String>
+    <sys:String x:Key="CaptionCheckSuccessful">Экзамен сдан успешно</sys:String>
+    <sys:String x:Key="ErrSyntax">Синтаксическая ошибка: строка {0},  колонка {1}. Ожидается: {2}, Найдено: '{3}'</sys:String>
+    <sys:String x:Key="ErrExpectedAny">&lt;любой&gt;</sys:String>
+    <sys:String x:Key="ErrTokenNull">&lt;null&gt;</sys:String>
     <!-- Endregion: UI -->
 
     <!-- Region: Comments -->

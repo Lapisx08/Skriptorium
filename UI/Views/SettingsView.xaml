@@ -62,7 +62,7 @@
                         <ComboBoxItem Content="Deutsch" Tag="de"/>
                         <ComboBoxItem Content="English" Tag="en"/>
                         <ComboBoxItem Content="Polski" Tag="pl"/>
-                        <ComboBoxItem Content="Russian" Tag="ru"/>
+                        <ComboBoxItem Content="Pусский" Tag="ru"/>
                     </ComboBox>
                 </Grid>
             </TabItem>

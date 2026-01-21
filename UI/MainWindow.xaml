@@ -190,7 +190,9 @@
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE943;" FontSize="14"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <Separator/>
+            </MenuItem>
+
+            <MenuItem Header="{DynamicResource Generators}">
                 <MenuItem Header="{DynamicResource NPCGenerator}" InputGestureText="{DynamicResource CtrlG}" Click="MenuNPCGenerator_Click">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" FontSize="14"/>
@@ -279,7 +281,7 @@
             <Button ToolTip="{DynamicResource DialogGenerator}" Click="MenuDialogGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEBDB;" FontSize="12"/>
             </Button>
-            <Button ToolTip="Quest Generator" Click="MenuQuestGenerator_Click">
+            <Button ToolTip="{DynamicResource QuestGenerator}" Click="MenuQuestGenerator_Click">
                 <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE736;" FontSize="12"/>
             </Button>
         </ToolBar>
@@ -303,8 +305,8 @@
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right" Margin="0,0,20,0">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Name="StatusPositionText" Text="Zeile 1, Spalte 1" Margin="0,0,10,0"/>
-                    <TextBlock Name="StatusCharCountText" Text="0 Zeichen"/>
+                    <TextBlock x:Name="StatusPositionText" Text="{DynamicResource StatusPositionDefault}" Margin="0,0,10,0"/>
+                    <TextBlock x:Name="StatusCharCountText" Text="{DynamicResource StatusCharCountEmpty}"/>
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>

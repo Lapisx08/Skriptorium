@@ -66,11 +66,12 @@ namespace Skriptorium.UI.Views.Tools
             if (string.IsNullOrWhiteSpace(questId))
             {
                 MessageBox.Show(
-                    "Bitte einen internen Quest-Namen angeben.",
-                    "Fehlende Eingabe",
+                    Application.Current.TryFindResource("MsgQuestNameRequired") as string
+                        ?? "Bitte einen internen Quest-Namen angeben.",
+                    Application.Current.TryFindResource("CaptionMissingInput") as string
+                        ?? "Fehlende Eingabe",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Warning
-                );
+                    MessageBoxImage.Warning);
                 return;
             }
 

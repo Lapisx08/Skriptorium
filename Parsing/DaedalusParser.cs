@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
+using System.Windows;
 
 namespace Skriptorium.Parsing
 {
@@ -160,13 +160,23 @@ namespace Skriptorium.Parsing
         public string Found { get; }
 
         public ParseException(string message, DaedalusToken token, string expected = null)
-            : base($"Syntax-Fehler: Zeile {token.Line}, Spalte {token.Column}. Erwartet: {expected ?? "<beliebig>"}, Gefunden: '{token?.Value}'")
+            : base(string.Format(
+                Application.Current.TryFindResource("ErrSyntax") as string
+                    ?? "Syntax-Fehler: Zeile {0}, Spalte {1}. Erwartet: {2}, Gefunden: '{3}'",
+                token?.Line ?? -1,
+                token?.Column ?? -1,
+                expected
+                    ?? (Application.Current.TryFindResource("ErrExpectedAny") as string ?? "<beliebig>"),
+                token?.Value
+                    ?? (Application.Current.TryFindResource("ErrTokenNull") as string ?? "<null>")
+            ))
         {
             Line = token?.Line ?? -1;
-            Column = token?.Line ?? -1;
+            Column = token?.Column ?? -1;
             Expected = expected;
             Found = token?.Value ?? "<null>";
         }
+
     }
 
     public class DaedalusParser
