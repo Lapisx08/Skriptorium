@@ -102,7 +102,10 @@ namespace Skriptorium.UI.Views.Tools
         private readonly List<string> maleHeads = new()
         {
             "Hum_Head_Psionic", "Hum_Head_Thief", "Hum_Head_Bald", "Hum_Head_Pony",
-            "Hum_Head_Fighter", "Hum_Head_FatBald", "HUM_HEAD_BALD_BART", "HUM_HEAD_BEARD",
+            "Hum_Head_Fighter", "Hum_Head_FatBald",
+            
+            // Destiny of Myrtana
+            "HUM_HEAD_BALD_BART", "HUM_HEAD_BEARD",
             "HUM_HEAD_BEARD2", "HUM_HEAD_BEARD4", "HUM_HEAD_BRODA2", "HUM_HEAD_IRO",
             "HUM_HEAD_KRUSSEL_BART", "HUM_HEAD_KRUSSEL_NOBART", "HUM_HEAD_LANGOFFEN_BART",
             "HUM_HEAD_LANGOFFEN_NOBART", "HUM_HEAD_LONG", "HUM_HEAD_LONGHAIR", "HUM_HEAD_MUSTACHE",
@@ -114,23 +117,28 @@ namespace Skriptorium.UI.Views.Tools
         {
             "Hum_Head_BabeHair", "Hum_Head_Babe8", "Hum_Head_Babe7", "Hum_Head_Babe6", "Hum_Head_Babe5",
             "Hum_Head_Babe4", "Hum_Head_Babe3", "Hum_Head_Babe2", "Hum_Head_Babe1", "Hum_Head_Babe",
+
+            // Destiny of Myrtana
             "HUM_HEAD_BABE9", "HUM_HEAD_BABE11", "HUM_HEAD_BABE12", "HUM_HEAD_BABE13", "HUM_HEAD_BABE14",
             "HUM_HEAD_GRELKA", "HUM_HEAD_REMI"
         };
 
         private readonly List<string> maleFaces = new()
         {
+            // Pale
             "Face_P_ToughBald", "Face_P_Tough_Drago", "Face_P_Tough_Torrez", "Face_P_Tough_Rodriguez",
             "Face_P_ToughBald_Nek", "Face_P_NormalBald", "Face_P_Normal01", "Face_P_Normal02",
             "Face_P_Normal_Fletcher", "Face_P_Normal03", "Face_P_NormalBart01", "Face_P_NormalBart_Cronos",
             "Face_P_NormalBart_Nefarius", "Face_P_NormalBart_Riordian", "Face_P_OldMan_Gravo",
-            "Face_P_Weak_Cutter", "Face_P_Weak_Ulf_Wohlers", "Face_N_Important_Arto", "Face_N_ImportantGrey",
-            "Face_N_ImportantOld", "Face_N_Tough_Lee", "Face_N_Tough_Skip", "Face_N_ToughBart01",
-            "Face_N_Tough_Okyl", "Face_N_Normal01", "Face_N_Normal_Cord", "Face_N_Normal_Olli_Kahn",
-            "Face_N_Normal02", "Face_N_Normal_Spassvogel", "Face_N_Normal03", "Face_N_Normal04",
-            "Face_N_Normal05", "Face_N_Normal_Stone", "Face_N_Normal06", "Face_N_Normal_Erpresser",
-            "Face_N_Normal07", "Face_N_Normal_Blade", "Face_N_Normal08", "Face_N_Normal14",
-            "Face_N_Normal_Sly", "Face_N_Normal16", "Face_N_Normal17", "Face_N_Normal18",
+            "Face_P_Weak_Cutter", "Face_P_Weak_Ulf_Wohlers",
+            
+            // Normal
+            "Face_N_Important_Arto", "Face_N_ImportantGrey", "Face_N_ImportantOld", "Face_N_Tough_Lee",
+            "Face_N_Tough_Skip", "Face_N_ToughBart01", "Face_N_Tough_Okyl", "Face_N_Normal01",
+            "Face_N_Normal_Cord", "Face_N_Normal_Olli_Kahn", "Face_N_Normal02", "Face_N_Normal_Spassvogel",
+            "Face_N_Normal03", "Face_N_Normal04", "Face_N_Normal05", "Face_N_Normal_Stone", "Face_N_Normal06",
+            "Face_N_Normal_Erpresser", "Face_N_Normal07", "Face_N_Normal_Blade", "Face_N_Normal08",
+            "Face_N_Normal14", "Face_N_Normal_Sly", "Face_N_Normal16", "Face_N_Normal17", "Face_N_Normal18",
             "Face_N_Normal19", "Face_N_Normal20", "Face_N_NormalBart01", "Face_N_NormalBart02",
             "Face_N_NormalBart03", "Face_N_NormalBart04", "Face_N_NormalBart05", "Face_N_NormalBart06",
             "Face_N_NormalBart_Senyan", "Face_N_NormalBart08", "Face_N_NormalBart09", "Face_N_NormalBart10",
@@ -139,11 +147,16 @@ namespace Skriptorium.UI.Views.Tools
             "Face_N_NormalBart_Grim", "Face_N_NormalBart20", "Face_N_NormalBart21", "Face_N_NormalBart22",
             "Face_N_OldBald_Jeremiah", "Face_N_Weak_Ulbert", "Face_N_Weak_BaalNetbek", "Face_N_Weak_Herek",
             "Face_N_Weak04", "Face_N_Weak05", "Face_N_Weak_Orry", "Face_N_Weak_Asghan", "Face_N_Weak_Markus_Kark",
-            "Face_N_Weak_Cipher_alt", "Face_N_NormalBart_Swiney", "Face_N_Weak12", "Face_L_ToughBald01",
-            "Face_L_Tough01", "Face_L_Tough02", "Face_L_Tough_Santino", "Face_L_ToughBart_Quentin",
-            "Face_L_Normal_GorNaBar", "Face_L_NormalBart01", "Face_L_NormalBart02", "Face_L_NormalBart_Rufus",
+            "Face_N_Weak_Cipher_alt", "Face_N_NormalBart_Swiney", "Face_N_Weak12", 
+
+            // Latinos
+            "Face_L_ToughBald01", "Face_L_Tough01", "Face_L_Tough02", "Face_L_Tough_Santino",
+            "Face_L_ToughBart_Quentin", "Face_L_Normal_GorNaBar", "Face_L_NormalBart01", "Face_L_NormalBart02",
+            "Face_L_NormalBart_Rufus",
+
+            // Black
             "Face_B_ToughBald", "Face_B_Tough_Pacho", "Face_B_Tough_Silas", "Face_B_Normal01",
-            "Face_B_Normal_Kirgo", "Face_B_Normal_Sharky", "Face_B_Normal_Orik", "Face_B_Normal_Kharim"
+            "Face_B_Normal_Kirgo", "Face_B_Normal_Sharky", "Face_B_Normal_Orik", "Face_B_Normal_Kharim",
         };
 
         private readonly List<string> femaleFaces = new()
