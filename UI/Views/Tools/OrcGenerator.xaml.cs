@@ -209,8 +209,6 @@ namespace Skriptorium.UI.Views.Tools
             headMeshEntry.SelectedIndex = 0; // Orc_HeadWarrior
             aivRealIdEntry.SelectedIndex = 0; // ID_ORCWARRIOR
             includeCommentsDropdown.SelectedIndex = 1; // Nein
-
-            detailsPanel.Children.Clear();
         }
     }
 }

@@ -4,132 +4,110 @@
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                  xmlns:local="clr-namespace:Skriptorium.UI.Views.Tools"
                  Title="{DynamicResource OrcGenerator}" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
-                 Height="800" Width="700">
-    
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="300"/>
-        </Grid.RowDefinitions>
+                 Height="730" Width="700" MinHeight="460" MinWidth="500">
 
-        <!-- Obere Eingabefelder für Orc-Grunddaten -->
-        <Grid Grid.Row="0" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="170"/>
-                <ColumnDefinition Width="400"/>
-            </Grid.ColumnDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <!-- Name -->
                 <RowDefinition Height="Auto"/>
-                <!-- Guild -->
-                <RowDefinition Height="Auto"/>
-                <!-- AIV_MM_REAL_ID -->
-                <RowDefinition Height="Auto"/>
-                <!-- ID -->
-                <RowDefinition Height="Auto"/>
-                <!-- Voice -->
-                <RowDefinition Height="Auto"/>
-                <!-- Flags -->
-                <RowDefinition Height="Auto"/>
-                <!-- Level -->
-                <RowDefinition Height="Auto"/>
-                <!-- Body Mesh -->
-                <RowDefinition Height="Auto"/>
-                <!-- Head Mesh -->
-                <RowDefinition Height="Auto"/>
-                <!-- Comments -->
+                <RowDefinition Height="*" MinHeight="250"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="{DynamicResource Name2}" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <TextBox x:Name="nameEntry" Grid.Row="0" Grid.Column="1" Margin="5"/>
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="400"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <TextBlock Text="{DynamicResource Guild}" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <ComboBox x:Name="guildEntry" Grid.Row="1" Grid.Column="1" Margin="5" SelectedIndex="0">
-                <ComboBoxItem Content="GIL_ORC"/>
-                <ComboBoxItem Content="GIL_FRIENDLY_ORC"/>
-            </ComboBox>
+                <TextBlock Text="{DynamicResource Name2}" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <TextBox x:Name="nameEntry" Grid.Row="0" Grid.Column="1" Margin="5"/>
 
-            <!-- NEW: AIV_MM_REAL_ID -->
-            <TextBlock Text="AIV_MM_REAL_ID:" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <ComboBox x:Name="aivRealIdEntry" Grid.Row="2" Grid.Column="1" Margin="5" SelectedIndex="1">
-                <ComboBoxItem Content="ID_ORCWARRIOR"/>
-                <ComboBoxItem Content="ID_ORCSHAMAN"/>
-                <ComboBoxItem Content="ID_ORCELITE"/>
-            </ComboBox>
+                <TextBlock Text="{DynamicResource Guild}" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <ComboBox x:Name="guildEntry" Grid.Row="1" Grid.Column="1" Margin="5" SelectedIndex="0">
+                    <ComboBoxItem Content="GIL_ORC"/>
+                    <ComboBoxItem Content="GIL_FRIENDLY_ORC"/>
+                </ComboBox>
 
-            <TextBlock Text="{DynamicResource ID}" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <TextBox x:Name="idEntry" Grid.Row="3" Grid.Column="1" Margin="5"/>
+                <TextBlock Text="AIV_MM_REAL_ID:" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <ComboBox x:Name="aivRealIdEntry" Grid.Row="2" Grid.Column="1" Margin="5" SelectedIndex="1">
+                    <ComboBoxItem Content="ID_ORCWARRIOR"/>
+                    <ComboBoxItem Content="ID_ORCSHAMAN"/>
+                    <ComboBoxItem Content="ID_ORCELITE"/>
+                </ComboBox>
 
-            <TextBlock Text="{DynamicResource Voice}" Grid.Row="4" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <TextBox x:Name="voiceEntry" Grid.Row="4" Grid.Column="1" Margin="5"/>
+                <TextBlock Text="{DynamicResource ID}" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <TextBox x:Name="idEntry" Grid.Row="3" Grid.Column="1" Margin="5"/>
 
-            <TextBlock Text="{DynamicResource Flags}" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <ComboBox x:Name="flagsEntry" Grid.Row="5" Grid.Column="1" Margin="5" SelectedIndex="0">
-                <ComboBoxItem Content="0"/>
-                <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
-                <ComboBoxItem Content="NPC_FLAG_IMPORTANT"/>
-            </ComboBox>
+                <TextBlock Text="{DynamicResource Voice}" Grid.Row="4" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <TextBox x:Name="voiceEntry" Grid.Row="4" Grid.Column="1" Margin="5"/>
 
-            <!-- Level -->
-            <TextBlock Text="{DynamicResource Level}" Grid.Row="6" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <TextBox x:Name="levelEntry" Grid.Row="6" Grid.Column="1" Margin="5"/>
+                <TextBlock Text="{DynamicResource Flags}" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <ComboBox x:Name="flagsEntry" Grid.Row="5" Grid.Column="1" Margin="5" SelectedIndex="0">
+                    <ComboBoxItem Content="0"/>
+                    <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
+                    <ComboBoxItem Content="NPC_FLAG_IMPORTANT"/>
+                </ComboBox>
 
-            <!-- Body Mesh -->
-            <TextBlock Text="Body Mesh:" Grid.Row="7" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <ComboBox x:Name="bodyMeshEntry" Grid.Row="7" Grid.Column="1" Margin="5" SelectedIndex="0">
-                <ComboBoxItem Content="ORC_BODYSLAVE"/>
-                <ComboBoxItem Content="ORC_BODYSCOUT"/>
-                <ComboBoxItem Content="Orc_Body_Worker"/>
-                <ComboBoxItem Content="ORC_BODY_NEWWARRIOR_01"/>
-                <ComboBoxItem Content="ORC_BODYWARRIOR2"/>
-                <ComboBoxItem Content="ORC_BODYWARRIOR3"/>
-                <ComboBoxItem Content="Orc_BodyHeavy"/>
-                <ComboBoxItem Content="Orc_BodyElite"/>
-                <ComboBoxItem Content="Orc_BodyWarrior"/>
-                <ComboBoxItem Content="ORC_MYRTANABODYELITE"/>
-                <ComboBoxItem Content="Orc_BodyShaman"/>
-                <ComboBoxItem Content="Orc_Body_Highshaman"/>
-            </ComboBox>
+                <TextBlock Text="{DynamicResource Level}" Grid.Row="6" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <TextBox x:Name="levelEntry" Grid.Row="6" Grid.Column="1" Margin="5"/>
 
-            <!-- Head Mesh -->
-            <TextBlock Text="Head Mesh:" Grid.Row="8" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <ComboBox x:Name="headMeshEntry" Grid.Row="8" Grid.Column="1" Margin="5" SelectedIndex="0">
-                <ComboBoxItem Content="Orc_HeadWarrior"/>
-                <ComboBoxItem Content="Orc_HeadShaman"/>
-            </ComboBox>
+                <TextBlock Text="Body Mesh:" Grid.Row="7" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <ComboBox x:Name="bodyMeshEntry" Grid.Row="7" Grid.Column="1" Margin="5" SelectedIndex="0">
+                    <ComboBoxItem Content="ORC_BODYSLAVE"/>
+                    <ComboBoxItem Content="ORC_BODYSCOUT"/>
+                    <ComboBoxItem Content="Orc_Body_Worker"/>
+                    <ComboBoxItem Content="ORC_BODY_NEWWARRIOR_01"/>
+                    <ComboBoxItem Content="ORC_BODYWARRIOR2"/>
+                    <ComboBoxItem Content="ORC_BODYWARRIOR3"/>
+                    <ComboBoxItem Content="Orc_BodyHeavy"/>
+                    <ComboBoxItem Content="Orc_BodyElite"/>
+                    <ComboBoxItem Content="Orc_BodyWarrior"/>
+                    <ComboBoxItem Content="ORC_MYRTANABODYELITE"/>
+                    <ComboBoxItem Content="Orc_BodyShaman"/>
+                    <ComboBoxItem Content="Orc_Body_Highshaman"/>
+                </ComboBox>
 
-            <!-- Comments -->
-            <TextBlock Text="{DynamicResource Comments2}" Grid.Row="9" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
-            <ComboBox x:Name="includeCommentsDropdown" Grid.Row="9" Grid.Column="1" Margin="5" SelectedIndex="1">
-                <ComboBoxItem Content="{DynamicResource Yes}"/>
-                <ComboBoxItem Content="{DynamicResource No}"/>
-            </ComboBox>
+                <TextBlock Text="Head Mesh:" Grid.Row="8" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <ComboBox x:Name="headMeshEntry" Grid.Row="8" Grid.Column="1" Margin="5" SelectedIndex="0">
+                    <ComboBoxItem Content="Orc_HeadWarrior"/>
+                    <ComboBoxItem Content="Orc_HeadShaman"/>
+                </ComboBox>
+
+                <TextBlock Text="{DynamicResource Comments2}" Grid.Row="9" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+                <ComboBox x:Name="includeCommentsDropdown" Grid.Row="9" Grid.Column="1" Margin="5" SelectedIndex="1">
+                    <ComboBoxItem Content="{DynamicResource Yes}"/>
+                    <ComboBoxItem Content="{DynamicResource No}"/>
+                </ComboBox>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,10,0,10">
+                <Button Click="GenerateCode_Click" Margin="5">
+                    <TextBlock Text="{DynamicResource Generate}"/>
+                </Button>
+                <Button Click="CopyToClipboard_Click" Margin="5">
+                    <TextBlock Text="{DynamicResource Copy}"/>
+                </Button>
+                <Button Click="ResetFields_Click" Margin="5">
+                    <TextBlock Text="{DynamicResource Reset}"/>
+                </Button>
+            </StackPanel>
+
+            <TextBox x:Name="outputText" Grid.Row="2" Margin="0,0,0,0"
+                     AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                     TextWrapping="Wrap" IsReadOnly="False" FontFamily="Consolas" FontSize="14"/>
         </Grid>
-
-        <!-- Dynamischer Bereich für Details -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="detailsPanel"/>
-        </ScrollViewer>
-
-        <!-- Button-Leiste -->
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,0">
-            <Button Click="GenerateCode_Click" Margin="5">
-                <TextBlock Text="{DynamicResource Generate}"/>
-            </Button>
-            <Button Click="CopyToClipboard_Click" Margin="5">
-                <TextBlock Text="{DynamicResource Copy}"/>
-            </Button>
-            <Button Click="ResetFields_Click" Margin="5">
-                <TextBlock Text="{DynamicResource Reset}"/>
-            </Button>
-        </StackPanel>
-
-        <!-- Output -->
-        <TextBox x:Name="outputText" Grid.Row="3" Margin="0,10,0,0"
-                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
-                 TextWrapping="Wrap" IsReadOnly="False" FontFamily="Consolas" FontSize="14"/>
-    </Grid>
+    </ScrollViewer>
 </mah:MetroWindow>

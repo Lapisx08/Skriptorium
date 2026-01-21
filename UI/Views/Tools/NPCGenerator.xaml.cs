@@ -378,9 +378,6 @@ namespace Skriptorium.UI.Views.Tools
             fightSkillsDropdown.SelectedIndex = 1; // "Nein"
             genderDropdown.SelectedIndex = 0; // "Männlich"
             includeCommentsDropdown.SelectedIndex = 1; // "Nein"
-
-            // Dynamischen Inhalt leeren
-            detailsPanel.Children.Clear();
         }
     }
 }

@@ -477,5 +477,10 @@ namespace Skriptorium.UI.Views.Tools
         {
 
         }
+
+        private void outputText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }
