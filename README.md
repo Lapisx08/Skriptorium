@@ -21,12 +21,12 @@ Wenn das Programm Skriptorium als Standardprogramm für Daedalus-Skripte gesetzt
 2. Folge dem Installationsassistenten
 
 ## Genutzte Pakete
- - MahApps.Metro (2.4.11)
- - AvalonEdit (6.3.1.120)
- - Dirkster.AvalonDock (4.72.1)
- - Dirkster.AvalonDock.Themes.VS2013 (4.72.1)
- - Ookii.Dialogs.Wpf (5.0.1)
- - UTF.Unknown (2.6.0)
+- MahApps.Metro (2.4.11)
+- AvalonEdit (6.3.1.120)
+- Dirkster.AvalonDock (4.72.1)
+- Dirkster.AvalonDock.Themes.VS2013 (4.72.1)
+- Ookii.Dialogs.Wpf (5.0.1)
+- UTF.Unknown (2.6.0)
 
 ## Entwicklung
 Das Projekt wurde in C# mit .NET 8.0 WPF in Visual Studio 2022 entwickelt
@@ -63,7 +63,6 @@ Pfade:
 - Hier wird das Skriptverzeichnis des Gothic-Ordners gesetzt. Dieses dient als Stammverzeichnis. Datei Explorer, Explorer Suche, Suchen und Ersetzen beziehen sich bei der Suche auf dieses Stammverzeichnis
 
 ### Datei
-
 Öffnen:
 - Beim Öffnen einer Datei wird immer der letzte Pfad geöffnet, von dem aus eine Datei erfolgreich geöffnet wurde. Wird eine Datei außerhalb des Stammverzeichnisses geöffnet, springt das Programm beim nächsten Öffnen zum Stammverzeichnis
 
@@ -71,32 +70,25 @@ Zuletzt geöffnet:
 - Es werden die letzten 20 Dateien angezeigt, die man geöffnet hat
 
 ## Bearbeiten
-
 Duplizieren:
 - Um Text duplizieren zu können, muss der Text erst markiert und dann dupliziert werden
 
 ### Suchen
 Suchen und Ersetzen:
 - Für die Suche in einem Skript sollte dieses aktiv sein, bevor man Suchen und Ersetzen öffnet. Bei Eingabe ins Suchfeld werden die Treffer in Echtzeit gelb markiert
-- Um im Skript zwischen den Treffen zu springen muss man den Button "Suchen" betätigen
+- Um im Skript zwischen den Treffen zu springen, muss man den die Pfeiltasten (Buttons) betätigen oder Enter und Shift + Enter nutzen
 
 Ersetzen:
-- Ersetzt den nächsten Treffer mit dem Text, das in dem Feld "Ersetzen durch" steht. Wenn das Feld leer ist, werden die Treffer gelöscht
+- Ersetzt den nächsten Treffer mit dem Text, das in dem Feld "Ersetzen" steht. Wenn das Feld leer ist, werden die Treffer gelöscht
 
 Alles Ersetzen:
 - Ersetzt alle Treffer im Skript
-
-Suchen in:
-- Bei Aktivierung können alle offenen Skripte oder das Stammverzeichnis durchsucht und Text ersetzt werden. Für die erste Suche muss hier der Suche Button betätigt werden
-- Änderungen im Suchfeld oder auch der Wechsel zwischen "In allen offenen Skripten" und "Im gesetzten Verzeichnis" werden dann zur Laufzeit aktualisiert
-- Suche muss nur neu gestartet werden, wenn das Feld leer ist, dann schließt sich das Fenster "Suchergebnisse". Beim Schließen des "Suchen und Ersetzen" Fensters bleibt das Fenster Suchergebnisse geöffnet
 
 ### Lesezeichen
 - Mit dieser Funktion kann man Lesezeichen in einem Skript setzen, um sich stellen zu markieren, die man im Laufe des Arbeitsvorgangs wieder auffinden möchte. Die Lesezeichen werden links vor dem eigentlichen Text in der Oberfläche erzeugt
 - Die Lesezeichen werden nicht im Skript gespeichert. Das bedeutet beim Schließen und erneuten Öffnen verschwinden diese
 
 ### Tools
-
 Syntax-Highlighting umschalten:
 - Kann ein und ausgeschaltet werden
 
@@ -120,9 +112,7 @@ Explorer Suche:
 Code Struktur:
 - Der Parser erkennt Instanzen, Funktionen, Variablen und Konstanten in einem Skript. Die Struktur wird in dem Fenster übersichtlich aufgeschlüsselt (siehe Hinweise)
 
-
 ### NPC Generator
-
 Name:
 - Eingabe des NPC-Namens, z. B. "Gottfried" (Zahlen sind nicht zulässig)
 
@@ -139,6 +129,7 @@ Voice:
 Flags:
 - Auswahl, ob NPC unsterblich sein soll
 - 0 kann sterben, NPC_FLAG_IMMORTAL kann nicht sterben
+- Zusätzlich kann man dem NPC die Erscheinung eines Geistes geben
 
 NPC Type:
 - Auswahl wie der NPC gegenüber dem Helden eingestellt ist
@@ -159,8 +150,39 @@ Geschlecht:
 - Auswahl des NPC-Geschlechts
 - Generiert B_SetNpcVisual automatisch aus Original-Visuals von Gothic 2
 
-### Dialog Generator 
+Kommentare:
+- Können ein- und ausgeschaltet werden
 
+### Ork Generator
+Name:
+- Eingabe des NPC-Namens, z. B. "Urshak" (Zahlen sind nicht zulässig)
+
+Gilde:
+- Auswahl der Gilde treffen
+
+AIV_MM_Real_ID:
+- Vergabe der Ork-ID
+
+Voice:
+- Eingabe der NPC-Stimme (es sind nur Zahlen erlaubt)
+
+Flags:
+- Auswahl, ob NPC unsterblich sein soll
+- 0 kann sterben, NPC_FLAG_IMMORTAL kann nicht sterben
+
+Level:
+- Vergabe des Levels
+
+Body Mesh:
+- Vergabe des Körper-Meshes
+
+Head Mesh:
+- Vergabe des Kopf-Meshes
+
+Kommentare:
+- Können ein- und ausgeschaltet werden
+
+### Dialog Generator 
 Dialoginstantz:
 - Eingabe der Dialoginstanz-Namens
 - DIA_ wird standardmäßig als Präfix hinzugefügt
@@ -187,4 +209,32 @@ Auswahlmöglichkeiten:
 
 Zeile hinzufügen:
 - Über Zeile hinzufügen können Dialogzeilen hinzugefügt werden, über den Minus-Button können Dialogzeilen gelöscht werden
+
+### Quest Generator 
+Interner Name:
+- Vergabe des internen Namens
+
+Anzeigename:
+- Vergabe des Anzeigenamens
+
+Start-Kapitel:
+- Gibt an, ab welchem Kapitel eine Quest erhältlich ist
+
+End-Kapitel:
+- Gibt an, bis zu welchem Kapitel die Quest verfügbar ist
+
+Start-Logtext:
+- Eingabe des Start-Logtexts
+
+Erfolg-Logtext:
+- Eingabe des Erfolg-Logtexts
+
+Abbruch-Logtext:
+- Eingabe des Abbruch-Logtexts
+
+Logeintrag hinzufügen:
+- Über Logeintrag hinzufügen können Logzeilen hinzugefügt werden, über den Minus-Button können Logzeilen gelöscht werden
+
+Ausgabedateien:
+- Die Ausgabedateien müssen in die jeweiligen Skripte eingefügt werden, die in dem Abschnitt angegeben sind
 </details>
