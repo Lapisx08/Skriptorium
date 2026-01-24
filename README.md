@@ -67,7 +67,7 @@ Pfade:
 - Beim Öffnen einer Datei wird immer der letzte Pfad geöffnet, von dem aus eine Datei erfolgreich geöffnet wurde. Wird eine Datei außerhalb des Stammverzeichnisses geöffnet, springt das Programm beim nächsten Öffnen zum Stammverzeichnis
 
 Zuletzt geöffnet: 
-- Es werden die letzten 20 Dateien angezeigt, die man geöffnet hat
+- Es werden die letzten 30 Dateien angezeigt, die man geöffnet hat
 
 ## Bearbeiten
 Duplizieren:

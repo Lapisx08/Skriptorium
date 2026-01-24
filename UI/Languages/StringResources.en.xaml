@@ -202,7 +202,7 @@
     <sys:String x:Key="MsgQuestNameRequired">Please specify an internal quest name..</sys:String>
 
     <!-- AboutSkriptorium -->
-    <sys:String x:Key="Version">Version: 1.0</sys:String>
+    <sys:String x:Key="Version">Version: 1.1</sys:String>
     <sys:String x:Key="Developer">Developer: Lapis, Nemora26</sys:String>
     <sys:String x:Key="Date">Date:</sys:String>
     <sys:String x:Key="Licensing">Licensed under the GNU General Public License Version 3</sys:String>

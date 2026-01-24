@@ -202,7 +202,7 @@
     <sys:String x:Key="MsgQuestNameRequired">Укажите внутреннее название квеста.</sys:String>
 
     <!-- AboutSkriptorium -->
-    <sys:String x:Key="Version">Version: 1.0</sys:String>
+    <sys:String x:Key="Version">Version: 1.1</sys:String>
     <sys:String x:Key="Developer">Разработчик: Lapis, Nemora26</sys:String>
     <sys:String x:Key="Date">Дата:</sys:String>
     <sys:String x:Key="Licensing">Лицензировано в соответствии с GNU General Public License Version 3</sys:String>

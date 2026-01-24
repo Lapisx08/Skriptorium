@@ -202,7 +202,7 @@
     <sys:String x:Key="MsgQuestNameRequired">Proszę podać wewnętrzną nazwę zadania.</sys:String>
 
     <!-- AboutSkriptorium -->
-    <sys:String x:Key="Version">Wersja: 1.0</sys:String>
+    <sys:String x:Key="Version">Wersja: 1.1</sys:String>
     <sys:String x:Key="Developer">Twórcy: Lapis, Nemora26</sys:String>
     <sys:String x:Key="Date">Data:</sys:String>
     <sys:String x:Key="Licensing">Licencjonowane na podstawie licencji GNU General Public License wersja 3.</sys:String>
