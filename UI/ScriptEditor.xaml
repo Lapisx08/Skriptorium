@@ -27,6 +27,7 @@
                                Grid.Row="1"
                                ShowLineNumbers="True"
                                FontFamily="Consolas"
+                               PreviewMouseLeftButtonDown="AvalonEditor_PreviewMouseLeftButtonDown"
                                FontSize="{Binding ElementName=root, Path=EffectiveFontSize}"/>
     </Grid>
 </UserControl>

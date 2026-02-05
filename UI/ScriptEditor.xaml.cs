@@ -18,6 +18,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Skriptorium.Analysis;
+using System.IO;
 
 namespace Skriptorium.UI
 {
@@ -153,6 +154,10 @@ namespace Skriptorium.UI
             _foldingManager = FoldingManager.Install(avalonEditor.TextArea);
             _foldingStrategy = new BraceFoldingStrategy();
             UpdateFoldings();
+
+            avalonEditor.TextArea.PreviewMouseLeftButtonDown += AvalonEditor_PreviewMouseLeftButtonDown;
+            avalonEditor.MouseHover += AvalonEditor_MouseHover;
+            avalonEditor.MouseHoverStopped += AvalonEditor_MouseHoverStopped;
 
             InitializeAutocompletion();
 
@@ -511,6 +516,23 @@ namespace Skriptorium.UI
                 ResetModifiedFlag();
                 UpdateFoldings();
                 UpdateAutocompletion();
+            }
+        }
+
+        public void LoadFile(string path)
+        {
+            if (System.IO.File.Exists(path))
+            {
+                this.FilePath = path; // Setzt den Pfad und triggert die Logik oben
+
+                string content = System.IO.File.ReadAllText(path, System.Text.Encoding.GetEncoding(1252));
+
+                _suppressChangeTracking = true;
+                avalonEditor.Text = content;
+                _originalText = content;
+                _suppressChangeTracking = false;
+
+                DoInitialHighlighting();
             }
         }
 
@@ -886,6 +908,120 @@ namespace Skriptorium.UI
                     avalonEditor.CaretOffset = caretOffset + 1;
                     e.Handled = true;
                 }
+            }
+        }
+
+        private ToolTip _toolTip = new ToolTip();
+
+        private void AvalonEditor_MouseHover(object sender, MouseEventArgs e)
+        {
+            if (Keyboard.Modifiers != ModifierKeys.Control) return;
+
+            TextView textView = avalonEditor.TextArea.TextView;
+            Point pos = e.GetPosition(textView);
+            var position = textView.GetPosition(pos + textView.ScrollOffset);
+
+            if (position.HasValue)
+            {
+                try
+                {
+                    int offset = avalonEditor.Document.GetOffset(position.Value.Line, position.Value.Column);
+                    string hoveredWord = GetWholeWordAtOffset(avalonEditor.Document, offset);
+
+                    if (!string.IsNullOrWhiteSpace(hoveredWord))
+                    {
+                        var definition = ProjectManager.Instance.Compiler.GlobalSymbols.Resolve(hoveredWord);
+
+                        if (definition != null)
+                        {
+                            bool isSelf = string.Equals(definition.FilePath, this.FilePath, StringComparison.OrdinalIgnoreCase)
+                                          && definition.Line == position.Value.Line;
+
+                            if (isSelf)
+                            {
+                                return; // Wenn es die eigene Definition ist, Tooltip gar nicht erst zeigen
+                            }
+
+                            // ToolTip anzeigen (wenn es nicht die eigene Stelle ist)
+                            _toolTip.Content = $"Definition gefunden:\n{Path.GetFileName(definition.FilePath)} (Zeile {definition.Line})";
+                            _toolTip.PlacementTarget = avalonEditor;
+                            _toolTip.IsOpen = true;
+                            e.Handled = true;
+                        }
+                    }
+                }
+                catch { /* Ignorieren */ }
+            }
+        }
+
+        private void AvalonEditor_MouseHoverStopped(object sender, MouseEventArgs e)
+        {
+            _toolTip.IsOpen = false;
+        }
+
+        private void AvalonEditor_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                System.Diagnostics.Debug.WriteLine("Strg + Klick erkannt!");
+
+                var pos = avalonEditor.GetPositionFromPoint(e.GetPosition(avalonEditor));
+                if (pos.HasValue)
+                {
+                    int offset = avalonEditor.Document.GetOffset(pos.Value.Line, pos.Value.Column);
+                    string clickedWord = GetWholeWordAtOffset(avalonEditor.Document, offset);
+
+                    System.Diagnostics.Debug.WriteLine($"Wort unter Cursor: '{clickedWord}'");
+
+                    if (!string.IsNullOrWhiteSpace(clickedWord))
+                    {
+                        var compiler = ProjectManager.Instance.Compiler;
+                        var definition = compiler.GlobalSymbols.Resolve(clickedWord);
+
+                        if (definition != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Definition gefunden in: {definition.FilePath}");
+                            e.Handled = true;
+
+                            JumpToDefinition(definition, clickedWord);
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("Definition im Compiler NICHT gefunden.");
+                        }
+                    }
+                }
+            }
+        }
+
+        private string GetWholeWordAtOffset(TextDocument document, int offset)
+        {
+            if (offset < 0 || offset >= document.TextLength) return string.Empty;
+
+            int start = offset;
+            while (start > 0 && IsDaedalusIdentifierChar(document.GetCharAt(start - 1)))
+                start--;
+
+            int end = offset;
+            while (end < document.TextLength && IsDaedalusIdentifierChar(document.GetCharAt(end)))
+                end++;
+
+            if (start == end) return string.Empty;
+            return document.GetText(start, end - start);
+        }
+
+        private bool IsDaedalusIdentifierChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+
+        private void JumpToDefinition(Declaration definition, string symbolName)
+        {
+            if (Application.Current.MainWindow is MainWindow mainWin)
+            {
+                mainWin.OpenAndNavigateTo(
+                    definition.FilePath,
+                    definition.Line,
+                    definition.Column,
+                    symbolName
+                );
             }
         }
     }

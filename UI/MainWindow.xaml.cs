@@ -26,6 +26,7 @@ namespace Skriptorium.UI
         private readonly EditMenuManager _editMenuManager;
         private readonly SearchManager _searchManager;
         private readonly DataMenuManager _dataMenuManager;
+        private readonly ProjectManager _projectManager;
         private ScriptEditor? _currentScriptEditor;
         private NPCGenerator? _npcGenerator;
         private OrcGenerator? _orcGenerator;
@@ -49,6 +50,7 @@ namespace Skriptorium.UI
             _searchManager = new SearchManager(_tabManager);
             _shortcutManager = new ShortcutManager(this);
             _dataMenuManager = new DataMenuManager(_tabManager, MenuDateiZuletztGeoeffnet);
+            _projectManager = new ProjectManager();
 
             // 2. Shortcuts registrieren
             _shortcutManager.Register(Key.I, ModifierKeys.Control,
@@ -135,26 +137,67 @@ namespace Skriptorium.UI
 
             LanguageManager.LanguageChanged += OnLanguageChanged;
             LanguageManager.LanguageChanged += (s, e) => UpdateStatusBar();
+
+            // Pfad aus den Einstellungen laden
+            string savedPath = Properties.Settings.Default.ScriptSearchPath;
+
+            if (!string.IsNullOrEmpty(savedPath))
+            {
+                // Hier wird der Manager gefüttert!
+                _projectManager.LoadProject(savedPath);
+            }
         }
 
         private void MainWindow_FirstLoaded(object sender, RoutedEventArgs e)
         {
-            this.Loaded -= MainWindow_FirstLoaded; // nur einmal ausführen
+            this.Loaded -= MainWindow_FirstLoaded;
 
-            // 1. Zuerst alle gespeicherten Tabs wieder öffnen (falls vorhanden)
+            // 1. Tabs wiederherstellen (Dein Code bleibt gleich)
             var savedTabs = DataManager.LoadOpenTabs();
+            string? firstValidPath = null;
+
             foreach (var tab in savedTabs)
             {
                 if (!string.IsNullOrWhiteSpace(tab.FilePath) && File.Exists(tab.FilePath))
                 {
+                    if (firstValidPath == null) firstValidPath = tab.FilePath;
                     DataManager.OpenFile(tab.FilePath, (content, path) =>
                         _tabManager.AddNewTab(content, Path.GetFileName(path), path));
                 }
-                else if (!string.IsNullOrWhiteSpace(tab.Content))
+            }
+
+            // 2. Projekt-Weite Indizierung (Der robuste Weg)
+            if (firstValidPath != null)
+            {
+                string? scriptsRoot = FindScriptsRoot(firstValidPath);
+
+                if (!string.IsNullOrEmpty(scriptsRoot))
                 {
-                    _tabManager.AddNewTab(tab.Content);
+                    System.Diagnostics.Debug.WriteLine($"[INFO] Wurzelverzeichnis erkannt: {scriptsRoot}");
+                    ProjectManager.Instance.LoadProject(scriptsRoot);
                 }
             }
+        }
+
+        /// <summary>
+        /// Wandert im Pfad nach oben, bis der "Scripts"-Ordner gefunden wird.
+        /// </summary>
+        private string? FindScriptsRoot(string path)
+        {
+            DirectoryInfo? current = new DirectoryInfo(path);
+
+            while (current != null)
+            {
+                // Prüfen, ob der aktuelle Ordner "Scripts" heißt
+                if (current.Name.Equals("Scripts", StringComparison.OrdinalIgnoreCase))
+                {
+                    return current.FullName;
+                }
+                current = current.Parent;
+            }
+
+            // Fallback: Wenn kein "Scripts"-Ordner gefunden wurde, nimm den Ordner der Datei
+            return Path.GetDirectoryName(path);
         }
 
         // Handler-Methode für Sprachänderungen
@@ -394,7 +437,7 @@ namespace Skriptorium.UI
 
         private void MenuSkriptoriumEinstellungen_Click(object? sender, RoutedEventArgs? e)
         {
-            var settings = new SettingsView
+            var settings = new SettingsView(this._projectManager)
             {
                 Owner = this
             };
@@ -961,6 +1004,112 @@ namespace Skriptorium.UI
                 if (editor == _currentScriptEditor) continue;
                 editor.SearchPanel.SetSearchText(GlobalSearchReplaceState.LastSearchText);
             }
+        }
+
+        public void OpenAndNavigateTo(string filePath, int line, int column, string symbolName)
+        {
+            // 1. Suche nach bereits offenem Dokument (Case-Insensitive Pfad-Vergleich)
+            var document = documentPane.Children
+                .OfType<LayoutDocument>()
+                .FirstOrDefault(d => d.Content is ScriptEditor editor &&
+                                     string.Equals(editor.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+
+            ScriptEditor targetEditor = null;
+
+            if (document != null)
+            {
+                document.IsActive = true;
+                targetEditor = (ScriptEditor)document.Content;
+            }
+            else
+            {
+                // Falls nicht offen, neu öffnen
+                targetEditor = OpenFileByPath(filePath);
+            }
+
+            if (targetEditor != null)
+            {
+                // Wir nutzen Background-Priorität, um sicherzustellen, dass das Laden/Rendern abgeschlossen ist
+                targetEditor.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    var editor = targetEditor.avalonEditor;
+                    if (editor == null || editor.Document == null) return;
+
+                    try
+                    {
+                        var doc = editor.Document;
+
+                        // 1. Zeile validieren (1-basiert)
+                        int actualLine = Math.Max(1, Math.Min(line, doc.LineCount));
+                        var lineInstance = doc.GetLineByNumber(actualLine);
+                        string lineText = doc.GetText(lineInstance.Offset, lineInstance.Length);
+
+                        // 2. Den exakten Index des Symbolnamens in dieser Zeile finden
+                        // Wir suchen Case-Insensitive, da Daedalus nicht Case-Sensitive ist.
+                        int indexInLine = lineText.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase);
+
+                        int finalOffset;
+                        int selectionLength;
+
+                        if (indexInLine != -1)
+                        {
+                            // Treffer in der Zeile gefunden
+                            finalOffset = lineInstance.Offset + indexInLine;
+                            selectionLength = symbolName.Length;
+                        }
+                        else
+                        {
+                            // Fallback: Falls der Name nicht gefunden wurde, nutze Parser-Spalte
+                            // (Oft ist column 1-basiert, daher -1 für den 0-basierten Offset)
+                            int safeColumn = Math.Max(0, Math.Min(column - 1, lineInstance.Length));
+                            finalOffset = lineInstance.Offset + safeColumn;
+
+                            // Wortlänge manuell messen für das Highlighting
+                            selectionLength = 0;
+                            while (finalOffset + selectionLength < doc.TextLength)
+                            {
+                                char c = doc.GetCharAt(finalOffset + selectionLength);
+                                if (char.IsLetterOrDigit(c) || c == '_') selectionLength++;
+                                else break;
+                            }
+                        }
+
+                        // 3. Fokus setzen (wichtig, damit Selection sichtbar wird)
+                        editor.Focus();
+
+                        // 4. Cursor positionieren und Text markieren
+                        editor.CaretOffset = finalOffset;
+                        editor.SelectionStart = finalOffset;
+                        editor.SelectionLength = selectionLength;
+
+                        // 5. Ansicht auf die Zeile zentrieren
+                        editor.ScrollToLine(actualLine);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Nav-Error] {ex.Message}");
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
+        }
+
+        public ScriptEditor OpenFileByPath(string filePath)
+        {
+            if (!System.IO.File.Exists(filePath)) return null;
+
+            var editor = new ScriptEditor();
+            editor.LoadFile(filePath); // Stelle sicher, dass ScriptEditor eine LoadFile Methode hat
+
+            var doc = new LayoutDocument
+            {
+                Title = System.IO.Path.GetFileName(filePath),
+                Content = editor
+            };
+
+            documentPane.Children.Add(doc);
+            doc.IsActive = true;
+
+            return editor;
         }
     }
 }

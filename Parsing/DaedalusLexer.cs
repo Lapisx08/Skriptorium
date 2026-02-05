@@ -105,6 +105,7 @@ namespace Skriptorium.Parsing
 
         private bool _expectInstanceName = false;
         private bool _inInstanceBaseContext = false;
+        private bool _inFunctionParameters = false;
 
         public List<DaedalusToken> Tokenize(string[] lines)
         {
@@ -225,7 +226,7 @@ namespace Skriptorium.Parsing
                     }
 
                     // =============================================
-                    //               Wichtigster Teil: Identifier
+                    // Wichtigster Teil: Identifier
                     // =============================================
                     if (identifier.IsMatch(remaining))
                     {
@@ -250,7 +251,6 @@ namespace Skriptorium.Parsing
                         else
                         {
                             // Normale Erkennung nur, wenn kein Instanzname erwartet wird
-
                             // Spezielle Keywords (self, other, slf, oth...)
                             if (specialKeywords.TryGetValue(val, out var specialType))
                             {
@@ -259,10 +259,18 @@ namespace Skriptorium.Parsing
                             // Sprachelemente (func, var, instance, int, string, ...)
                             else if (keywordsMap.TryGetValue(val, out var keywordType))
                             {
-                                type = keywordType;
-                                if (type == TokenType.InstanceKeyword)
+                                // NEU: "instance" in Funktionsparametern als Identifier behandeln
+                                if (_inFunctionParameters && val.Equals("instance", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    _expectInstanceName = true;
+                                    type = TokenType.Identifier;
+                                }
+                                else
+                                {
+                                    type = keywordType;
+                                    if (type == TokenType.InstanceKeyword)
+                                    {
+                                        _expectInstanceName = true;
+                                    }
                                 }
                             }
                             // Kontextabhängige Typen
@@ -301,7 +309,6 @@ namespace Skriptorium.Parsing
                                                        prevPrev.Type == TokenType.FuncKeyword &&
                                                        prev.Type == TokenType.TypeKeyword;
                                 }
-
                                 if (!isFunctionContext)
                                 {
                                     foreach (var prefix in prefixTokenTypes)
@@ -316,10 +323,14 @@ namespace Skriptorium.Parsing
                                             break;
                                         }
                                     }
-
                                     // ⚡ Base-Klasse Flag direkt nach dem ersten Base-Token zurücksetzen
                                     if (_inInstanceBaseContext)
                                         _inInstanceBaseContext = false;
+                                }
+                                else
+                                {
+                                    // NEU: Wenn in Funktionskontext, als FunctionName setzen
+                                    type = TokenType.FunctionName;
                                 }
                             }
                         }
@@ -332,6 +343,10 @@ namespace Skriptorium.Parsing
 
                         tokens.Add(new DaedalusToken(type, val, line + 1, column + 1));
                         column += match.Length;
+
+                        // NEU: State-Management für Funktionsparameter
+                        UpdateFunctionParameterState(tokens);
+
                         continue;
                     }
 
@@ -339,6 +354,10 @@ namespace Skriptorium.Parsing
                     {
                         tokens.Add(new DaedalusToken(tokenType, current.ToString(), line + 1, column + 1));
                         column++;
+
+                        // NEU: State-Management auch bei Symbolen
+                        UpdateFunctionParameterState(tokens);
+
                         continue;
                     }
 
@@ -350,7 +369,6 @@ namespace Skriptorium.Parsing
             tokens.Add(new DaedalusToken(TokenType.EOF, "", lines.Length, 0));
 
             // ==================== POST-PROCESSING ====================
-
             // func → Rückgabetyp → Funktionsname
             for (int i = 0; i < tokens.Count - 1; i++)
             {
@@ -431,6 +449,28 @@ namespace Skriptorium.Parsing
             }
 
             return tokens;
+        }
+
+        private void UpdateFunctionParameterState(List<DaedalusToken> tokens)
+        {
+            if (tokens.Count < 2) return;
+
+            var last = tokens[tokens.Count - 1];
+            var prev = tokens[tokens.Count - 2];
+
+            // Funktion beginnt: func/type FunctionName (
+            if (prev.Type == TokenType.FunctionName && last.Type == TokenType.OpenParenthesis)
+            {
+                _inFunctionParameters = true;
+            }
+
+            // Funktion endet
+            if (last.Type == TokenType.CloseParenthesis)
+            {
+                _inFunctionParameters = false;
+                _expectInstanceName = false;
+                _inInstanceBaseContext = false;
+            }
         }
     }
 }

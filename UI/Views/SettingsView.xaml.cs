@@ -12,9 +12,11 @@ namespace Skriptorium.UI.Views
     public partial class SettingsView : MetroWindow
     {
         private bool _isInitializing = true;
+        private readonly ProjectManager _projectManager;
 
-        public SettingsView()
+        public SettingsView(ProjectManager projectManager)
         {
+            _projectManager = projectManager; // Manager speichern
             InitializeComponent();
 
             // Theme-Voreinstellung

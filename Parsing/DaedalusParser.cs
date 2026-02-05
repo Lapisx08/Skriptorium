@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Skriptorium.Parsing
 {
@@ -9,6 +10,8 @@ namespace Skriptorium.Parsing
     {
         public int Line { get; set; }
         public int Column { get; set; }
+        public string Name { get; set; }
+        public string FilePath { get; set; }
     }
 
     public class InstanceDeclaration : Declaration
@@ -183,6 +186,7 @@ namespace Skriptorium.Parsing
     {
         private readonly List<DaedalusToken> _tokens;
         private int _position;
+        public List<ParseException> Errors = new List<ParseException>();
 
         public DaedalusParser(IEnumerable<DaedalusToken> tokens)
         {
@@ -194,30 +198,91 @@ namespace Skriptorium.Parsing
         public List<Declaration> ParseScript()
         {
             var declarations = new List<Declaration>();
+            int lastPosition = -1;
+            int recursionGuard = 0;
+
             while (!IsAtEnd())
             {
-                var decl = ParseDeclaration();
-                if (decl != null)
+                // Sicherung: Wenn wir uns nicht vorwärts bewegen, erzwingen wir Fortschritt
+                if (_position == lastPosition)
                 {
-                    if (decl is InstanceDeclaration)
+                    recursionGuard++;
+                    if (recursionGuard > 10)
                     {
-                        var instanceDecls = ParseInstanceDeclaration();
-                        declarations.AddRange(instanceDecls);
-                    }
-                    else
-                    {
-                        declarations.Add(decl);
+                        Advance();
+                        recursionGuard = 0;
                     }
                 }
                 else
-                    Advance();
+                {
+                    recursionGuard = 0;
+                }
+                lastPosition = _position;
+
+                try
+                {
+                    declarations.Add(ParseDeclaration());
+                }
+                catch (ParseException ex)
+                {
+                    Errors.Add(ex);
+                    Synchronize();
+                }
+                catch (Exception ex)
+                {
+                    // Fängt unerwartete Abstürze (z.B. NullReference) ab
+                    System.Diagnostics.Debug.WriteLine($"Unerwarteter Fehler: {ex.Message}");
+                    Synchronize();
+                }
             }
             return declarations;
         }
 
+        private void Synchronize()
+        {
+            // Falls wir schon am Ende sind, nichts tun
+            if (IsAtEnd()) return;
+
+            // Wir merken uns die Position vor dem Vorrücken
+            int startPos = _position;
+            Advance();
+
+            while (!IsAtEnd())
+            {
+                // 1. Check: Haben wir ein Semikolon gerade hinter uns gelassen?
+                if (_position > 0 && _tokens[_position - 1].Type == TokenType.Semicolon)
+                    return;
+
+                // 2. Check: Stehen wir vor einem neuen Block?
+                switch (Peek(0).Type)
+                {
+                    case TokenType.FuncKeyword:
+                    case TokenType.InstanceKeyword:
+                    case TokenType.PrototypeKeyword:
+                    case TokenType.ConstKeyword:
+                    case TokenType.VarKeyword:
+                        return;
+                }
+
+                Advance();
+
+                // Sicherheits-Check: Falls Advance nicht vorwärts kommt (sollte nicht passieren)
+                if (_position <= startPos) break;
+            }
+        }
+
         private Declaration ParseDeclaration()
         {
-            if (Match(TokenType.InstanceKeyword)) return new InstanceDeclaration();
+            // FEHLER WAR: if (Match(TokenType.InstanceKeyword)) return new InstanceDeclaration();
+            // KORREKTUR: Die Methode aufrufen, die auch Namen und Basisklasse parst!
+            if (Match(TokenType.InstanceKeyword))
+            {
+                var instances = ParseInstanceDeclaration();
+                // Da ParseInstanceDeclaration eine Liste zurückgibt (wegen Komma-Trennung),
+                // nehmen wir hier das erste Element oder passen die Logik an.
+                return instances.FirstOrDefault();
+            }
+
             if (Match(TokenType.FuncKeyword)) return ParseFunction();
 
             // NEU: Wenn eine "VAR" - Deklaration wie "VAR <Type> <Name> (" aussieht,
@@ -1346,5 +1411,38 @@ namespace Skriptorium.Parsing
 
         private void Advance() => _position++;
         private bool IsAtEnd() => _position >= _tokens.Count;
+
+        public void CollectGlobals(List<Declaration> declarations, SymbolTable symbolTable)
+        {
+            foreach (var decl in declarations)
+            {
+                if (decl is ClassDeclaration cls)
+                    symbolTable.Register(cls.Name, cls);
+
+                else if (decl is FunctionDeclaration func)
+                    symbolTable.Register(func.Name, func);
+
+                else if (decl is InstanceDeclaration inst)
+                    symbolTable.Register(inst.Name, inst);
+
+                else if (decl is PrototypeDeclaration proto)
+                {
+                    // Daedalus Prototyp-Namen aus der Signatur extrahieren
+                    // "C_NPC(C_NPC_Default)" -> "C_NPC"
+                    string name = proto.Signature.Split('(')[0].Trim();
+                    symbolTable.Register(name, proto);
+                }
+                else if (decl is MultiVarDeclaration mVar)
+                {
+                    foreach (var v in mVar.Declarations)
+                        symbolTable.Register(v.Name, v);
+                }
+                else if (decl is MultiConstDeclaration mConst)
+                {
+                    foreach (var c in mConst.Declarations)
+                        symbolTable.Register(c.Name, c);
+                }
+            }
+        }
     }
 }
