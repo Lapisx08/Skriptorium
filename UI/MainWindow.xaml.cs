@@ -140,63 +140,114 @@ namespace Skriptorium.UI
 
             // Pfad aus den Einstellungen laden
             string savedPath = Properties.Settings.Default.ScriptSearchPath;
-
-            if (!string.IsNullOrEmpty(savedPath))
-            {
-                // Hier wird der Manager gefüttert!
-                _projectManager.LoadProject(savedPath);
-            }
         }
 
-        private void MainWindow_FirstLoaded(object sender, RoutedEventArgs e)
+        private string? _initialFirstValidPath;           // für spätere lazy Indizierung
+        private bool _initialIndexingTriggered;           // Schutz vor mehrfachem Start
+
+        private bool _backgroundIndexingStarted = false;
+
+        private async void MainWindow_FirstLoaded(object sender, RoutedEventArgs e)
         {
             this.Loaded -= MainWindow_FirstLoaded;
 
-            // 1. Tabs wiederherstellen (Dein Code bleibt gleich)
-            var savedTabs = DataManager.LoadOpenTabs();
-            string? firstValidPath = null;
-
-            foreach (var tab in savedTabs)
-            {
-                if (!string.IsNullOrWhiteSpace(tab.FilePath) && File.Exists(tab.FilePath))
+            // 1. Tabs asynchron wiederherstellen (wie bisher – sehr gut!)
+            await Task.Run(() => DataManager.LoadOpenTabs())
+                .ContinueWith(async t =>
                 {
-                    if (firstValidPath == null) firstValidPath = tab.FilePath;
-                    DataManager.OpenFile(tab.FilePath, (content, path) =>
-                        _tabManager.AddNewTab(content, Path.GetFileName(path), path));
-                }
-            }
+                    if (t.IsFaulted) { /* Fehlerbehandlung wie bisher */ }
 
-            // 2. Projekt-Weite Indizierung (Der robuste Weg)
-            if (firstValidPath != null)
-            {
-                string? scriptsRoot = FindScriptsRoot(firstValidPath);
+                    var savedTabs = t.Result;
+                    string? firstValidPath = null;
 
-                if (!string.IsNullOrEmpty(scriptsRoot))
-                {
-                    System.Diagnostics.Debug.WriteLine($"[INFO] Wurzelverzeichnis erkannt: {scriptsRoot}");
-                    ProjectManager.Instance.LoadProject(scriptsRoot);
-                }
-            }
+                    foreach (var tab in savedTabs)
+                    {
+                        if (string.IsNullOrWhiteSpace(tab.FilePath) || !File.Exists(tab.FilePath))
+                            continue;
+
+                        if (firstValidPath == null)
+                            firstValidPath = tab.FilePath;
+
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            DataManager.OpenFile(tab.FilePath, (content, path) =>
+                                _tabManager.AddNewTab(content, Path.GetFileName(path), path));
+                        });
+                    }
+
+                    _initialFirstValidPath = firstValidPath;
+
+                    // ───────────────────────────────────────────────────────────────
+                    // NEU: Hintergrund-Indizierung sanft starten (nach 800–1500 ms Verzögerung)
+                    // ───────────────────────────────────────────────────────────────
+                    if (!string.IsNullOrEmpty(firstValidPath) && !_backgroundIndexingStarted)
+                    {
+                        _backgroundIndexingStarted = true;
+
+                        // Kleine Verzögerung → UI ist schon sichtbar und reagiert
+                        await Task.Delay(1200);  // 1,2 Sekunden – fühlt sich natürlich an
+
+                        // Optional: ganz leichter Hinweis (nicht zwingend)
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            // StatusPositionText.Text = "Projekt wird im Hintergrund indiziert…";
+                            // oder Snackbar:
+                            // MainSnackbar?.MessageQueue?.Enqueue("Indiziere Projekt für GoTo Definition…", null, null, null, false, true, TimeSpan.FromSeconds(6));
+                        });
+
+                        // Eigentliche Indizierung im Hintergrund-Thread
+                        _ = Task.Run(() =>
+                        {
+                            try
+                            {
+                                string? root = FindScriptsRoot(firstValidPath);
+                                if (string.IsNullOrEmpty(root))
+                                {
+                                    // Fallback: Einstellungen-Pfad
+                                    root = Properties.Settings.Default.ScriptSearchPath;
+                                }
+
+                                if (!string.IsNullOrEmpty(root) && Directory.Exists(root))
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[Background] Indiziere Projekt: {root}");
+                                    ProjectManager.Instance.LoadProject(root);
+                                }
+                                else if (File.Exists(firstValidPath))
+                                {
+                                    // Sicherheitsnetz: zumindest die erste Datei
+                                    ProjectManager.Instance.RefreshSingleFile(firstValidPath);
+                                }
+
+                                // Optional: Erfolg melden
+                                Dispatcher.Invoke(() =>
+                                {
+                                    // StatusPositionText.Text = "";
+                                    // MainSnackbar?.MessageQueue?.Enqueue("Indizierung abgeschlossen", null, null, null, true, true, TimeSpan.FromSeconds(3));
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Hintergrund-Indizierung fehlgeschlagen: {ex.Message}");
+                            }
+                        });
+                    }
+                }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
-        /// <summary>
-        /// Wandert im Pfad nach oben, bis der "Scripts"-Ordner gefunden wird.
-        /// </summary>
+        // Füge das irgendwo in der Klasse MainWindow ein (z. B. nach den Feldern oder vor MainWindow_FirstLoaded)
+
         private string? FindScriptsRoot(string path)
         {
             DirectoryInfo? current = new DirectoryInfo(path);
-
             while (current != null)
             {
-                // Prüfen, ob der aktuelle Ordner "Scripts" heißt
                 if (current.Name.Equals("Scripts", StringComparison.OrdinalIgnoreCase))
                 {
                     return current.FullName;
                 }
                 current = current.Parent;
             }
-
-            // Fallback: Wenn kein "Scripts"-Ordner gefunden wurde, nimm den Ordner der Datei
+            // Fallback: Ordner der Datei selbst
             return Path.GetDirectoryName(path);
         }
 

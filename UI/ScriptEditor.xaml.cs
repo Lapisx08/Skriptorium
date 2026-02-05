@@ -959,39 +959,147 @@ namespace Skriptorium.UI
             _toolTip.IsOpen = false;
         }
 
+        private bool _initialIndexingAttempted = false;
+        private readonly object _indexingLock = new object();
+
         private void AvalonEditor_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (Keyboard.Modifiers == ModifierKeys.Control)
+            if (Keyboard.Modifiers != ModifierKeys.Control)
+                return;
+
+            System.Diagnostics.Debug.WriteLine("Strg + Klick erkannt!");
+
+            var pos = avalonEditor.GetPositionFromPoint(e.GetPosition(avalonEditor));
+            if (!pos.HasValue)
+                return;
+
+            int offset = avalonEditor.Document.GetOffset(pos.Value.Line, pos.Value.Column);
+            string clickedWord = GetWholeWordAtOffset(avalonEditor.Document, offset);
+
+            if (string.IsNullOrWhiteSpace(clickedWord))
+                return;
+
+            System.Diagnostics.Debug.WriteLine($"Wort unter Cursor: '{clickedWord}'");
+
+            var compiler = ProjectManager.Instance.Compiler;
+            var definition = compiler.GlobalSymbols.Resolve(clickedWord);
+
+            // Fall 1: Definition gefunden → sofort springen
+            if (definition != null)
             {
-                System.Diagnostics.Debug.WriteLine("Strg + Klick erkannt!");
+                System.Diagnostics.Debug.WriteLine($"Definition gefunden in: {definition.FilePath}");
+                e.Handled = true;
+                JumpToDefinition(definition, clickedWord);
+                return;
+            }
 
-                var pos = avalonEditor.GetPositionFromPoint(e.GetPosition(avalonEditor));
-                if (pos.HasValue)
+            // Fall 2: Nicht gefunden → einmalig Indizierung anstoßen
+            System.Diagnostics.Debug.WriteLine("Definition im Compiler NICHT gefunden → starte Indizierung");
+
+            if (_initialIndexingAttempted)
+            {
+                // Wir haben schon versucht → mehrfaches Indizieren verhindern
+                System.Diagnostics.Debug.WriteLine("Indizierung wurde bereits versucht – Symbol bleibt nicht gefunden.");
+                return;
+            }
+
+            lock (_indexingLock)
+            {
+                if (_initialIndexingAttempted)
+                    return;
+
+                _initialIndexingAttempted = true;
+            }
+
+            // UI-Feedback geben (optional, aber sehr hilfreich)
+            Dispatcher.Invoke(() =>
+            {
+
+            });
+
+            // Asynchrone Indizierung starten
+            Task.Run(() =>
+            {
+                try
                 {
-                    int offset = avalonEditor.Document.GetOffset(pos.Value.Line, pos.Value.Column);
-                    string clickedWord = GetWholeWordAtOffset(avalonEditor.Document, offset);
+                    string? filePath = this.FilePath; // aktuelle Datei des Editors
+                    string? rootPath = null;
 
-                    System.Diagnostics.Debug.WriteLine($"Wort unter Cursor: '{clickedWord}'");
-
-                    if (!string.IsNullOrWhiteSpace(clickedWord))
+                    if (!string.IsNullOrEmpty(filePath))
                     {
-                        var compiler = ProjectManager.Instance.Compiler;
-                        var definition = compiler.GlobalSymbols.Resolve(clickedWord);
+                        rootPath = FindScriptsRoot(filePath);
+                    }
 
-                        if (definition != null)
+                    if (!string.IsNullOrEmpty(rootPath) && Directory.Exists(rootPath))
+                    {
+                        // Variante A: ganzes Projekt indizieren (empfohlen, wenn es nicht zu groß ist)
+                        System.Diagnostics.Debug.WriteLine($"Indiziere komplettes Projekt: {rootPath}");
+                        ProjectManager.Instance.LoadProject(rootPath);
+                    }
+                    else if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+                    {
+                        // Variante B: nur die aktuelle Datei (schneller, aber unvollständig)
+                        System.Diagnostics.Debug.WriteLine($"Indiziere nur aktuelle Datei: {filePath}");
+                        ProjectManager.Instance.RefreshSingleFile(filePath);
+                    }
+                    else
+                    {
+                        // Fallback: Pfad aus den Einstellungen nehmen
+                        string? savedPath = Properties.Settings.Default.ScriptSearchPath;
+                        if (!string.IsNullOrEmpty(savedPath) && Directory.Exists(savedPath))
                         {
-                            System.Diagnostics.Debug.WriteLine($"Definition gefunden in: {definition.FilePath}");
-                            e.Handled = true;
-
-                            JumpToDefinition(definition, clickedWord);
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine("Definition im Compiler NICHT gefunden.");
+                            System.Diagnostics.Debug.WriteLine($"Indiziere aus gespeichertem Pfad: {savedPath}");
+                            ProjectManager.Instance.LoadProject(savedPath);
                         }
                     }
+
+                    // Nach dem Indizieren nochmal versuchen
+                    definition = compiler.GlobalSymbols.Resolve(clickedWord);
+
+                    if (definition != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Nach Indizierung gefunden: {definition.FilePath}");
+                        Dispatcher.Invoke(() =>
+                        {
+                            JumpToDefinition(definition, clickedWord);
+                            // Optional: Status zurücksetzen
+                            // StatusPositionText.Text = "";
+                        });
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Symbol auch nach Indizierung nicht gefunden.");
+                        Dispatcher.Invoke(() =>
+                        {
+                            // Optional: Hinweis anzeigen
+                            // MessageBox.Show($"Symbol '{clickedWord}' wurde nicht gefunden.", "Nicht gefunden", MessageBoxButton.OK, MessageBoxImage.Information);
+                        });
+                    }
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Fehler beim Indizieren: {ex.Message}");
+                    Dispatcher.Invoke(() =>
+                    {
+                        // Status oder Meldung
+                        // StatusPositionText.Text = "Indizierung fehlgeschlagen";
+                    });
+                }
+            });
+        }
+
+        private string? FindScriptsRoot(string path)
+        {
+            DirectoryInfo? current = new DirectoryInfo(path);
+            while (current != null)
+            {
+                if (current.Name.Equals("Scripts", StringComparison.OrdinalIgnoreCase))
+                {
+                    return current.FullName;
+                }
+                current = current.Parent;
             }
+            return Path.GetDirectoryName(path);
         }
 
         private string GetWholeWordAtOffset(TextDocument document, int offset)
