@@ -5,9 +5,7 @@ namespace Skriptorium.Formatting
 {
     public class DaedalusFormatter
     {
-        private const int IndentSize = 4;
-
-        private string Indent(int level) => new string(' ', IndentSize * level);
+        private string Indent(int level) => new string('\t', level);
 
         public string Format(string script)
         {

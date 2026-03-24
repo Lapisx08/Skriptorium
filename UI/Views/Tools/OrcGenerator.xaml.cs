@@ -121,70 +121,68 @@ namespace Skriptorium.UI.Views.Tools
 
             sb.AppendLine($"instance {idEntry.Text}_{nameSafe}_Ork (Npc_Default)");
             sb.AppendLine("{");
-            sb.AppendLine("    // ------ NSC ------\"");
-            sb.AppendLine($"    name                   =  \"{nameEntry.Text}\";");
-            sb.AppendLine($"    guild                  =  {((ComboBoxItem)guildEntry.SelectedItem)?.Content};");
-
-            sb.AppendLine($"    aivar[AIV_MM_REAL_ID]  =  {((ComboBoxItem)aivRealIdEntry.SelectedItem)?.Content};");
-
-            sb.AppendLine($"    id                     =  {idEntry.Text};");
-            sb.AppendLine($"    voice                  =  {voiceEntry.Text};");
-            sb.AppendLine($"    flags                  =  {((ComboBoxItem)flagsEntry.SelectedItem)?.Content};");
-            sb.AppendLine("    npctype                =  NPCTYPE_MAIN;");
-            sb.AppendLine($"    level                  =  {levelEntry.Text};");
+            sb.AppendLine("\t// ------ NSC ------\"");
+            sb.AppendLine($"\tname\t\t\t\t  = \"{nameEntry.Text}\";");
+            sb.AppendLine($"\tguild\t\t\t\t  = {((ComboBoxItem)guildEntry.SelectedItem)?.Content};");
+            sb.AppendLine($"\taivar[AIV_MM_REAL_ID] = {((ComboBoxItem)aivRealIdEntry.SelectedItem)?.Content};");
+            sb.AppendLine($"\tid\t\t\t\t\t  = {idEntry.Text};");
+            sb.AppendLine($"\tvoice\t\t\t\t  = {voiceEntry.Text};");
+            sb.AppendLine($"\tflags\t\t\t\t  = {((ComboBoxItem)flagsEntry.SelectedItem)?.Content};");
+            sb.AppendLine("\tnpctype\t\t\t\t  = NPCTYPE_MAIN;");
+            sb.AppendLine($"\tlevel\t\t\t\t  = {levelEntry.Text};");
             sb.AppendLine();
 
-            sb.AppendLine("    // ------ Attribute ------");
-            sb.AppendLine($"    attribute[ATR_STRENGTH]       =  80;{(includeComments ? $" // {cStrengthComment}" : "")}");
-            sb.AppendLine("    attribute[ATR_DEXTERITY]      =  80;");
-            sb.AppendLine("    attribute[ATR_HITPOINTS_MAX]  =  225;");
-            sb.AppendLine("    attribute[ATR_HITPOINTS]      =  225;");
-            sb.AppendLine("    attribute[ATR_MANA_MAX]       =  0;");
-            sb.AppendLine("    attribute[ATR_MANA]           =  0;");
+            sb.AppendLine("\t// ------ Attribute ------");
+            sb.AppendLine($"\tattribute[ATR_STRENGTH]\t\t = 80;{(includeComments ? $" // {cStrengthComment}" : "")}");
+            sb.AppendLine("\tattribute[ATR_DEXTERITY]\t = 80;");
+            sb.AppendLine("\tattribute[ATR_HITPOINTS_MAX] = 225;");
+            sb.AppendLine("\tattribute[ATR_HITPOINTS]\t = 225;");
+            sb.AppendLine("\tattribute[ATR_MANA_MAX]\t\t = 0;");
+            sb.AppendLine("\tattribute[ATR_MANA]\t\t\t = 0;");
             sb.AppendLine();
 
-            sb.AppendLine("    //----- Protections ----");
-            sb.AppendLine("    protection[PROT_BLUNT]  =  150;");
-            sb.AppendLine("    protection[PROT_EDGE]   =  150;");
-            sb.AppendLine("    protection[PROT_POINT]  =  150;");
-            sb.AppendLine("    protection[PROT_FIRE]   =  150;");
-            sb.AppendLine("    protection[PROT_FLY]    =  150;");
-            sb.AppendLine("    protection[PROT_MAGIC]  =  20;");
+            sb.AppendLine("\t//----- Protections ----");
+            sb.AppendLine("\tprotection[PROT_BLUNT] = 150;");
+            sb.AppendLine("\tprotection[PROT_EDGE]  = 150;");
+            sb.AppendLine("\tprotection[PROT_POINT] = 150;");
+            sb.AppendLine("\tprotection[PROT_FIRE]  = 150;");
+            sb.AppendLine("\tprotection[PROT_FLY]   = 150;");
+            sb.AppendLine("\tprotection[PROT_MAGIC] = 20;");
             sb.AppendLine();
 
-            sb.AppendLine("    //----- HitChances -----");
-            sb.AppendLine("    HitChance[NPC_TALENT_1H]        =  0;");
-            sb.AppendLine("    HitChance[NPC_TALENT_2H]        =  0;");
-            sb.AppendLine("    HitChance[NPC_TALENT_BOW]       =  0;");
-            sb.AppendLine("    HitChance[NPC_TALENT_CROSSBOW]  =  0;");
+            sb.AppendLine("\t//----- HitChances -----");
+            sb.AppendLine("\tHitChance[NPC_TALENT_1H]\t   = 0;");
+            sb.AppendLine("\tHitChance[NPC_TALENT_2H]\t   = 0;");
+            sb.AppendLine("\tHitChance[NPC_TALENT_BOW]\t   = 0;");
+            sb.AppendLine("\tHitChance[NPC_TALENT_CROSSBOW] = 0;");
             sb.AppendLine();
 
-            sb.AppendLine("    // ------ Kampf-Taktik ------");
-            sb.AppendLine("    fight_tactic  =  FAI_ORC;");
+            sb.AppendLine("\t// ------ Kampf-Taktik ------");
+            sb.AppendLine("\tfight_tactic = FAI_ORC;");
             sb.AppendLine();
 
-            sb.AppendLine("    // ------ Ausgerüstete Waffen ------");
-            sb.AppendLine("    EquipItem (self, ItMw_2H_OrcAxe_01);");
+            sb.AppendLine("\t// ------ Ausgerüstete Waffen ------");
+            sb.AppendLine("\tEquipItem (self, ItMw_2H_OrcAxe_01);");
             sb.AppendLine();
 
-            sb.AppendLine("    // ------ Inventar ------");
+            sb.AppendLine("\t// ------ Inventar ------");
             sb.AppendLine();
 
-            sb.AppendLine("    // ------ Aussehen ------");
-            sb.AppendLine("    Mdl_SetVisual (self, \"Orc.mds\");");
-            sb.AppendLine($"    Mdl_SetVisualBody (self, \"{((ComboBoxItem)bodyMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, \"{((ComboBoxItem)headMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, NO_ARMOR);");
-            sb.AppendLine("    Mdl_SetModelFatness (self, 0);");
+            sb.AppendLine("\t// ------ Aussehen ------");
+            sb.AppendLine("\tMdl_SetVisual (self, \"Orc.mds\");");
+            sb.AppendLine($"\tMdl_SetVisualBody (self, \"{((ComboBoxItem)bodyMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, \"{((ComboBoxItem)headMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, NO_ARMOR);");
+            sb.AppendLine("\tMdl_SetModelFatness (self, 0);");
             sb.AppendLine();
 
-            sb.AppendLine("    // ------ TA anmelden ------");
-            sb.AppendLine($"    daily_routine  =  Rtn_Start_{idEntry.Text};");
+            sb.AppendLine("\t// ------ TA anmelden ------");
+            sb.AppendLine($"\tdaily_routine = Rtn_Start_{idEntry.Text};");
             sb.AppendLine("};");
             sb.AppendLine();
 
             sb.AppendLine($"func void Rtn_Start_{idEntry.Text} ()");
             sb.AppendLine("{");
-            sb.AppendLine("    TA_Stand_ArmsCrossed (08,00,20,00,\"WP_Platzhalter\");");
-            sb.AppendLine("    TA_Stand_ArmsCrossed (20,00,08,00,\"WP_Platzhalter\");");
+            sb.AppendLine("\tTA_Stand_ArmsCrossed (08,00, 20,00, \"WP_Platzhalter\");");
+            sb.AppendLine("\tTA_Stand_ArmsCrossed (20,00, 08,00, \"WP_Platzhalter\");");
             sb.AppendLine("};");
 
             outputText.Text = sb.ToString();

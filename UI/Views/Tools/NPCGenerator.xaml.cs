@@ -251,119 +251,119 @@ namespace Skriptorium.UI.Views.Tools
 
             sb.AppendLine($"instance {guildShort}_{idEntry.Text}_{nameEntry.Text.Replace(" ", "_")} (Npc_Default)");
             sb.AppendLine("{");
-            sb.AppendLine("    // ------ NSC ------");
-            sb.AppendLine($"    name     =  \"{nameEntry.Text}\";");
-            sb.AppendLine($"    guild    =  {guildText};");
-            sb.AppendLine($"    id       =  {idEntry.Text};");
-            sb.AppendLine($"    voice    =  {voiceEntry.Text};");
-            sb.AppendLine($"    flags    =  {flagsEntry.Text};");
-            sb.AppendLine($"    npctype  =  {((ComboBoxItem)npcTypeDropdown.SelectedItem)?.Content};");
+            sb.AppendLine("\t// ------ NSC ------");
+            sb.AppendLine($"\tname\t= \"{nameEntry.Text}\";");
+            sb.AppendLine($"\tguild\t= {guildText};");
+            sb.AppendLine($"\tid\t\t= {idEntry.Text};");
+            sb.AppendLine($"\tvoice\t= {voiceEntry.Text};");
+            sb.AppendLine($"\tflags\t= {flagsEntry.Text};");
+            sb.AppendLine($"\tnpctype\t= {((ComboBoxItem)npcTypeDropdown.SelectedItem)?.Content};");
 
             if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
-                sb.AppendLine("    level    =  1;");
+                sb.AppendLine("\tlevel\t= 1;");
             }
             sb.AppendLine();
 
             if (((ComboBoxItem)aivarsDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
                 // AIVARS
-                sb.AppendLine("    // ------ AIVARS ------");
-                sb.AppendLine($"    aivar[AIV_ToughGuy]              =  TRUE;{(includeComments && cAivToughGuy != null ? $" // {cAivToughGuy}" : "")}");
-                sb.AppendLine($"    aivar[AIV_ToughGuyNewsOverride]  =  TRUE;{(includeComments ? "" : "")}");
-                sb.AppendLine($"    aivar[AIV_IGNORE_Murder]         =  TRUE;{(includeComments ? "" : "")}");
-                sb.AppendLine($"    aivar[AIV_IGNORE_Theft]          =  TRUE;{(includeComments ? "" : "")}");
-                sb.AppendLine($"    aivar[AIV_IGNORE_Sheepkiller]    =  TRUE;{(includeComments ? "" : "")}");
-                sb.AppendLine($"    aivar[AIV_IgnoresFakeGuild]      =  TRUE;{(includeComments && cAivIgnoresFakeGuild != null ? $" // {cAivIgnoresFakeGuild}" : "")}");
-                sb.AppendLine($"    aivar[AIV_IgnoresArmor]          =  TRUE;{(includeComments && cAivIgnoresArmor != null ? $" // {cAivIgnoresArmor}" : "")}");
-                sb.AppendLine($"    aivar[AIV_NPCIsRanger]           =  TRUE;{(includeComments && cAivNpcIsRanger != null ? $" // {cAivNpcIsRanger}" : "")}");
-                sb.AppendLine($"    aivar[AIV_NoFightParker]         =  TRUE;{(includeComments && cAivNoFightParker != null ? $" // {cAivNoFightParker}" : "")}");
-                sb.AppendLine($"    aivar[AIV_EnemyOverride]         =  TRUE;{(includeComments ? "" : "")}");
-                sb.AppendLine($"    aivar[AIV_MagicUser]             =  MAGIC_ALWAYS;{(includeComments && cAivMagicUser != null ? $" // {cAivMagicUser}" : "")}");
-                sb.AppendLine($"    // {(includeComments && cDeleteUnusedAIV != null ? cDeleteUnusedAIV : "Lösche die AIV, die nicht benötigt werden")}");
+                sb.AppendLine("\t// ------ AIVARS ------");
+                sb.AppendLine($"\taivar[AIV_ToughGuy]\t\t\t\t= TRUE;{(includeComments && cAivToughGuy != null ? $" // {cAivToughGuy}" : "")}");
+                sb.AppendLine($"\taivar[AIV_ToughGuyNewsOverride]\t= TRUE;{(includeComments ? "" : "")}");
+                sb.AppendLine($"\taivar[AIV_IGNORE_Murder]\t\t= TRUE;{(includeComments ? "" : "")}");
+                sb.AppendLine($"\taivar[AIV_IGNORE_Theft]\t\t\t= TRUE;{(includeComments ? "" : "")}");
+                sb.AppendLine($"\taivar[AIV_IGNORE_Sheepkiller]\t= TRUE;{(includeComments ? "" : "")}");
+                sb.AppendLine($"\taivar[AIV_IgnoresFakeGuild]\t\t= TRUE;{(includeComments && cAivIgnoresFakeGuild != null ? $" // {cAivIgnoresFakeGuild}" : "")}");
+                sb.AppendLine($"\taivar[AIV_IgnoresArmor]\t\t\t= TRUE;{(includeComments && cAivIgnoresArmor != null ? $" // {cAivIgnoresArmor}" : "")}");
+                sb.AppendLine($"\taivar[AIV_NPCIsRanger]\t\t\t= TRUE;{(includeComments && cAivNpcIsRanger != null ? $" // {cAivNpcIsRanger}" : "")}");
+                sb.AppendLine($"\taivar[AIV_NoFightParker]\t\t= TRUE;{(includeComments && cAivNoFightParker != null ? $" // {cAivNoFightParker}" : "")}");
+                sb.AppendLine($"\taivar[AIV_EnemyOverride]\t\t= TRUE;{(includeComments ? "" : "")}");
+                sb.AppendLine($"\taivar[AIV_MagicUser]\t\t\t= MAGIC_ALWAYS;{(includeComments && cAivMagicUser != null ? $" // {cAivMagicUser}" : "")}");
+                sb.AppendLine($"\t// {(includeComments && cDeleteUnusedAIV != null ? cDeleteUnusedAIV : "Lösche die AIV, die nicht benötigt werden")}");
                 sb.AppendLine();
             }
 
             // Attribute
-            sb.AppendLine("    // ------ Attribute ------");
+            sb.AppendLine("\t// ------ Attribute ------");
 
             // Nur hinzufügen, wenn keine individuellen Attribute gesetzt werden
             if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() !=
                 (Application.Current.TryFindResource("Yes") as string))
             {
-                sb.AppendLine($"    B_SetAttributesToChapter (self, 1);{(includeComments ? $" // {cSetAttributesChapter}" : "")}");
+                sb.AppendLine($"\tB_SetAttributesToChapter (self, 1);{(includeComments ? $" // {cSetAttributesChapter}" : "")}");
                 sb.AppendLine();
             }
 
             if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
-                sb.AppendLine("    attribute[ATR_STRENGTH]       =  10;");
-                sb.AppendLine("    attribute[ATR_DEXTERITY]      =  10;");
-                sb.AppendLine("    attribute[ATR_HITPOINTS_MAX]  =  40;");
-                sb.AppendLine("    attribute[ATR_HITPOINTS]      =  40;");
-                sb.AppendLine("    attribute[ATR_MANA_MAX]       =  10;");
-                sb.AppendLine("    attribute[ATR_MANA]           =  10;");
+                sb.AppendLine("\tattribute[ATR_STRENGTH]\t\t = 10;");
+                sb.AppendLine("\tattribute[ATR_DEXTERITY]\t = 10;");
+                sb.AppendLine("\tattribute[ATR_HITPOINTS_MAX] = 40;");
+                sb.AppendLine("\tattribute[ATR_HITPOINTS]\t = 40;");
+                sb.AppendLine("\tattribute[ATR_MANA_MAX]\t\t = 10;");
+                sb.AppendLine("\tattribute[ATR_MANA]\t\t\t = 10;");
                 sb.AppendLine();
             }
 
             // Kampf-Taktik
-            sb.AppendLine("    // ------ Kampf-Taktik ------");
-            sb.AppendLine($"    fight_tactic  =  FAI_HUMAN_COWARD;{(includeComments ? " // COWARD / NORMAL / STRONG / MASTER" : "")}");
+            sb.AppendLine("\t// ------ Kampf-Taktik ------");
+            sb.AppendLine($"\tfight_tactic = FAI_HUMAN_COWARD;{(includeComments ? " // COWARD / NORMAL / STRONG / MASTER" : "")}");
             sb.AppendLine();
 
             // Ausgerüstete Waffen
-            sb.AppendLine("    // ------ Ausgerüstete Waffen ------");
-            sb.AppendLine($"    EquipItem (self, ItMw_1h_Bau_Mace);{(includeComments ? $" // {cEquipItem}" : "")}");
+            sb.AppendLine("\t// ------ Ausgerüstete Waffen ------");
+            sb.AppendLine($"\tEquipItem (self, ItMw_1h_Bau_Mace);{(includeComments ? $" // {cEquipItem}" : "")}");
             sb.AppendLine();
 
             // Inventar
-            sb.AppendLine("    // ------ Inventar ------");
-            sb.AppendLine($"    B_CreateAmbientInv (self);{(includeComments ? $" // {cCreateAmbientInv}" : "")}");
+            sb.AppendLine("\t// ------ Inventar ------");
+            sb.AppendLine($"\tB_CreateAmbientInv (self);{(includeComments ? $" // {cCreateAmbientInv}" : "")}");
             sb.AppendLine();
 
             // Aussehen
-            sb.AppendLine("    // ------ Aussehen ------");
-            sb.AppendLine($"    {GenerateNpcVisual()};{(includeComments ? $" // {cNpcVisual}" : "")}");
-            sb.AppendLine($"    Mdl_SetModelFatness (self, 0);{(includeComments ? " // -1 / 0 / 1 / 2" : "")}");
-            sb.AppendLine($"    Mdl_ApplyOverlayMds (self, \"Humans_Tired.mds\");{(includeComments ? " // Tired / Militia / Mage / Arrogance / Relaxed" : "")}");
+            sb.AppendLine("\t// ------ Aussehen ------");
+            sb.AppendLine($"\t{GenerateNpcVisual()};{(includeComments ? $" // {cNpcVisual}" : "")}");
+            sb.AppendLine($"\tMdl_SetModelFatness (self, 0);{(includeComments ? " // -1 / 0 / 1 / 2" : "")}");
+            sb.AppendLine($"\tMdl_ApplyOverlayMds (self, \"Humans_Tired.mds\");{(includeComments ? " // Tired / Militia / Mage / Arrogance / Relaxed" : "")}");
             sb.AppendLine();
 
             // NSC-relevante Talente
-            sb.AppendLine("    // ------ NSC-relevante Talente ------");
-            sb.AppendLine("    B_GiveNpcTalents (self);");
+            sb.AppendLine("\t// ------ NSC-relevante Talente ------");
+            sb.AppendLine("\tB_GiveNpcTalents (self);");
             sb.AppendLine();
 
             // Kampf-Talente
-            sb.AppendLine("    // ------ Kampf-Talente ------");
+            sb.AppendLine("\t// ------ Kampf-Talente ------");
 
             // Nur hinzufügen, wenn keine individuellen Kampf-Talente gesetzt werden
             if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() !=
                 (Application.Current.TryFindResource("Yes") as string))
             {
-                sb.AppendLine($"    B_SetFightSkills (self, 10);{(includeComments ? $" // {cFightSkills}" : "")}");
+                sb.AppendLine($"\tB_SetFightSkills (self, 10);{(includeComments ? $" // {cFightSkills}" : "")}");
                 sb.AppendLine();
             }
 
             if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
-                sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_1H, 10);");
-                sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_2H, 10);");
-                sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_BOW, 10);");
-                sb.AppendLine("    B_AddFightSkill (self, NPC_TALENT_CROSSBOW, 10);");
+                sb.AppendLine("\tB_AddFightSkill (self, NPC_TALENT_1H, 10);");
+                sb.AppendLine("\tB_AddFightSkill (self, NPC_TALENT_2H, 10);");
+                sb.AppendLine("\tB_AddFightSkill (self, NPC_TALENT_BOW, 10);");
+                sb.AppendLine("\tB_AddFightSkill (self, NPC_TALENT_CROSSBOW, 10);");
                 sb.AppendLine();
             }
 
             // TA anmelden
-            sb.AppendLine("    // ------ TA anmelden ------");
-            sb.AppendLine($"    daily_routine  =  Rtn_Start_{idEntry.Text};");
+            sb.AppendLine("\t// ------ TA anmelden ------");
+            sb.AppendLine($"\tdaily_routine = Rtn_Start_{idEntry.Text};");
             sb.AppendLine("};");
             sb.AppendLine();
 
             // Tagesroutine-Funktion
             sb.AppendLine($"func void Rtn_Start_{idEntry.Text} (){(includeComments && cDailyRoutine != null ? $" // {cDailyRoutine}" : "")}");
             sb.AppendLine("{");
-            sb.AppendLine("    TA_Stand_ArmsCrossed (08,00,20,00,\"WP_Platzhalter\");");
-            sb.AppendLine("    TA_Stand_ArmsCrossed (20,00,08,00,\"WP_Platzhalter\");");
+            sb.AppendLine("\tTA_Stand_ArmsCrossed (08,00, 20,00, \"WP_Platzhalter\");");
+            sb.AppendLine("\tTA_Stand_ArmsCrossed (20,00, 08,00, \"WP_Platzhalter\");");
             sb.AppendLine("};");
 
             outputText.Text = sb.ToString();

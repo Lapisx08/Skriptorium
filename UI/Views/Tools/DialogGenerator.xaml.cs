@@ -336,23 +336,21 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("// ************************************************************");
             sb.AppendLine("//                          Überschrift");
             sb.AppendLine("// ************************************************************");
-            sb.AppendLine();
-
             sb.AppendLine($"instance DIA_{dialogInstance} (C_INFO) ");
             sb.AppendLine("{");
-            sb.AppendLine($"    npc          =  {npcInstance};");
-            sb.AppendLine($"    nr           =  {dialogNumber};");
-            sb.AppendLine($"    condition    =  DIA_{dialogInstance}_Condition;");
-            sb.AppendLine($"    information  =  DIA_{dialogInstance}_Info;");
-            sb.AppendLine($"    important    =  {important};");
-            sb.AppendLine($"    permanent    =  {permanent};");
-            sb.AppendLine($"    Description  =  \"{description}\";");
+            sb.AppendLine($"\tnpc\t\t\t= {npcInstance};");
+            sb.AppendLine($"\tnr\t\t\t= {dialogNumber};");
+            sb.AppendLine($"\tcondition\t= DIA_{dialogInstance}_Condition;");
+            sb.AppendLine($"\tinformation = DIA_{dialogInstance}_Info;");
+            sb.AppendLine($"\timportant\t= {important};");
+            sb.AppendLine($"\tpermanent\t= {permanent};");
+            sb.AppendLine($"\tDescription = \"{description}\";");
             sb.AppendLine("};");
             sb.AppendLine();
 
             sb.AppendLine($"func int DIA_{dialogInstance}_Condition ()");
             sb.AppendLine("{");
-            sb.AppendLine("    return TRUE;");
+            sb.AppendLine("\treturn TRUE;");
             sb.AppendLine("};");
             sb.AppendLine();
 
@@ -384,7 +382,7 @@ namespace Skriptorium.UI.Views.Tools
                         secondParam = "self";
                     }
 
-                    sb.AppendLine($"    AI_Output ({firstParam}, {secondParam}, \"{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
+                    sb.AppendLine($"\tAI_Output ({firstParam}, {secondParam}, \"{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
                     dialogIndex++;
                 }
                 else if (type == "XP")
@@ -393,7 +391,7 @@ namespace Skriptorium.UI.Views.Tools
 
                     if (int.TryParse(xpValue, out int xp) && xp >= 0)
                     {
-                        sb.AppendLine($"    B_GivePlayerXP ({xp});");
+                        sb.AppendLine($"\tB_GivePlayerXP ({xp});");
                     }
                     else
                     {
@@ -452,11 +450,11 @@ namespace Skriptorium.UI.Views.Tools
                         secondParam = "self";
                     }
 
-                    sb.AppendLine($"    B_GiveInvItems ({firstParam}, {secondParam}, {itemName}, {itemQuantity});");
+                    sb.AppendLine($"\tB_GiveInvItems ({firstParam}, {secondParam}, {itemName}, {itemQuantity});");
                 }
                 else if (type == "END")
                 {
-                    sb.AppendLine("    AI_StopProcessInfos (self);");
+                    sb.AppendLine("\tAI_StopProcessInfos (self);");
                 }
             }
 

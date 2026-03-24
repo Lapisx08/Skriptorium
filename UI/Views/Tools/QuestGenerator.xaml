@@ -107,7 +107,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{DynamicResource QuestDialogFuc}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Text="{DynamicResource QuestDialogFunc}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         <Button Grid.Column="1" Margin="5,0,0,0" Tag="{Binding ElementName=OutDialogBox}" Click="CopyToClipboard_Click">
                             <TextBlock Text="{DynamicResource Copy}"/>
                         </Button>
