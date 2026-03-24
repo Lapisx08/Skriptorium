@@ -281,11 +281,14 @@ namespace Skriptorium.UI.Views.Tools
         {
             outputText.Text = "";
 
-            string dialogInstance = dialogInstanceEntry.Text.Trim();
+            // 1. Eingaben holen und trimmen
+            // Wir nennen den rohen Text aus der TextBox jetzt "rawInstance"
+            string rawInstance = dialogInstanceEntry.Text.Trim();
             string npcInstance = npcInstanceEntry.Text.Trim();
             string description = descriptionEntry.Text.Trim();
 
-            if (string.IsNullOrEmpty(dialogInstance) || string.IsNullOrEmpty(npcInstance) || string.IsNullOrEmpty(description))
+            // 2. Pflichtfelder prüfen
+            if (string.IsNullOrEmpty(rawInstance) || string.IsNullOrEmpty(npcInstance) || string.IsNullOrEmpty(description))
             {
                 MessageBox.Show(
                     Application.Current.TryFindResource("MsgFillAllDialogFields") as string
@@ -297,10 +300,32 @@ namespace Skriptorium.UI.Views.Tools
                 return;
             }
 
+            // 3. Instanz-Logik (Präfix und Leerzeichen)
+            string dialogInstance;
+            rawInstance = rawInstance.Replace(" ", "_");
+
+            // Prüfung auf TRIA_ (Trialog)
+            if (rawInstance.StartsWith("TRIA_", StringComparison.OrdinalIgnoreCase))
+            {
+                dialogInstance = rawInstance;
+            }
+            // Prüfung auf DIA_ (Standard Dialog)
+            else if (rawInstance.StartsWith("DIA_", StringComparison.OrdinalIgnoreCase))
+            {
+                dialogInstance = rawInstance;
+            }
+            // Falls kein Präfix da ist, Standard DIA_ hinzufügen
+            else
+            {
+                dialogInstance = $"DIA_{rawInstance}";
+            }
+
+            // 4. Weitere UI-Werte abgreifen
             string dialogNumber = (dialogNumberDropdown.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "1";
             string important = importantDropdown.Text == Application.Current.TryFindResource("Yes") as string ? "TRUE" : "FALSE";
             string permanent = permanentDropdown.Text == Application.Current.TryFindResource("Yes") as string ? "TRUE" : "FALSE";
 
+            // 5. Validierung der Dialogzeilen
             bool hasDialogLine = false;
             bool hasNonEmptyDialogText = false;
 
@@ -310,7 +335,6 @@ namespace Skriptorium.UI.Views.Tools
                 if (type == "DIALOG")
                 {
                     hasDialogLine = true;
-
                     if (!string.IsNullOrWhiteSpace(line.TextEntry.Text))
                     {
                         hasNonEmptyDialogText = true;
@@ -331,30 +355,33 @@ namespace Skriptorium.UI.Views.Tools
                 return;
             }
 
+            // 6. Code-Generierung (StringBuilder)
             var sb = new System.Text.StringBuilder();
 
             sb.AppendLine("// ************************************************************");
             sb.AppendLine("//                          Überschrift");
             sb.AppendLine("// ************************************************************");
-            sb.AppendLine($"instance DIA_{dialogInstance} (C_INFO) ");
+
+            // WICHTIG: Hier nutzen wir jetzt dialogInstance (da ist das DIA_ schon drin)
+            sb.AppendLine($"instance {dialogInstance} (C_INFO) ");
             sb.AppendLine("{");
             sb.AppendLine($"\tnpc\t\t\t= {npcInstance};");
             sb.AppendLine($"\tnr\t\t\t= {dialogNumber};");
-            sb.AppendLine($"\tcondition\t= DIA_{dialogInstance}_Condition;");
-            sb.AppendLine($"\tinformation = DIA_{dialogInstance}_Info;");
+            sb.AppendLine($"\tcondition\t= {dialogInstance}_Condition;");
+            sb.AppendLine($"\tinformation = {dialogInstance}_Info;");
             sb.AppendLine($"\timportant\t= {important};");
             sb.AppendLine($"\tpermanent\t= {permanent};");
             sb.AppendLine($"\tDescription = \"{description}\";");
             sb.AppendLine("};");
             sb.AppendLine();
 
-            sb.AppendLine($"func int DIA_{dialogInstance}_Condition ()");
+            sb.AppendLine($"func int {dialogInstance}_Condition ()");
             sb.AppendLine("{");
             sb.AppendLine("\treturn TRUE;");
             sb.AppendLine("};");
             sb.AppendLine();
 
-            sb.AppendLine($"func void DIA_{dialogInstance}_Info ()");
+            sb.AppendLine($"func void {dialogInstance}_Info ()");
             sb.AppendLine("{");
 
             int dialogIndex = 0;
@@ -369,41 +396,19 @@ namespace Skriptorium.UI.Views.Tools
                         continue;
 
                     string speakerKey = line.SpeakerDropdown.SelectedValue as string ?? "HERO";
+                    string firstParam = (speakerKey == "NPC") ? "self" : "other";
+                    string secondParam = (speakerKey == "NPC") ? "other" : "self";
 
-                    string firstParam, secondParam;
-                    if (speakerKey == "NPC")
-                    {
-                        firstParam = "self";
-                        secondParam = "other";
-                    }
-                    else
-                    {
-                        firstParam = "other";
-                        secondParam = "self";
-                    }
-
-                    sb.AppendLine($"\tAI_Output ({firstParam}, {secondParam}, \"DIA_{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
+                    // Auch hier: dialogInstance nutzen
+                    sb.AppendLine($"\tAI_Output ({firstParam}, {secondParam}, \"{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
                     dialogIndex++;
                 }
                 else if (type == "XP")
                 {
                     string xpValue = line.XPEntry.Text.Trim();
-
                     if (int.TryParse(xpValue, out int xp) && xp >= 0)
                     {
                         sb.AppendLine($"\tB_GivePlayerXP ({xp});");
-                    }
-                    else
-                    {
-                        MessageBox.Show(
-                            Application.Current.TryFindResource("MsgInvalidXpValue") as string
-                                ?? "Ungültiger XP-Wert in einer Zeile. Bitte gib eine ganze Zahl >= 0 ein.",
-                            Application.Current.TryFindResource("CaptionError") as string
-                                ?? "Fehler",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                        return;
-
                     }
                 }
                 else if (type == "ITEM")
@@ -412,45 +417,12 @@ namespace Skriptorium.UI.Views.Tools
                     string itemQuantityText = line.ItemQuantityEntry.Text.Trim();
                     string recipientKey = line.SpeakerDropdown.SelectedValue as string ?? "HERO";
 
-                    if (string.IsNullOrEmpty(itemName))
+                    if (!string.IsNullOrEmpty(itemName) && int.TryParse(itemQuantityText, out int itemQuantity) && itemQuantity > 0)
                     {
-                        MessageBox.Show(
-                            Application.Current.TryFindResource("MsgItemInstanceRequired") as string
-                                ?? "Bitte Iteminstanz angeben.",
-                            Application.Current.TryFindResource("CaptionError") as string
-                                ?? "Fehler",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                        return;
-
+                        string firstParam = (recipientKey == "NPC") ? "self" : "other";
+                        string secondParam = (recipientKey == "NPC") ? "other" : "self";
+                        sb.AppendLine($"\tB_GiveInvItems ({firstParam}, {secondParam}, {itemName}, {itemQuantity});");
                     }
-
-                    if (!int.TryParse(itemQuantityText, out int itemQuantity) || itemQuantity <= 0)
-                    {
-                        MessageBox.Show(
-                            Application.Current.TryFindResource("MsgInvalidItemAmount") as string
-                                ?? "Bitte eine gültige Item-Anzahl (> 0) angeben.",
-                            Application.Current.TryFindResource("CaptionError") as string
-                                ?? "Fehler",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                        return;
-                    }
-
-                    string firstParam, secondParam;
-
-                    if (recipientKey == "NPC")
-                    {
-                        firstParam = "self";
-                        secondParam = "other";
-                    }
-                    else // Held
-                    {
-                        firstParam = "other";
-                        secondParam = "self";
-                    }
-
-                    sb.AppendLine($"\tB_GiveInvItems ({firstParam}, {secondParam}, {itemName}, {itemQuantity});");
                 }
                 else if (type == "END")
                 {
@@ -459,7 +431,6 @@ namespace Skriptorium.UI.Views.Tools
             }
 
             sb.AppendLine("};");
-
             outputText.Text = sb.ToString();
         }
 
