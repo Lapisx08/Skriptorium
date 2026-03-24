@@ -382,7 +382,7 @@ namespace Skriptorium.UI.Views.Tools
                         secondParam = "self";
                     }
 
-                    sb.AppendLine($"\tAI_Output ({firstParam}, {secondParam}, \"{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
+                    sb.AppendLine($"\tAI_Output ({firstParam}, {secondParam}, \"DIA_{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
                     dialogIndex++;
                 }
                 else if (type == "XP")
