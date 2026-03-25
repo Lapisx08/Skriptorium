@@ -22,6 +22,7 @@ namespace Skriptorium.Managers
         private int _newScriptCounter = 1;
         private bool _isInitializing = true;
         private readonly Dictionary<string, FileSystemWatcher> _watchers = new Dictionary<string, FileSystemWatcher>(StringComparer.OrdinalIgnoreCase);
+        
         public ScriptTabManager(DockingManager dockingManager, LayoutDocumentPane documentPane)
         {
             _dockingManager = dockingManager;
@@ -181,11 +182,17 @@ namespace Skriptorium.Managers
 
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            if (e.Name.StartsWith("~") || e.Name.EndsWith(".tmp") || e.Name.Contains(".syncthing."))
+                return;
+
+            Application.Current.Dispatcher.Invoke(async () =>
             {
                 string filePath = e.FullPath;
                 var editors = GetAllOpenEditors().Where(ed => string.Equals(ed.FilePath, filePath, StringComparison.OrdinalIgnoreCase)).ToList();
-                if (!editors.Any() || !File.Exists(filePath)) return;
+
+                if (!editors.Any()) return;
+
+                await System.Threading.Tasks.Task.Delay(100);
 
                 try
                 {
@@ -193,61 +200,95 @@ namespace Skriptorium.Managers
                     foreach (var editor in editors)
                     {
                         if (newContent == editor.Text) continue;
-                        if (editor.IsModified)
-                        {
-                            // Ohne MessageBox einfach lokale Änderungen beibehalten
-                            continue;
-                        }
+
+                        if (editor.IsModified) continue;
+
                         editor.SetTextAndResetModified(newContent);
                         UpdateTabTitle(editor);
                     }
-                    // Hinweis-MessageBox entfernt
                 }
-                catch (Exception ex)
-                {
-                    // Fehler-MessageBox entfernt, optional: Logging
-                }
+                catch (IOException) { /* Datei ist evtl. noch gesperrt, ignorieren oder loggen */ }
             });
         }
 
         private void OnFileRenamed(object sender, RenamedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            if (e.Name != null && (e.Name.StartsWith("~") || e.Name.EndsWith(".tmp") || e.Name.Contains(".syncthing.")))
+                return;
+
+            Application.Current.Dispatcher.InvokeAsync(async () =>
             {
                 string oldPath = e.OldFullPath;
                 string newPath = e.FullPath;
-                var editors = GetAllOpenEditors().Where(ed => string.Equals(ed.FilePath, oldPath, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                var editors = GetAllOpenEditors()
+                    .Where(ed => string.Equals(ed.FilePath, oldPath, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
                 if (editors.Any())
                 {
+                    await System.Threading.Tasks.Task.Delay(200);
+
                     foreach (var editor in editors)
                     {
                         editor.FilePath = newPath;
+
                         var doc = GetDocumentForEditor(editor);
                         if (doc != null)
                         {
                             doc.Title = Path.GetFileName(newPath);
                             doc.ToolTip = newPath;
+
+                            if (doc.Title.Contains(" (Nicht gefunden)"))
+                                doc.Title = doc.Title.Replace(" (Nicht gefunden)", "");
                         }
+
                         UpdateTabTitle(editor);
                     }
-                    // Hinweis-MessageBox entfernt
+
+                    // Watcher-Logik aktualisieren
+                    RemoveWatcher(oldPath);
+                    SetupWatcher(newPath);
                 }
-                // Watcher aktualisieren: Alten entfernen, neuen einrichten
-                RemoveWatcher(oldPath);
-                SetupWatcher(newPath);
             });
         }
 
         private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            // Temporäre Syncthing-Dateien ignorieren
+            if (e.Name != null && (e.Name.StartsWith("~") || e.Name.EndsWith(".tmp") || e.Name.Contains(".syncthing.")))
+                return;
+
+            Application.Current.Dispatcher.InvokeAsync(async () =>
             {
                 string filePath = e.FullPath;
-                var editors = GetAllOpenEditors().Where(ed => string.Equals(ed.FilePath, filePath, StringComparison.OrdinalIgnoreCase)).ToList();
-                if (editors.Any())
+
+                await System.Threading.Tasks.Task.Delay(800);
+
+                if (File.Exists(filePath))
+                    return;
+
+                var editors = GetAllOpenEditors()
+                    .Where(ed => string.Equals(ed.FilePath, filePath, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (!editors.Any())
+                    return;
+
+                const string missingSuffix = " (Nicht gefunden)";
+
+                foreach (var editor in editors)
                 {
-                    // Hinweis-MessageBox entfernt
+                    var doc = GetDocumentForEditor(editor);
+                    if (doc != null)
+                    {
+                        if (!doc.Title.EndsWith(missingSuffix, StringComparison.Ordinal))
+                        {
+                            doc.Title += missingSuffix;
+                        }
+                    }
                 }
+
                 RemoveWatcher(filePath);
             });
         }
