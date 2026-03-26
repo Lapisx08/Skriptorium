@@ -742,7 +742,7 @@ namespace Skriptorium.UI
                 }
                 else
                 {
-                    avalonEditor.Document.Insert(caretOffset, "\"");
+                    avalonEditor.Document.Insert(caretOffset, "\"\"");
                     avalonEditor.CaretOffset = caretOffset + 1;
                     e.Handled = true;
                 }
