@@ -121,7 +121,7 @@ namespace Skriptorium.UI.Views.Tools
 
             sb.AppendLine($"instance {idEntry.Text}_{nameSafe}_Ork (Npc_Default)");
             sb.AppendLine("{");
-            sb.AppendLine("\t// ------ NSC ------\"");
+            sb.AppendLine("\t// ------ NSC ------");
             sb.AppendLine($"\tname\t\t\t\t  = \"{nameEntry.Text}\";");
             sb.AppendLine($"\tguild\t\t\t\t  = {((ComboBoxItem)guildEntry.SelectedItem)?.Content};");
             sb.AppendLine($"\taivar[AIV_MM_REAL_ID] = {((ComboBoxItem)aivRealIdEntry.SelectedItem)?.Content};");
