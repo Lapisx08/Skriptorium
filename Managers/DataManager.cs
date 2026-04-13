@@ -49,7 +49,7 @@ namespace Skriptorium.Managers
         }
 
         // Speichert Datei
-        private static void WriteFileAutoEncoding(string filePath, string content)
+        public static void WriteFileAutoEncoding(string filePath, string content)
         {
             try
             {

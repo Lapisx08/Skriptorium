@@ -265,6 +265,7 @@ namespace Skriptorium.UI.Views
         {
             string searchTerm = TxtSearch.Text;
             string replaceTerm = TxtReplace.Text;
+
             if (string.IsNullOrEmpty(searchTerm))
             {
                 MessageBox.Show("Bitte geben Sie einen Suchtext ein.", "Ersetzen Alle", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -282,11 +283,17 @@ namespace Skriptorium.UI.Views
                     var lastModified = File.GetLastWriteTime(node.FullPath);
 
                     if (_fileCache.TryGetValue(node.FullPath, out var cached) && cached.LastModified == lastModified)
+                    {
                         text = cached.Content;
+                    }
                     else
                     {
                         text = ReadFileAutoEncoding(node.FullPath);
-                        _fileCache.AddOrUpdate(node.FullPath, (text, lastModified), (k, v) => (text, lastModified));
+                        // Aktuellen Zeitstempel nach dem Lesen verwenden
+                        var currentLastModified = File.GetLastWriteTime(node.FullPath);
+                        _fileCache.AddOrUpdate(node.FullPath,
+                            (text, currentLastModified),
+                            (k, v) => (text, currentLastModified));
                     }
 
                     string newText = text;
@@ -301,6 +308,7 @@ namespace Skriptorium.UI.Views
                             bool leftOk = offset == 0 || !char.IsLetterOrDigit(newText[offset - 1]);
                             int afterIndex = offset + searchTerm.Length;
                             bool rightOk = afterIndex >= newText.Length || !char.IsLetterOrDigit(newText[afterIndex]);
+
                             if (!(leftOk && rightOk))
                             {
                                 offset++;
@@ -315,8 +323,16 @@ namespace Skriptorium.UI.Views
 
                     if (replacedCount > 0)
                     {
-                        File.WriteAllText(node.FullPath, newText);
-                        _fileCache.AddOrUpdate(node.FullPath, (newText, File.GetLastWriteTime(node.FullPath)), (k, v) => (newText, File.GetLastWriteTime(node.FullPath)));
+                        DataManager.WriteFileAutoEncoding(node.FullPath, newText);
+
+                        var newLastModified = File.GetLastWriteTime(node.FullPath);
+                        _fileCache.AddOrUpdate(node.FullPath,
+                            (newText, newLastModified),
+                            (k, v) => (newText, newLastModified));
+
+                        // Lokalen Encoding-Cache auf Latin-1 setzen (wie DataManager)
+                        _fileEncodings[node.FullPath] = Encoding.GetEncoding("ISO-8859-1");
+
                         totalReplacedCount += replacedCount;
                     }
                 }
@@ -328,16 +344,22 @@ namespace Skriptorium.UI.Views
                 {
                     lock (_errors) { _errors.Add($"Zugriff verweigert für {node.FullPath}: {ex.Message}"); }
                 }
+                catch (Exception ex) // zusätzlicher Fallback-Catch
+                {
+                    lock (_errors) { _errors.Add($"Unerwarteter Fehler bei {node.FullPath}: {ex.Message}"); }
+                }
             }
 
             Dispatcher.Invoke(() =>
             {
                 MessageBox.Show(totalReplacedCount == 0
                     ? "Keine Treffer gefunden zum Ersetzen."
-                    : $"{totalReplacedCount} Treffer wurden ersetzt.", "Ersetzen Alle", MessageBoxButton.OK, MessageBoxImage.Information);
+                    : $"{totalReplacedCount} Treffer wurden ersetzt.",
+                    "Ersetzen Alle", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 if (_errors.Any())
-                    MessageBox.Show($"Es traten Fehler auf:\n{string.Join("\n", _errors.Take(5))}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"Es traten Fehler auf:\n{string.Join("\n", _errors.Take(5))}",
+                        "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
             }, DispatcherPriority.Background);
 
             StartSearch(searchTerm);
