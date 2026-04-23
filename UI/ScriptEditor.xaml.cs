@@ -20,6 +20,8 @@ using System.Windows.Media;
 using Skriptorium.Analysis;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Threading;
+
 namespace Skriptorium.UI
 {
     public class SyntaxColorizingTransformer : DocumentColorizingTransformer
@@ -96,8 +98,22 @@ namespace Skriptorium.UI
         public double Zoom { get; set; } = 1.0;
         public double EffectiveFontSize => OriginalFontSize * Zoom;
         private readonly double[] _zoomSteps = { 0.2, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0 };
+
         // GoTo-Unterstreichung bei Strg + Hover
         private TextMarker? _hoverUnderlineMarker;
+
+        // Horizontales scrollen
+        private bool _isMiddleDragging = false;
+        private Point _dragStartPoint;
+        private double _currentDeltaX;
+        private double _currentDeltaY;
+        private DispatcherTimer _autoscrollTimer;
+
+        private enum ScrollAxis { None, Horizontal, Vertical }
+        private ScrollAxis _activeAxis = ScrollAxis.None;
+        private const double ScrollThreshold = 30.0;
+        private const double SpeedFactor = 0.15;
+
         public ScriptEditor()
         {
             InitializeComponent();
@@ -108,10 +124,12 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextEntering += TextArea_TextEntering;
             avalonEditor.TextArea.TextEntered += TextArea_TextEntered;
             avalonEditor.PreviewMouseWheel += AvalonEditor_PreviewMouseWheel;
+
             if (avalonEditor.Document == null)
             {
                 return;
             }
+
             _markers = new TextSegmentCollection<TextMarker>(avalonEditor.Document);
             _markerRenderer = new TextMarkerRenderer(avalonEditor.TextArea.TextView, _markers);
             avalonEditor.TextArea.TextView.BackgroundRenderers.Add(_markerRenderer);
@@ -124,6 +142,10 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.LineTransformers.Add(_colorizer);
             ThemeManager.Current.ThemeChanged += OnThemeChanged;
             DoInitialHighlighting();
+
+            avalonEditor.TextArea.TextView.Redraw();
+            avalonEditor.TextArea.TextView.InvalidateVisual();
+
             _bookmarkManager = new BookmarkManager(avalonEditor);
             _foldingManager = FoldingManager.Install(avalonEditor.TextArea);
             _foldingStrategy = new BraceFoldingStrategy();
@@ -131,10 +153,24 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.PreviewMouseLeftButtonDown += AvalonEditor_PreviewMouseLeftButtonDown;
             avalonEditor.MouseHover += AvalonEditor_MouseHover;
             avalonEditor.MouseHoverStopped += AvalonEditor_MouseHoverStopped;
+
             // Hover-Unterstreichung für GoTo
             avalonEditor.MouseMove += AvalonEditor_MouseMove;
             avalonEditor.MouseLeave += AvalonEditor_MouseLeave;
+
+            // Horizontales scrollen
+            avalonEditor.TextArea.MouseDown += AvalonEditor_MouseDown_MiddleScroll;
+            avalonEditor.TextArea.MouseMove += AvalonEditor_MouseMove_MiddleScroll;
+            avalonEditor.TextArea.MouseUp += AvalonEditor_MouseUp_MiddleScroll;
+            avalonEditor.QueryCursor += AvalonEditor_QueryCursor;
+            avalonEditor.Options.EnableRectangularSelection = true;
+            avalonEditor.Options.EnableVirtualSpace = true;
+            _autoscrollTimer = new DispatcherTimer (DispatcherPriority.Render);
+            _autoscrollTimer.Interval = TimeSpan.FromMilliseconds(10);
+            _autoscrollTimer.Tick += AutoscrollTimer_Tick;
+
             InitializeAutocompletion();
+
             // Setze initialen globalen Zoom (falls MainWindow verfügbar)
             Loaded += (s, e) =>
             {
@@ -411,6 +447,9 @@ namespace Skriptorium.UI
             ApplySyntaxHighlighting();
             UpdateFoldings();
             UpdateAutocompletion();
+
+            avalonEditor.TextArea.TextView.Redraw();
+            avalonEditor.TextArea.TextView.InvalidateVisual();
         }
         private void UpdateFoldings()
         {
@@ -621,7 +660,9 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.Redraw();
         }
         [GeneratedRegex(@"Zeile\s+(\d+),\s*Spalte\s+(\d+)")]
+        
         private static partial Regex ErrorPositionRegex();
+
         public List<string> CheckAll()
         {
             ClearHighlighting();
@@ -663,7 +704,9 @@ namespace Skriptorium.UI
         {
             CaretPositionChanged?.Invoke(this, e);
         }
+
         public event EventHandler? CaretPositionChanged;
+
         public void ToggleSyntaxHighlighting()
         {
             _syntaxHighlightingEnabled = !_syntaxHighlightingEnabled;
@@ -682,6 +725,7 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.InvalidateVisual();
             avalonEditor.TextArea.TextView.Redraw();
         }
+
         public class DefaultColorLineTransformer : DocumentColorizingTransformer
         {
             private readonly Color _defaultColor;
@@ -697,6 +741,7 @@ namespace Skriptorium.UI
                 });
             }
         }
+
         public void FormatCode()
         {
             var document = Avalon.Document;
@@ -711,6 +756,7 @@ namespace Skriptorium.UI
                 }
             }
         }
+
         private void TextArea_TextEntering(object sender, TextCompositionEventArgs e)
         {
             var caretOffset = avalonEditor.CaretOffset;
@@ -775,7 +821,146 @@ namespace Skriptorium.UI
                 }
             }
         }
+
+        // Vertikales und Horizontales scrollen mit Mausrad
+        private ScrollViewer GetScrollViewer(Visual parent)
+        {
+            if (parent is ScrollViewer scrollViewer)
+                return scrollViewer;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i) as Visual;
+                var result = GetScrollViewer(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+
+        private void AvalonEditor_QueryCursor(object sender, QueryCursorEventArgs e)
+        {
+            if (_isMiddleDragging)
+            {
+                switch (_activeAxis)
+                {
+                    case ScrollAxis.Horizontal: e.Cursor = Cursors.SizeWE; break;
+                    case ScrollAxis.Vertical: e.Cursor = Cursors.SizeNS; break;
+                    default: e.Cursor = Cursors.SizeAll; break;
+                }
+                e.Handled = true;
+            }
+        }
+
+
+        private void AutoscrollTimer_Tick(object sender, EventArgs e)
+        {
+            if (!_isMiddleDragging) return;
+
+            var scrollViewer = GetScrollViewer(avalonEditor);
+            if (scrollViewer == null) return;
+
+            double absX = Math.Abs(_currentDeltaX);
+            double absY = Math.Abs(_currentDeltaY);
+            ScrollAxis oldAxis = _activeAxis;
+
+            // --- Dynamische Achsen-Logik ---
+            // Wenn wir uns innerhalb der Totzone bewegen, setzen wir auf None
+            if (absX < ScrollThreshold && absY < ScrollThreshold)
+            {
+                _activeAxis = ScrollAxis.None;
+            }
+            else
+            {
+                // Wir vergleichen ständig X und Y. 
+                // Wer den größeren Abstand zur Mitte hat, gewinnt die Priorität.
+                _activeAxis = absX > absY ? ScrollAxis.Horizontal : ScrollAxis.Vertical;
+            }
+
+            // Override Cursor anpassen, wenn die Achse wechselt
+            if (_activeAxis != oldAxis)
+            {
+                switch (_activeAxis)
+                {
+                    case ScrollAxis.Horizontal: Mouse.OverrideCursor = Cursors.SizeWE; break;
+                    case ScrollAxis.Vertical: Mouse.OverrideCursor = Cursors.SizeNS; break;
+                    default: Mouse.OverrideCursor = Cursors.SizeAll; break;
+                }
+            }
+
+            // Scroll-Ausführung
+            if (_activeAxis == ScrollAxis.Horizontal)
+            {
+                double speedX = (_currentDeltaX - (Math.Sign(_currentDeltaX) * ScrollThreshold)) * SpeedFactor;
+                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + speedX);
+            }
+            else if (_activeAxis == ScrollAxis.Vertical)
+            {
+                double speedY = (_currentDeltaY - (Math.Sign(_currentDeltaY) * ScrollThreshold)) * SpeedFactor;
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + speedY);
+            }
+        }
+
+        private void AvalonEditor_MouseDown_MiddleScroll(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Middle)
+                return;
+
+            // --- AUTOSCROLL START ---
+            _dragStartPoint = e.GetPosition(avalonEditor.TextArea.TextView);
+            _isMiddleDragging = true;
+            _activeAxis = ScrollAxis.None;
+            _currentDeltaX = 0;
+            _currentDeltaY = 0;
+
+            Mouse.OverrideCursor = Cursors.SizeAll;
+            avalonEditor.TextArea.CaptureMouse();
+            _autoscrollTimer.Start();
+
+            e.Handled = true;
+        }
+
+        private void AvalonEditor_MouseMove_MiddleScroll(object sender, MouseEventArgs e)
+        {
+            if (!_isMiddleDragging)
+                return;
+
+            Point currentPos = e.GetPosition(avalonEditor.TextArea.TextView);
+            double diffX = currentPos.X - _dragStartPoint.X;
+            double diffY = currentPos.Y - _dragStartPoint.Y;
+
+            _currentDeltaX = Math.Abs(diffX) > ScrollThreshold ? diffX : 0;
+            _currentDeltaY = Math.Abs(diffY) > ScrollThreshold ? diffY : 0;
+
+            if (_activeAxis != ScrollAxis.None ||
+                Math.Abs(_currentDeltaX) > 0 ||
+                Math.Abs(_currentDeltaY) > 0)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void AvalonEditor_MouseUp_MiddleScroll(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Middle)
+                return;
+
+            if (_isMiddleDragging)
+            {
+                _isMiddleDragging = false;
+                _activeAxis = ScrollAxis.None;
+                _autoscrollTimer.Stop();
+                Mouse.OverrideCursor = null;
+
+                if (avalonEditor.TextArea.IsMouseCaptured)
+                    avalonEditor.TextArea.ReleaseMouseCapture();
+
+                e.Handled = true;
+            }
+        }
+
         private ToolTip _toolTip = new ToolTip();
+
         private void AvalonEditor_MouseHover(object sender, MouseEventArgs e)
         {
             if (Keyboard.Modifiers != ModifierKeys.Control) return;
@@ -809,10 +994,12 @@ namespace Skriptorium.UI
                 catch { }
             }
         }
+
         private void AvalonEditor_MouseHoverStopped(object sender, MouseEventArgs e)
         {
             _toolTip.IsOpen = false;
         }
+
         // ====================== GoTo-Unterstreichung bei Strg + Hover ======================
         private void AvalonEditor_MouseMove(object sender, MouseEventArgs e)
         {
@@ -864,8 +1051,10 @@ namespace Skriptorium.UI
             avalonEditor.Cursor = Cursors.IBeam;
             avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
         }
+
         private bool _initialIndexingAttempted = false;
         private readonly object _indexingLock = new object();
+
         private void AvalonEditor_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (Keyboard.Modifiers != ModifierKeys.Control)
@@ -1002,12 +1191,14 @@ namespace Skriptorium.UI
     {
         private readonly TextView _textView;
         private readonly TextSegmentCollection<TextMarker> _markers;
+
         public TextMarkerRenderer(TextView textView, TextSegmentCollection<TextMarker> markers)
         {
             _textView = textView;
             _markers = markers;
         }
         public KnownLayer Layer => KnownLayer.Selection;
+
         public void Draw(TextView textView, DrawingContext drawingContext)
         {
             if (!_textView.VisualLinesValid) return;
