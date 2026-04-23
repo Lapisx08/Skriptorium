@@ -5,7 +5,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
-using Skriptorium.Managers; // LanguageManager
+using Skriptorium.Managers;
 
 namespace Skriptorium.UI.Views
 {
@@ -16,7 +16,7 @@ namespace Skriptorium.UI.Views
 
         public SettingsView(ProjectManager projectManager)
         {
-            _projectManager = projectManager; // Manager speichern
+            _projectManager = projectManager;
             InitializeComponent();
 
             // Theme-Voreinstellung
@@ -43,6 +43,19 @@ namespace Skriptorium.UI.Views
                 }
             }
 
+            // UI-Zoom-Voreinstellung
+            double savedUiZoom = Properties.Settings.Default.UiZoom;
+            string zoomText = $"{(int)(savedUiZoom * 100)} %";
+
+            foreach (ComboBoxItem item in ComboUiZoom.Items)
+            {
+                if (item.Content?.ToString() == zoomText)
+                {
+                    ComboUiZoom.SelectedItem = item;
+                    break;
+                }
+            }
+
             _isInitializing = false;
         }
 
@@ -65,6 +78,31 @@ namespace Skriptorium.UI.Views
 
                 Properties.Settings.Default.Theme = fullTheme;
                 Properties.Settings.Default.Save();
+            }
+        }
+
+        // UI-Zoom wechseln
+        private void ComboUiZoom_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isInitializing) return;
+
+            if (ComboUiZoom.SelectedItem is ComboBoxItem item)
+            {
+                string text = item.Content.ToString()!.Replace(" %", "");
+
+                if (double.TryParse(text, out double percent))
+                {
+                    double zoom = percent / 100.0;
+
+                    Properties.Settings.Default.UiZoom = zoom;
+                    Properties.Settings.Default.Save();
+
+                    // Sofort anwenden
+                    if (Owner is MainWindow mw)
+                    {
+                        mw.SetUiZoom(zoom);
+                    }
+                }
             }
         }
 

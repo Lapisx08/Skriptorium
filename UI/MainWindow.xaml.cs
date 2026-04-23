@@ -16,6 +16,7 @@ using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Skriptorium.UI
 {
@@ -38,6 +39,10 @@ namespace Skriptorium.UI
         public MainWindow()
         {
             InitializeComponent();
+
+            // UI-Zoom laden
+            double uiZoom = Properties.Settings.Default.UiZoom;
+            SetUiZoom(uiZoom);
 
             this.AddHandler(
                 Keyboard.PreviewKeyDownEvent,
@@ -1145,6 +1150,14 @@ namespace Skriptorium.UI
             doc.IsActive = true;
 
             return editor;
+        }
+
+        public void SetUiZoom(double zoom)
+        {
+            if (RootGrid != null)
+            {
+                RootGrid.LayoutTransform = new ScaleTransform(zoom, zoom);
+            }
         }
     }
 }

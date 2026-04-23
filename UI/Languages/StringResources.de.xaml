@@ -213,6 +213,7 @@
     <sys:String x:Key="Theme">Anzeigemodus:</sys:String>
     <sys:String x:Key="LightMode">Tagmodus</sys:String>
     <sys:String x:Key="DarkMode">Nachtmodus</sys:String>
+    <sys:String x:Key="UIZoom">UI-Skalierung:</sys:String>
     <sys:String x:Key="Language">Sprache:</sys:String>
     <sys:String x:Key="Paths">Pfade</sys:String>
     <sys:String x:Key="PathToGothicScripts">Pfad zu Gothic Skripts:</sys:String>

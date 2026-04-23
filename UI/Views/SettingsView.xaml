@@ -51,12 +51,29 @@
                         <ComboBoxItem Content="{DynamicResource DarkMode}" Tag="Dark"/>
                     </ComboBox>
 
+                    <!-- UI Zoom -->
+                    <TextBlock Text="{DynamicResource UIZoom}"
+                               Grid.Row="1" Grid.Column="0"
+                               Margin="0,0,5,5" VerticalAlignment="Center"/>
+
+                    <ComboBox x:Name="ComboUiZoom"
+                              Grid.Row="1" Grid.Column="1"
+                              Margin="0,0,0,5"
+                              SelectionChanged="ComboUiZoom_SelectionChanged">
+                        <ComboBoxItem Content="100 %"/>
+                        <ComboBoxItem Content="125 %"/>
+                        <ComboBoxItem Content="150 %"/>
+                        <ComboBoxItem Content="200 %"/>
+                        <ComboBoxItem Content="300 %"/>
+                        <ComboBoxItem Content="400 %"/>
+                    </ComboBox>
+
                     <!-- Sprache -->
                     <TextBlock Text="{DynamicResource Language}" 
-                               Grid.Row="1" Grid.Column="0" 
+                               Grid.Row="2" Grid.Column="0" 
                                Margin="0,0,5,5" VerticalAlignment="Center"/>
                     <ComboBox x:Name="ComboLanguage"
-                              Grid.Row="1" Grid.Column="1" 
+                              Grid.Row="2" Grid.Column="1" 
                               Margin="0,0,0,5"
                               SelectionChanged="ComboLanguage_SelectionChanged">
                         <ComboBoxItem Content="Deutsch" Tag="de"/>

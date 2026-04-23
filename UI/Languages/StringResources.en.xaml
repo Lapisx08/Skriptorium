@@ -213,6 +213,7 @@
     <sys:String x:Key="Theme">Theme:</sys:String>
     <sys:String x:Key="LightMode">Light Mode</sys:String>
     <sys:String x:Key="DarkMode">Dark Mode</sys:String>
+    <sys:String x:Key="UIZoom">UI-Zoom:</sys:String>
     <sys:String x:Key="Language">Language:</sys:String>
     <sys:String x:Key="Paths">Paths</sys:String>
     <sys:String x:Key="PathToGothicScripts">Path To Gothic Scripts:</sys:String>

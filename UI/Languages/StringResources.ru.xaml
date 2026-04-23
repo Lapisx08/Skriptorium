@@ -213,6 +213,7 @@
     <sys:String x:Key="Theme">Тема:</sys:String>
     <sys:String x:Key="LightMode">Светлый режим</sys:String>
     <sys:String x:Key="DarkMode">Темный режим</sys:String>
+    <sys:String x:Key="UIZoom">Масштаб интерфейса:</sys:String>
     <sys:String x:Key="Language">Язык:</sys:String>
     <sys:String x:Key="Paths">Пути</sys:String>
     <sys:String x:Key="PathToGothicScripts">Путь к готическим шрифтам:</sys:String>

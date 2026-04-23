@@ -213,6 +213,7 @@
     <sys:String x:Key="Theme">Tryb wyświetlania:</sys:String>
     <sys:String x:Key="LightMode">Tryb dzienny</sys:String>
     <sys:String x:Key="DarkMode">Tryb nocny</sys:String>
+    <sys:String x:Key="UIZoom">Skalowanie interfejsu:</sys:String>
     <sys:String x:Key="Language">Język:</sys:String>
     <sys:String x:Key="Paths">Ścieżki</sys:String>
     <sys:String x:Key="PathToGothicScripts">Ścieżka do skryptów Gothic:</sys:String>
