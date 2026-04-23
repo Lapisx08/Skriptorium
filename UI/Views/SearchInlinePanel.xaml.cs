@@ -129,15 +129,24 @@ namespace Skriptorium.UI.Views
             if (Visibility != Visibility.Visible)
             {
                 Visibility = Visibility.Visible;
-                TxtSearch.Focus();
             }
 
+            // Die Suche initialisieren (falls Text vorhanden ist)
             if (!string.IsNullOrEmpty(TxtSearch.Text))
             {
                 StartSearch(TxtSearch.Text);
                 if (_currentMatchIndex >= 0 && _searchOffsets.Count > 0)
+                {
                     SelectCurrentMatch();
+                }
             }
+
+            // Fokus ERZWINGEN (nachdem Visibility gesetzt wurde)
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                TxtSearch.Focus();
+                TxtSearch.SelectAll();
+            }), System.Windows.Threading.DispatcherPriority.Input);
         }
 
         private void SearchInlinePanel_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -458,7 +467,6 @@ namespace Skriptorium.UI.Views
 
             _editor.Avalon.Select(offset, length);
             _editor.Avalon.ScrollToLine(_editor.Avalon.Document.GetLineByOffset(offset).LineNumber);
-            _editor.Avalon.Focus();
 
             _currentMatch = _currentMatchIndex + 1;
             UpdateMatchInfo(_currentMatch, _totalMatches);
