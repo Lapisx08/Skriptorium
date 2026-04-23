@@ -32,7 +32,7 @@ namespace Skriptorium.UI.Views
         private bool _matchCase = false;
         private bool _wholeWord = false;
         private readonly DispatcherTimer _searchTimer;
-        private CancellationTokenSource _cts;
+        private CancellationTokenSource? _cts;
         private readonly List<string> _errors = new List<string>();
         private static readonly ConcurrentDictionary<string, Encoding> _fileEncodings = new();
 
@@ -235,7 +235,7 @@ namespace Skriptorium.UI.Views
             if (sender is TextBlock tb && tb.DataContext is FileMatch fm && !string.IsNullOrEmpty(fm.Highlight))
             {
                 tb.Inlines.Clear();
-                string text = fm.LinePreview;
+                string text = fm.LinePreview ?? string.Empty;
                 string search = fm.Highlight;
                 var comp = _matchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
@@ -446,8 +446,8 @@ namespace Skriptorium.UI.Views
     public class FileMatch
     {
         public int LineNumber { get; set; }
-        public string LinePreview { get; set; }
-        public string Highlight { get; set; }
+        public string? LinePreview { get; set; }
+        public string? Highlight { get; set; }
         public int LineOffset { get; set; }
         public int MatchLength { get; set; }
     }
@@ -468,7 +468,8 @@ namespace Skriptorium.UI.Views
 
         public FileSearchNode(string path) => FullPath = path;
 
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
         protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(name));
     }
 

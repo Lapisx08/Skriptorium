@@ -170,7 +170,7 @@ namespace Skriptorium.Managers
                     continue; // Zeile nicht sichtbar
 
                 var rect = BackgroundGeometryBuilder.GetRectsForSegment(TextView, visualLine.FirstDocumentLine).FirstOrDefault();
-                if (rect == null)
+                if (rect.IsEmpty)
                     continue;
 
                 var bookmarkRect = new Rect(0, rect.Top, 5, rect.Height);

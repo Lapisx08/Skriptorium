@@ -66,7 +66,7 @@ namespace Skriptorium.UI
         {
             Text = text;
         }
-        public System.Windows.Media.ImageSource Image => null;
+        public ImageSource? Image => null;
         public string Text { get; }
         public object Content => Text;
         public object Description => $"Vorschlag: {Text}";
@@ -89,7 +89,7 @@ namespace Skriptorium.UI
         private BookmarkManager? _bookmarkManager;
         private bool _syntaxHighlightingEnabled = true;
         private FoldingManager? _foldingManager;
-        private BraceFoldingStrategy _foldingStrategy;
+        private readonly BraceFoldingStrategy _foldingStrategy = new();
         private bool _allFolded = false;
         private AutocompletionEngine? _autocompletionEngine;
         private CompletionWindow? _completionWindow;
@@ -107,7 +107,7 @@ namespace Skriptorium.UI
         private Point _dragStartPoint;
         private double _currentDeltaX;
         private double _currentDeltaY;
-        private DispatcherTimer _autoscrollTimer;
+        private readonly DispatcherTimer _autoscrollTimer = new(DispatcherPriority.Render);
 
         private enum ScrollAxis { None, Horizontal, Vertical }
         private ScrollAxis _activeAxis = ScrollAxis.None;
@@ -124,11 +124,6 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextEntering += TextArea_TextEntering;
             avalonEditor.TextArea.TextEntered += TextArea_TextEntered;
             avalonEditor.PreviewMouseWheel += AvalonEditor_PreviewMouseWheel;
-
-            if (avalonEditor.Document == null)
-            {
-                return;
-            }
 
             _markers = new TextSegmentCollection<TextMarker>(avalonEditor.Document);
             _markerRenderer = new TextMarkerRenderer(avalonEditor.TextArea.TextView, _markers);
@@ -148,8 +143,8 @@ namespace Skriptorium.UI
 
             _bookmarkManager = new BookmarkManager(avalonEditor);
             _foldingManager = FoldingManager.Install(avalonEditor.TextArea);
-            _foldingStrategy = new BraceFoldingStrategy();
             UpdateFoldings();
+
             avalonEditor.TextArea.PreviewMouseLeftButtonDown += AvalonEditor_PreviewMouseLeftButtonDown;
             avalonEditor.MouseHover += AvalonEditor_MouseHover;
             avalonEditor.MouseHoverStopped += AvalonEditor_MouseHoverStopped;
@@ -165,7 +160,6 @@ namespace Skriptorium.UI
             avalonEditor.QueryCursor += AvalonEditor_QueryCursor;
             avalonEditor.Options.EnableRectangularSelection = true;
             avalonEditor.Options.EnableVirtualSpace = true;
-            _autoscrollTimer = new DispatcherTimer (DispatcherPriority.Render);
             _autoscrollTimer.Interval = TimeSpan.FromMilliseconds(10);
             _autoscrollTimer.Tick += AutoscrollTimer_Tick;
 
@@ -180,21 +174,25 @@ namespace Skriptorium.UI
                 }
             };
         }
+
         private void InitializeAutocompletion()
         {
             _autocompletionEngine = new AutocompletionEngine();
             string[] lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
             _autocompletionEngine.UpdateSymbolsFromCode(lines);
         }
+
         public void ToggleAutocompletion()
         {
             _autocompletionEnabled = !_autocompletionEnabled;
+
             if (!_autocompletionEnabled && _completionWindow != null)
             {
                 _completionWindow.Close();
                 _completionWindow = null;
             }
         }
+
         private void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
         {
             if (!_autocompletionEnabled)
@@ -206,6 +204,7 @@ namespace Skriptorium.UI
                 }
                 return;
             }
+
             if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '*')
             {
                 if (_completionWindow != null)
@@ -215,6 +214,7 @@ namespace Skriptorium.UI
                 }
                 return;
             }
+
             if (IsInCommentOrString(avalonEditor.CaretOffset))
             {
                 if (_completionWindow != null)
@@ -224,7 +224,9 @@ namespace Skriptorium.UI
                 }
                 return;
             }
+
             string prefix = GetCurrentWordPrefix();
+
             if (string.IsNullOrEmpty(prefix) || prefix.Length < 2)
             {
                 if (_completionWindow != null)
@@ -234,8 +236,10 @@ namespace Skriptorium.UI
                 }
                 return;
             }
-            var suggestions = _autocompletionEngine.GetSuggestions(prefix);
-            if (!suggestions.Any())
+
+            var suggestions = _autocompletionEngine?.GetSuggestions(prefix);
+
+            if (suggestions == null || !suggestions.Any())
             {
                 if (_completionWindow != null)
                 {
@@ -244,6 +248,7 @@ namespace Skriptorium.UI
                 }
                 return;
             }
+
             if (_completionWindow == null)
             {
                 _completionWindow = new CompletionWindow(avalonEditor.TextArea);
@@ -259,6 +264,7 @@ namespace Skriptorium.UI
                 }) + 35;
                 _completionWindow.Width = Math.Max(150, maxWidth);
                 bool isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
+
                 if (isDark)
                 {
                     _completionWindow.Background = new SolidColorBrush(Color.FromRgb(30, 30, 30));
@@ -287,6 +293,7 @@ namespace Skriptorium.UI
                 }
                 _completionWindow.Show();
             }
+
             _completionWindow.CompletionList.CompletionData.Clear();
             foreach (var suggestion in suggestions)
             {
@@ -294,6 +301,7 @@ namespace Skriptorium.UI
             }
             _completionWindow.CompletionList.SelectItem(prefix);
         }
+
         private bool IsInCommentOrString(int offset)
         {
             var currentLine = avalonEditor.Document.GetLineByOffset(offset);
@@ -302,6 +310,7 @@ namespace Skriptorium.UI
             {
                 int startOffset = avalonEditor.Document.GetOffset(token.Line, token.Column);
                 int endOffset = startOffset + token.Value.Length;
+
                 if (offset >= startOffset && offset <= endOffset)
                 {
                     if (token.Type == TokenType.Comment || token.Type == TokenType.CommentBlock || token.Type == TokenType.StringLiteral)
@@ -310,6 +319,7 @@ namespace Skriptorium.UI
             }
             return false;
         }
+
         private string GetCurrentWordPrefix()
         {
             var document = avalonEditor.Document;
@@ -324,6 +334,7 @@ namespace Skriptorium.UI
                 return "";
             return document.GetText(start, offset - start);
         }
+
         private void UpdateAutocompletion()
         {
             try
@@ -331,18 +342,20 @@ namespace Skriptorium.UI
                 var parser = new DaedalusParser(_cachedTokens);
                 _ast = parser.ParseScript();
                 string[] lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-                _autocompletionEngine.UpdateSymbolsFromCode(lines);
+                _autocompletionEngine?.UpdateSymbolsFromCode(lines);
             }
             catch (Exception)
             {
             }
         }
+
         public void SetZoom(double zoomFactor)
         {
             Zoom = zoomFactor;
             avalonEditor.FontSize = OriginalFontSize * Zoom;
             avalonEditor.TextArea.TextView.Redraw();
         }
+
         private double GetNextZoomStep(bool zoomIn)
         {
             int currentIndex = Array.IndexOf(_zoomSteps, Zoom);
@@ -362,6 +375,7 @@ namespace Skriptorium.UI
             newIndex = Math.Clamp(newIndex, 0, _zoomSteps.Length - 1);
             return _zoomSteps[newIndex];
         }
+
         private void AvalonEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (Keyboard.Modifiers == ModifierKeys.Control)
@@ -396,6 +410,7 @@ namespace Skriptorium.UI
                 e.Handled = true;
             }
         }
+
         private void OnThemeChanged(object? sender, ThemeChangedEventArgs e)
         {
             var isDark = e.NewTheme?.BaseColorScheme == "Dark";
@@ -408,20 +423,22 @@ namespace Skriptorium.UI
             ApplyCaretBrushFromTheme();
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
+
         private void DoInitialHighlighting()
         {
             if (string.IsNullOrEmpty(avalonEditor.Text))
             {
                 _cachedTokens = new List<DaedalusToken>();
-                _colorizer.UpdateTokens(_cachedTokens);
+                _colorizer?.UpdateTokens(_cachedTokens);
                 return;
             }
             var lines = avalonEditor.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
             _cachedTokens = new DaedalusLexer().Tokenize(lines);
-            _colorizer.UpdateTokens(_cachedTokens);
+            _colorizer?.UpdateTokens(_cachedTokens);
             avalonEditor.TextArea.TextView.InvalidateVisual();
             UpdateAutocompletion();
         }
+
         protected override void OnVisualParentChanged(DependencyObject oldParent)
         {
             base.OnVisualParentChanged(oldParent);
@@ -431,6 +448,7 @@ namespace Skriptorium.UI
                 _foldingManager = null;
             }
         }
+
         private void ApplyCaretBrushFromTheme()
         {
             var isDark = ThemeManager.Current.DetectTheme()?.BaseColorScheme == "Dark";
@@ -438,6 +456,7 @@ namespace Skriptorium.UI
                 ? new SolidColorBrush(Colors.WhiteSmoke)
                 : new SolidColorBrush(Colors.Black);
         }
+
         private void AvalonEditor_TextChanged(object? sender, EventArgs e)
         {
             if (_suppressChangeTracking)
@@ -451,25 +470,31 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.Redraw();
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
+
         private void UpdateFoldings()
         {
             if (_foldingManager == null || avalonEditor.Document == null)
                 return;
             var foldings = _foldingStrategy.CreateNewFoldings(avalonEditor.Document);
-            _foldingManager.UpdateFoldings(foldings, -1);
+            _foldingManager?.UpdateFoldings(foldings, -1);
         }
+
         public void ToggleAllFoldings()
         {
             if (_foldingManager == null || !_foldingManager.AllFoldings.Any()) return;
             bool shouldFold = !_allFolded;
             foreach (var section in _foldingManager.AllFoldings)
             {
-                section.IsFolded = shouldFold;
+                if (section != null)
+                    section.IsFolded = shouldFold;
             }
             _allFolded = shouldFold;
         }
+
         public bool IsModified { get; private set; } = false;
+
         public string Text => avalonEditor.Text;
+
         public string FilePath
         {
             get => _filePath;
@@ -482,6 +507,7 @@ namespace Skriptorium.UI
                 UpdateAutocompletion();
             }
         }
+
         public void LoadFile(string path)
         {
             if (System.IO.File.Exists(path))
@@ -495,6 +521,7 @@ namespace Skriptorium.UI
                 DoInitialHighlighting();
             }
         }
+
         public void SetTextAndResetModified(string text)
         {
             _suppressChangeTracking = true;
@@ -508,6 +535,7 @@ namespace Skriptorium.UI
             UpdateFoldings();
             UpdateAutocompletion();
         }
+
         public void SetTextAndMarkAsModified(string text)
         {
             _suppressChangeTracking = true;
@@ -521,14 +549,18 @@ namespace Skriptorium.UI
             UpdateFoldings();
             UpdateAutocompletion();
         }
+
         public void ResetModifiedFlag()
         {
             _originalText = avalonEditor.Text;
             IsModified = false;
             TextChanged?.Invoke(this, null);
         }
+
         public event TextChangedEventHandler? TextChanged;
+
         public TextEditor Avalon => avalonEditor;
+
         public void HighlightAllOccurrences(string searchText, bool matchCase = false, bool wholeWord = false, bool restrictToSelection = false, int selectionStart = 0, int selectionLength = 0)
         {
             if (string.IsNullOrWhiteSpace(searchText) || _markers == null || _markerRenderer == null)
@@ -558,29 +590,34 @@ namespace Skriptorium.UI
                     BackgroundColor = Colors.Yellow,
                     ForegroundColor = Colors.Black
                 };
-                _markers.Add(marker);
+                _markers?.Add(marker);
                 offset += searchText.Length;
             }
             avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
+
         public void ClearAllBookmarks()
         {
             _bookmarkManager?.ClearAll();
         }
+
         public void GotoNextBookmark()
         {
             _bookmarkManager?.GotoNext();
         }
+
         public void GotoPreviousBookmark()
         {
             _bookmarkManager?.GotoPrevious();
         }
+
         public void ToggleBookmarkAtCaret()
         {
             int lineNumber = avalonEditor.TextArea.Caret.Line;
             _bookmarkManager?.ToggleBookmark(lineNumber);
         }
+
         public void ClearHighlighting()
         {
             if (_markers == null) return;
@@ -588,6 +625,7 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
+
         public void HighlightError(int line, int column, int length)
         {
             if (_markers == null) return;
@@ -599,13 +637,15 @@ namespace Skriptorium.UI
                     BackgroundColor = Colors.Red,
                     ForegroundColor = Colors.White
                 };
-                _markers.Add(marker);
+                _markers?.Add(marker);
                 avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
             }
             catch { }
         }
+
         private List<string> Errors = new List<string>();
         private List<Skriptorium.Parsing.Declaration> _ast = new List<Skriptorium.Parsing.Declaration>();
+
         private void ApplySyntaxHighlighting()
         {
             if (!_syntaxHighlightingEnabled)
@@ -642,6 +682,7 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
             avalonEditor.TextArea.TextView.InvalidateVisual();
         }
+
         public void ApplySyntaxHighlightingState()
         {
             avalonEditor.TextArea.TextView.LineTransformers.Clear();
@@ -700,7 +741,8 @@ namespace Skriptorium.UI
             }
             return errors;
         }
-        private void AvalonEditor_CaretPositionChanged(object sender, EventArgs e)
+
+        private void AvalonEditor_CaretPositionChanged(object? sender, EventArgs e)
         {
             CaretPositionChanged?.Invoke(this, e);
         }
@@ -823,7 +865,7 @@ namespace Skriptorium.UI
         }
 
         // Vertikales und Horizontales scrollen mit Mausrad
-        private ScrollViewer GetScrollViewer(Visual parent)
+        private ScrollViewer? GetScrollViewer(Visual? parent)
         {
             if (parent is ScrollViewer scrollViewer)
                 return scrollViewer;
@@ -853,7 +895,7 @@ namespace Skriptorium.UI
         }
 
 
-        private void AutoscrollTimer_Tick(object sender, EventArgs e)
+        private void AutoscrollTimer_Tick(object? sender, EventArgs e)
         {
             if (!_isMiddleDragging) return;
 

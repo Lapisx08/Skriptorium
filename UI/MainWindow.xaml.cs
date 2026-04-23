@@ -142,99 +142,87 @@ namespace Skriptorium.UI
             string savedPath = Properties.Settings.Default.ScriptSearchPath;
         }
 
-        private string? _initialFirstValidPath;           // für spätere lazy Indizierung
-        private bool _initialIndexingTriggered;           // Schutz vor mehrfachem Start
-
+        private string? _initialFirstValidPath;
         private bool _backgroundIndexingStarted = false;
 
         private async void MainWindow_FirstLoaded(object sender, RoutedEventArgs e)
         {
             this.Loaded -= MainWindow_FirstLoaded;
 
-            // 1. Tabs asynchron wiederherstellen (wie bisher – sehr gut!)
-            await Task.Run(() => DataManager.LoadOpenTabs())
-                .ContinueWith(async t =>
+            try
+            {
+                // 1. Tabs asynchron laden
+                // Wir warten hier direkt auf das Ergebnis, statt ContinueWith zu nutzen
+                var savedTabs = await Task.Run(() => DataManager.LoadOpenTabs());
+
+                string? firstValidPath = null;
+
+                foreach (var tab in savedTabs)
                 {
-                    if (t.IsFaulted) { /* Fehlerbehandlung wie bisher */ }
+                    if (string.IsNullOrWhiteSpace(tab.FilePath) || !File.Exists(tab.FilePath))
+                        continue;
 
-                    var savedTabs = t.Result;
-                    string? firstValidPath = null;
+                    // Den ersten gültigen Pfad für die spätere Indizierung merken
+                    firstValidPath ??= tab.FilePath;
 
-                    foreach (var tab in savedTabs)
+                    // UI-Update: Da wir in einer 'async' Methode auf dem UI-Thread sind,
+                    // können wir direkt Dispatcher.InvokeAsync nutzen.
+                    await Dispatcher.InvokeAsync(() =>
                     {
-                        if (string.IsNullOrWhiteSpace(tab.FilePath) || !File.Exists(tab.FilePath))
-                            continue;
+                        DataManager.OpenFile(tab.FilePath, (content, path) =>
+                            _tabManager.AddNewTab(content, Path.GetFileName(path), path));
+                    });
+                }
 
-                        if (firstValidPath == null)
-                            firstValidPath = tab.FilePath;
+                // Das Feld wird hier befüllt. Wenn es immer noch grau ist, 
+                // liegt es nur daran, dass du den Wert nirgendwo anders AUSLIEST.
+                _initialFirstValidPath = firstValidPath;
 
-                        await Dispatcher.InvokeAsync(() =>
-                        {
-                            DataManager.OpenFile(tab.FilePath, (content, path) =>
-                                _tabManager.AddNewTab(content, Path.GetFileName(path), path));
-                        });
-                    }
+                // 2. Hintergrund-Indizierung sanft starten
+                if (!string.IsNullOrEmpty(firstValidPath) && !_backgroundIndexingStarted)
+                {
+                    _backgroundIndexingStarted = true;
 
-                    _initialFirstValidPath = firstValidPath;
+                    // Kurze Pause, damit die UI erst einmal "durchatmen" kann
+                    await Task.Delay(1200);
 
-                    // ───────────────────────────────────────────────────────────────
-                    // NEU: Hintergrund-Indizierung sanft starten (nach 800–1500 ms Verzögerung)
-                    // ───────────────────────────────────────────────────────────────
-                    if (!string.IsNullOrEmpty(firstValidPath) && !_backgroundIndexingStarted)
-                    {
-                        _backgroundIndexingStarted = true;
-
-                        // Kleine Verzögerung → UI ist schon sichtbar und reagiert
-                        await Task.Delay(1200);  // 1,2 Sekunden – fühlt sich natürlich an
-
-                        // Optional: ganz leichter Hinweis (nicht zwingend)
-                        await Dispatcher.InvokeAsync(() =>
-                        {
-                            // StatusPositionText.Text = "Projekt wird im Hintergrund indiziert…";
-                            // oder Snackbar:
-                            // MainSnackbar?.MessageQueue?.Enqueue("Indiziere Projekt für GoTo Definition…", null, null, null, false, true, TimeSpan.FromSeconds(6));
-                        });
-
-                        // Eigentliche Indizierung im Hintergrund-Thread
-                        _ = Task.Run(() =>
-                        {
-                            try
-                            {
-                                string? root = FindScriptsRoot(firstValidPath);
-                                if (string.IsNullOrEmpty(root))
-                                {
-                                    // Fallback: Einstellungen-Pfad
-                                    root = Properties.Settings.Default.ScriptSearchPath;
-                                }
-
-                                if (!string.IsNullOrEmpty(root) && Directory.Exists(root))
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"[Background] Indiziere Projekt: {root}");
-                                    ProjectManager.Instance.LoadProject(root);
-                                }
-                                else if (File.Exists(firstValidPath))
-                                {
-                                    // Sicherheitsnetz: zumindest die erste Datei
-                                    ProjectManager.Instance.RefreshSingleFile(firstValidPath);
-                                }
-
-                                // Optional: Erfolg melden
-                                Dispatcher.Invoke(() =>
-                                {
-                                    // StatusPositionText.Text = "";
-                                    // MainSnackbar?.MessageQueue?.Enqueue("Indizierung abgeschlossen", null, null, null, true, true, TimeSpan.FromSeconds(3));
-                                });
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"Hintergrund-Indizierung fehlgeschlagen: {ex.Message}");
-                            }
-                        });
-                    }
-                }, TaskScheduler.FromCurrentSynchronizationContext());
+                    // Den schweren Teil komplett in den Hintergrund schieben
+                    _ = Task.Run(() => RunBackgroundIndexing(firstValidPath));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Fehler beim Starten] {ex.Message}");
+            }
         }
 
-        // Füge das irgendwo in der Klasse MainWindow ein (z. B. nach den Feldern oder vor MainWindow_FirstLoaded)
+        // Ausgelagerte Logik für bessere Übersicht
+        private void RunBackgroundIndexing(string startPath)
+        {
+            try
+            {
+                string? root = FindScriptsRoot(startPath) ?? Properties.Settings.Default.ScriptSearchPath;
+
+                if (!string.IsNullOrEmpty(root) && Directory.Exists(root))
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Background] Indiziere Projekt: {root}");
+                    ProjectManager.Instance.LoadProject(root);
+                }
+                else if (File.Exists(startPath))
+                {
+                    ProjectManager.Instance.RefreshSingleFile(startPath);
+                }
+
+                // Erfolg in der UI melden (optional)
+                Dispatcher.Invoke(() => {
+                    // Hier könnte ein Status-Update stehen
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Indizierungs-Fehler] {ex.Message}");
+            }
+        }
 
         private string? FindScriptsRoot(string path)
         {
@@ -382,7 +370,7 @@ namespace Skriptorium.UI
             }
         }
 
-        private void DockingManager_ActiveContentChanged(object sender, EventArgs e)
+        private void DockingManager_ActiveContentChanged(object? sender, EventArgs e)
         {
             if (_currentScriptEditor != null)
             {
@@ -547,7 +535,7 @@ namespace Skriptorium.UI
             var editors = _tabManager.GetAllOpenEditors()
                                      .Where(ed => ed.FilePath != null)
                                      .ToList();
-            bool allSaved = true;
+
             foreach (var editor in editors)
             {
                 if (DataManager.SaveFile(editor))
@@ -555,14 +543,9 @@ namespace Skriptorium.UI
                     var document = _tabManager.GetDocumentForEditor(editor);
                     if (document != null)
                     {
-                        document.Title = System.IO.Path.GetFileName(editor.FilePath);
+                        document.Title = System.IO.Path.GetFileName(editor.FilePath!);
                     }
                     _tabManager.UpdateTabTitle(editor);
-                }
-                else
-                {
-                    allSaved = false;
-                    break;
                 }
             }
             _dataMenuManager.UpdateRecentFilesMenu();
@@ -942,7 +925,7 @@ namespace Skriptorium.UI
             UpdateCodeStructureView();
         }
 
-        private void ScriptEditor_CaretPositionChanged(object sender, EventArgs e)
+        private void ScriptEditor_CaretPositionChanged(object? sender, EventArgs e)
         {
             UpdateStatusBar();
         }
@@ -1022,7 +1005,7 @@ namespace Skriptorium.UI
             dicts.Add(new ResourceDictionary { Source = uri });
         }
 
-        private void SearchPanel_VisibilityChanged(object sender, EventArgs e)
+        private void SearchPanel_VisibilityChanged(object? sender, EventArgs e)
         {
             if (_currentScriptEditor == null) return;
 
@@ -1044,7 +1027,7 @@ namespace Skriptorium.UI
             }
         }
 
-        private void SearchPanel_SearchTextChanged(object sender, EventArgs e)
+        private void SearchPanel_SearchTextChanged(object? sender, EventArgs e)
         {
             if (_currentScriptEditor == null) return;
 
@@ -1065,7 +1048,7 @@ namespace Skriptorium.UI
                 .FirstOrDefault(d => d.Content is ScriptEditor editor &&
                                      string.Equals(editor.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
 
-            ScriptEditor targetEditor = null;
+            ScriptEditor? targetEditor = null;
 
             if (document != null)
             {
@@ -1144,12 +1127,13 @@ namespace Skriptorium.UI
             }
         }
 
-        public ScriptEditor OpenFileByPath(string filePath)
+        public ScriptEditor? OpenFileByPath(string filePath)
         {
-            if (!System.IO.File.Exists(filePath)) return null;
+            if (!System.IO.File.Exists(filePath))
+                return null;
 
             var editor = new ScriptEditor();
-            editor.LoadFile(filePath); // Stelle sicher, dass ScriptEditor eine LoadFile Methode hat
+            editor.LoadFile(filePath);
 
             var doc = new LayoutDocument
             {

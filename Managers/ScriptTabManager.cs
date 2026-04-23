@@ -20,7 +20,6 @@ namespace Skriptorium.Managers
         private readonly DockingManager _dockingManager;
         private readonly LayoutDocumentPane _defaultDocumentPane;
         private int _newScriptCounter = 1;
-        private bool _isInitializing = true;
         private readonly Dictionary<string, FileSystemWatcher> _watchers = new Dictionary<string, FileSystemWatcher>(StringComparer.OrdinalIgnoreCase);
         
         public ScriptTabManager(DockingManager dockingManager, LayoutDocumentPane documentPane)
@@ -182,8 +181,10 @@ namespace Skriptorium.Managers
 
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            if (e.Name.StartsWith("~") || e.Name.EndsWith(".tmp") || e.Name.Contains(".syncthing."))
+            if (e.Name?.StartsWith("~") == true || e.Name?.EndsWith(".tmp") == true || e.Name?.Contains(".syncthing.") == true)
+            {
                 return;
+            }
 
             Application.Current.Dispatcher.Invoke(async () =>
             {
@@ -523,16 +524,6 @@ namespace Skriptorium.Managers
             return (ControlTemplate)System.Windows.Markup.XamlReader.Parse(xamlTemplate);
         }
 
-        private void RegisterMouseWheelHandlers()
-        {
-            var tabControls = FindVisualChildren<TabControl>(_dockingManager);
-            foreach (var tabControl in tabControls)
-            {
-                tabControl.PreviewMouseWheel -= TabControl_PreviewMouseWheel;
-                tabControl.PreviewMouseWheel += TabControl_PreviewMouseWheel;
-            }
-        }
-
         private IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
@@ -540,10 +531,14 @@ namespace Skriptorium.Managers
                 for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
                 {
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T tChild)
-                        yield return tChild;
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                        yield return childOfChild;
+                    if (child != null)
+                    {
+                        if (child is T tChild)
+                            yield return tChild;
+
+                        foreach (T childOfChild in FindVisualChildren<T>(child))
+                            yield return childOfChild;
+                    }
                 }
             }
         }
@@ -608,22 +603,22 @@ namespace Skriptorium.Managers
     public class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;
-        private readonly Func<object, bool> _canExecute;
+        private readonly Func<object, bool>? _canExecute;
 
-        public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+        public RelayCommand(Action<object> execute, Func<object, bool>? canExecute = null)
         {
-            _execute = execute;
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
         }
 
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
             remove => CommandManager.RequerySuggested -= value;
         }
 
-        public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
+        public bool CanExecute(object? parameter) => _canExecute == null || _canExecute(parameter!);
 
-        public void Execute(object parameter) => _execute(parameter);
+        public void Execute(object? parameter) => _execute(parameter!);
     }
 }
