@@ -159,7 +159,6 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.MouseUp += AvalonEditor_MouseUp_MiddleScroll;
             avalonEditor.QueryCursor += AvalonEditor_QueryCursor;
             avalonEditor.Options.EnableRectangularSelection = true;
-            avalonEditor.Options.EnableVirtualSpace = true;
             _autoscrollTimer.Interval = TimeSpan.FromMilliseconds(10);
             _autoscrollTimer.Tick += AutoscrollTimer_Tick;
 
