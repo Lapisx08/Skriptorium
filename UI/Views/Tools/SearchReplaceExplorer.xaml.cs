@@ -19,6 +19,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Windows.Services.Maps;
 
 namespace Skriptorium.UI.Views
 {
@@ -289,7 +290,6 @@ namespace Skriptorium.UI.Views
                     else
                     {
                         text = ReadFileAutoEncoding(node.FullPath);
-                        // Aktuellen Zeitstempel nach dem Lesen verwenden
                         var currentLastModified = File.GetLastWriteTime(node.FullPath);
                         _fileCache.AddOrUpdate(node.FullPath,
                             (text, currentLastModified),
@@ -323,17 +323,36 @@ namespace Skriptorium.UI.Views
 
                     if (replacedCount > 0)
                     {
+                        // Datei speichern
                         DataManager.WriteFileAutoEncoding(node.FullPath, newText);
 
+                        // Cache aktualisieren
                         var newLastModified = File.GetLastWriteTime(node.FullPath);
                         _fileCache.AddOrUpdate(node.FullPath,
                             (newText, newLastModified),
                             (k, v) => (newText, newLastModified));
 
-                        // Lokalen Encoding-Cache auf Latin-1 setzen (wie DataManager)
                         _fileEncodings[node.FullPath] = Encoding.GetEncoding("ISO-8859-1");
 
                         totalReplacedCount += replacedCount;
+
+                        // *** NEU: Offene Tabs über den TabManager aktualisieren ***
+                        // Wir suchen in allen offenen Editoren nach dem passenden Dateipfad
+                        var openEditor = _tabManager.GetAllOpenEditors().FirstOrDefault(ed =>
+                            string.Equals(ed.FilePath, node.FullPath, StringComparison.OrdinalIgnoreCase));
+
+                        if (openEditor != null)
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                // Den Text im Editor aktualisieren
+                                // Nutze die Methode deines ScriptEditors, um den Status korrekt zu setzen
+                                openEditor.SetTextAndResetModified(newText);
+
+                                // Falls der TabManager den Titel (mit/ohne Sternchen) verwalten soll:
+                                _tabManager.UpdateTabTitle(openEditor);
+                            });
+                        }
                     }
                 }
                 catch (IOException ex)
@@ -344,7 +363,7 @@ namespace Skriptorium.UI.Views
                 {
                     lock (_errors) { _errors.Add($"Zugriff verweigert für {node.FullPath}: {ex.Message}"); }
                 }
-                catch (Exception ex) // zusätzlicher Fallback-Catch
+                catch (Exception ex)
                 {
                     lock (_errors) { _errors.Add($"Unerwarteter Fehler bei {node.FullPath}: {ex.Message}"); }
                 }
@@ -364,6 +383,7 @@ namespace Skriptorium.UI.Views
 
             StartSearch(searchTerm);
         }
+
 
         private void SearchResultsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
