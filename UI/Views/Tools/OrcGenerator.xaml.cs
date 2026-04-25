@@ -162,16 +162,16 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             sb.AppendLine("\t// ------ Ausgerüstete Waffen ------");
-            sb.AppendLine("\tEquipItem (self, ItMw_2H_OrcAxe_01);");
+            sb.AppendLine("\tEquipItem(self, ItMw_2H_OrcAxe_01);");
             sb.AppendLine();
 
             sb.AppendLine("\t// ------ Inventar ------");
             sb.AppendLine();
 
             sb.AppendLine("\t// ------ Aussehen ------");
-            sb.AppendLine("\tMdl_SetVisual (self, \"Orc.mds\");");
-            sb.AppendLine($"\tMdl_SetVisualBody (self, \"{((ComboBoxItem)bodyMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, \"{((ComboBoxItem)headMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, NO_ARMOR);");
-            sb.AppendLine("\tMdl_SetModelFatness (self, 0);");
+            sb.AppendLine("\tMdl_SetVisual(self, \"Orc.mds\");");
+            sb.AppendLine($"\tMdl_SetVisualBody(self, \"{((ComboBoxItem)bodyMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, \"{((ComboBoxItem)headMeshEntry.SelectedItem)?.Content}\", DEFAULT, DEFAULT, NO_ARMOR);");
+            sb.AppendLine("\tMdl_SetModelFatness(self, 0);");
             sb.AppendLine();
 
             sb.AppendLine("\t// ------ TA anmelden ------");
@@ -181,8 +181,8 @@ namespace Skriptorium.UI.Views.Tools
 
             sb.AppendLine($"func void Rtn_Start_{idEntry.Text} ()");
             sb.AppendLine("{");
-            sb.AppendLine("\tTA_Stand_ArmsCrossed (08,00, 20,00, \"WP_Platzhalter\");");
-            sb.AppendLine("\tTA_Stand_ArmsCrossed (20,00, 08,00, \"WP_Platzhalter\");");
+            sb.AppendLine("\tTA_Stand_ArmsCrossed(08,00, 20,00, \"WP_Platzhalter\");");
+            sb.AppendLine("\tTA_Stand_ArmsCrossed(20,00, 08,00, \"WP_Platzhalter\");");
             sb.AppendLine("};");
 
             outputText.Text = sb.ToString();

@@ -85,29 +85,29 @@ namespace Skriptorium.UI.Views.Tools
 
             // B_CloseTopics.d
             OutCloseBox.Text =
-                $"B_CloseTopic ({topic}, {mis}, {StartChapterBox.Text}, {EndChapterBox.Text});\n";
+                $"B_CloseTopic({topic}, {mis}, {StartChapterBox.Text}, {EndChapterBox.Text});\n";
 
             // Questdialog
             var sb = new StringBuilder();
 
             sb.AppendLine("// Queststart");
-            sb.AppendLine($"Log_CreateTopic ({topic}, LOG_MISSION);");
-            sb.AppendLine($"Log_SetTopicStatus ({topic}, LOG_RUNNING);");
+            sb.AppendLine($"Log_CreateTopic({topic}, LOG_MISSION);");
+            sb.AppendLine($"Log_SetTopicStatus({topic}, LOG_RUNNING);");
             sb.AppendLine($"{mis} = LOG_RUNNING;");
-            sb.AppendLine($"B_LogEntry ({topic}, \"{Escape(LogStartBox.Text)}\");");
+            sb.AppendLine($"B_LogEntry({topic}, \"{Escape(LogStartBox.Text)}\");");
             sb.AppendLine();
 
             sb.AppendLine("// Questerfolg");
-            sb.AppendLine($"Log_SetTopicStatus ({topic}, LOG_SUCCESS);");
+            sb.AppendLine($"Log_SetTopicStatus({topic}, LOG_SUCCESS);");
             sb.AppendLine($"{mis} = LOG_SUCCESS;");
-            sb.AppendLine($"B_LogEntry ({topic}, \"{Escape(LogSuccessBox.Text)}\");");
+            sb.AppendLine($"B_LogEntry({topic}, \"{Escape(LogSuccessBox.Text)}\");");
             sb.AppendLine("B_CheckLog();");
             sb.AppendLine();
 
             sb.AppendLine("// Quest gescheitert");
-            sb.AppendLine($"Log_SetTopicStatus ({topic}, LOG_FAILED);");
+            sb.AppendLine($"Log_SetTopicStatus({topic}, LOG_FAILED);");
             sb.AppendLine($"{mis} = LOG_FAILED;");
-            sb.AppendLine($"B_LogEntry ({topic}, \"{Escape(LogFailBox.Text)}\");");
+            sb.AppendLine($"B_LogEntry({topic}, \"{Escape(LogFailBox.Text)}\");");
             sb.AppendLine("B_CheckLog();");
             sb.AppendLine();
 
@@ -117,7 +117,7 @@ namespace Skriptorium.UI.Views.Tools
                     continue;
 
                 sb.AppendLine("// Neue Questinfos");
-                sb.AppendLine($"B_LogEntry ({topic}, \"{Escape(log.Text)}\");");
+                sb.AppendLine($"B_LogEntry({topic}, \"{Escape(log.Text)}\");");
             }
 
             OutDialogBox.Text = sb.ToString();

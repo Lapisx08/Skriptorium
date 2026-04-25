@@ -400,7 +400,7 @@ namespace Skriptorium.UI.Views.Tools
                     string secondParam = (speakerKey == "NPC") ? "other" : "self";
 
                     // Auch hier: dialogInstance nutzen
-                    sb.AppendLine($"\tAI_Output ({firstParam}, {secondParam}, \"{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
+                    sb.AppendLine($"\tAI_Output({firstParam}, {secondParam}, \"{dialogInstance}_{dialogIndex:00}\"); // {dialogText}");
                     dialogIndex++;
                 }
                 else if (type == "XP")
@@ -408,7 +408,7 @@ namespace Skriptorium.UI.Views.Tools
                     string xpValue = line.XPEntry.Text.Trim();
                     if (int.TryParse(xpValue, out int xp) && xp >= 0)
                     {
-                        sb.AppendLine($"\tB_GivePlayerXP ({xp});");
+                        sb.AppendLine($"\tB_GivePlayerXP({xp});");
                     }
                 }
                 else if (type == "ITEM")
@@ -421,12 +421,12 @@ namespace Skriptorium.UI.Views.Tools
                     {
                         string firstParam = (recipientKey == "NPC") ? "self" : "other";
                         string secondParam = (recipientKey == "NPC") ? "other" : "self";
-                        sb.AppendLine($"\tB_GiveInvItems ({firstParam}, {secondParam}, {itemName}, {itemQuantity});");
+                        sb.AppendLine($"\tB_GiveInvItems({firstParam}, {secondParam}, {itemName}, {itemQuantity});");
                     }
                 }
                 else if (type == "END")
                 {
-                    sb.AppendLine("\tAI_StopProcessInfos (self);");
+                    sb.AppendLine("\tAI_StopProcessInfos(self);");
                 }
             }
 

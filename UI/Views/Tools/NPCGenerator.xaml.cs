@@ -188,7 +188,7 @@ namespace Skriptorium.UI.Views.Tools
             string face = gender == Gender.MALE
                 ? maleFaces[rng.Next(maleFaces.Count)]
                 : femaleFaces[rng.Next(femaleFaces.Count)];
-            return $"B_SetNpcVisual (self, {gender}, \"{head}\", {face}, {bodyTex}, NO_ARMOR)";
+            return $"B_SetNpcVisual(self, {gender}, \"{head}\", {face}, {bodyTex}, NO_ARMOR)";
         }
 
         private void GenerateCode_Click(object sender, RoutedEventArgs e)
@@ -291,7 +291,7 @@ namespace Skriptorium.UI.Views.Tools
             if (((ComboBoxItem)attributesDropdown.SelectedItem)?.Content.ToString() !=
                 (Application.Current.TryFindResource("Yes") as string))
             {
-                sb.AppendLine($"\tB_SetAttributesToChapter (self, 1);{(includeComments ? $" // {cSetAttributesChapter}" : "")}");
+                sb.AppendLine($"\tB_SetAttributesToChapter(self, 1);{(includeComments ? $" // {cSetAttributesChapter}" : "")}");
                 sb.AppendLine();
             }
 
@@ -313,24 +313,24 @@ namespace Skriptorium.UI.Views.Tools
 
             // Ausgerüstete Waffen
             sb.AppendLine("\t// ------ Ausgerüstete Waffen ------");
-            sb.AppendLine($"\tEquipItem (self, ItMw_1h_Bau_Mace);{(includeComments ? $" // {cEquipItem}" : "")}");
+            sb.AppendLine($"\tEquipItem(self, ItMw_1h_Bau_Mace);{(includeComments ? $" // {cEquipItem}" : "")}");
             sb.AppendLine();
 
             // Inventar
             sb.AppendLine("\t// ------ Inventar ------");
-            sb.AppendLine($"\tB_CreateAmbientInv (self);{(includeComments ? $" // {cCreateAmbientInv}" : "")}");
+            sb.AppendLine($"\tB_CreateAmbientInv(self);{(includeComments ? $" // {cCreateAmbientInv}" : "")}");
             sb.AppendLine();
 
             // Aussehen
             sb.AppendLine("\t// ------ Aussehen ------");
             sb.AppendLine($"\t{GenerateNpcVisual()};{(includeComments ? $" // {cNpcVisual}" : "")}");
-            sb.AppendLine($"\tMdl_SetModelFatness (self, 0);{(includeComments ? " // -1 / 0 / 1 / 2" : "")}");
-            sb.AppendLine($"\tMdl_ApplyOverlayMds (self, \"Humans_Tired.mds\");{(includeComments ? " // Tired / Militia / Mage / Arrogance / Relaxed" : "")}");
+            sb.AppendLine($"\tMdl_SetModelFatness(self, 0);{(includeComments ? " // -1 / 0 / 1 / 2" : "")}");
+            sb.AppendLine($"\tMdl_ApplyOverlayMds(self, \"Humans_Tired.mds\");{(includeComments ? " // Tired / Militia / Mage / Arrogance / Relaxed" : "")}");
             sb.AppendLine();
 
             // NSC-relevante Talente
             sb.AppendLine("\t// ------ NSC-relevante Talente ------");
-            sb.AppendLine("\tB_GiveNpcTalents (self);");
+            sb.AppendLine("\tB_GiveNpcTalents(self);");
             sb.AppendLine();
 
             // Kampf-Talente
@@ -340,16 +340,16 @@ namespace Skriptorium.UI.Views.Tools
             if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() !=
                 (Application.Current.TryFindResource("Yes") as string))
             {
-                sb.AppendLine($"\tB_SetFightSkills (self, 10);{(includeComments ? $" // {cFightSkills}" : "")}");
+                sb.AppendLine($"\tB_SetFightSkills(self, 10);{(includeComments ? $" // {cFightSkills}" : "")}");
                 sb.AppendLine();
             }
 
             if (((ComboBoxItem)fightSkillsDropdown.SelectedItem)?.Content.ToString() == Application.Current.TryFindResource("Yes") as string)
             {
-                sb.AppendLine("\tB_AddFightSkill (self, NPC_TALENT_1H, 10);");
-                sb.AppendLine("\tB_AddFightSkill (self, NPC_TALENT_2H, 10);");
-                sb.AppendLine("\tB_AddFightSkill (self, NPC_TALENT_BOW, 10);");
-                sb.AppendLine("\tB_AddFightSkill (self, NPC_TALENT_CROSSBOW, 10);");
+                sb.AppendLine("\tB_AddFightSkill(self, NPC_TALENT_1H, 10);");
+                sb.AppendLine("\tB_AddFightSkill(self, NPC_TALENT_2H, 10);");
+                sb.AppendLine("\tB_AddFightSkill(self, NPC_TALENT_BOW, 10);");
+                sb.AppendLine("\tB_AddFightSkill(self, NPC_TALENT_CROSSBOW, 10);");
                 sb.AppendLine();
             }
 
@@ -362,8 +362,8 @@ namespace Skriptorium.UI.Views.Tools
             // Tagesroutine-Funktion
             sb.AppendLine($"func void Rtn_Start_{idEntry.Text} (){(includeComments && cDailyRoutine != null ? $" // {cDailyRoutine}" : "")}");
             sb.AppendLine("{");
-            sb.AppendLine("\tTA_Stand_ArmsCrossed (08,00, 20,00, \"WP_Platzhalter\");");
-            sb.AppendLine("\tTA_Stand_ArmsCrossed (20,00, 08,00, \"WP_Platzhalter\");");
+            sb.AppendLine("\tTA_Stand_ArmsCrossed(08,00, 20,00, \"WP_Platzhalter\");");
+            sb.AppendLine("\tTA_Stand_ArmsCrossed(20,00, 08,00, \"WP_Platzhalter\");");
             sb.AppendLine("};");
 
             outputText.Text = sb.ToString();
