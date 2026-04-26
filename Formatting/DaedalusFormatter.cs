@@ -42,7 +42,7 @@ namespace Skriptorium.Formatting
                 }
             }
 
-            return sb.ToString().TrimEnd();
+            return sb.ToString().TrimEnd() + Environment.NewLine;
         }
 
         // Zählt die Differenz von { und } in einer Zeile unter Berücksichtigung von Strings/Kommentare

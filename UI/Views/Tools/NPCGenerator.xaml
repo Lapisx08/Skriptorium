@@ -66,8 +66,8 @@
                     <ComboBoxItem Content="0"/>
                     <ComboBoxItem Content="NPC_FLAG_IMMORTAL"/>
                     <ComboBoxItem Content="NPC_FLAG_IMPORTANT"/>
-                    <ComboBoxItem Content="NPC_FLAG_GHOST|NPC_FLAG_IMMORTAL"/>
-                    <ComboBoxItem Content="NPC_FLAG_GHOST|0"/>
+                    <ComboBoxItem Content="NPC_FLAG_GHOST | NPC_FLAG_IMMORTAL"/>
+                    <ComboBoxItem Content="NPC_FLAG_GHOST | 0"/>
                 </ComboBox>
 
                 <TextBlock Text="{DynamicResource NPCType}" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
@@ -75,6 +75,58 @@
                     <ComboBoxItem Content="NPCTYPE_MAIN"/>
                     <ComboBoxItem Content="NPCTYPE_AMBIENT"/>
                     <ComboBoxItem Content="NPCTYPE_FRIEND"/>
+
+                    <!-- Ardea -->
+                    <ComboBoxItem Content="NPCTYPE_ARDEAMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_ARDEA_AMBIENT"/>
+
+                    <!-- Kap Dun-->
+                    <ComboBoxItem Content="NPCTYPE_KAPDUNMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_KAPDUN_AMBIENT"/>
+
+                    <!-- Montera -->
+                    <ComboBoxItem Content="NPCTYPE_MONTERAMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_MONTERA_AMBIENT"/>
+
+                    <!-- Gotha -->
+                    <ComboBoxItem Content="NPCTYPE_GOTHAMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_GOTHA_AMBIENT"/>
+
+                    <!-- Trelis -->
+                    <ComboBoxItem Content="NPCTYPE_TRELISMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_TRELIS_AMBIENT"/>
+
+                    <!-- Faring -->
+                    <ComboBoxItem Content="NPCTYPE_FARINGMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_FARING_AMBIENT"/>
+
+                    <!-- Geldern -->
+                    <ComboBoxItem Content="NPCTYPE_GELDERNMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_GELDERN_AMBIENT"/>
+
+                    <!-- Vengard -->
+                    <ComboBoxItem Content="NPCTYPE_VENGARDMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_VENGARD_AMBIENT"/>
+
+                    <!-- Silden -->
+                    <ComboBoxItem Content="NPCTYPE_SILDENMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_SILDEN_AMBIENT"/>
+
+                    <!-- Varant -->
+                    <ComboBoxItem Content="NPCTYPE_VARANTMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_VARANT_AMBIENT"/>
+
+                    <!-- Nordmar -->
+                    <ComboBoxItem Content="NPCTYPE_NORDMARMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_NORDMAR_AMBIENT"/>
+
+                    <!-- Waldläufer -->
+                    <ComboBoxItem Content="NPCTYPE_RANGERMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_RANGER_AMBIENT"/>
+
+                    <!-- Diebesgilde -->
+                    <ComboBoxItem Content="NPCTYPE_THIEVESGUILDMAIN"/>
+                    <ComboBoxItem Content="NPCTYPE_THIEVESGUILD_AMBIENT"/>
                 </ComboBox>
 
                 <TextBlock Text="{DynamicResource AIVARs}" Grid.Row="6" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
