@@ -14,6 +14,8 @@ namespace Skriptorium.UI.Views.Tools
         public QuestGenerator()
         {
             InitializeComponent();
+
+            RootGrid.LayoutTransform = App.UiScale;
         }
 
         // + Logeintrag hinzufügen

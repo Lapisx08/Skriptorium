@@ -8,7 +8,7 @@
 
     <!-- ScrollViewer um alles scrollbar zu machen -->
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-        <Grid Margin="10">
+        <Grid x:Name="RootGrid" Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <!-- Eingabefelder -->

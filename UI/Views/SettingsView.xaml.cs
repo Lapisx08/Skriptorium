@@ -19,6 +19,8 @@ namespace Skriptorium.UI.Views
             _projectManager = projectManager;
             InitializeComponent();
 
+            RootGrid.LayoutTransform = App.UiScale;
+
             // Theme-Voreinstellung
             string savedTheme = Properties.Settings.Default.Theme ?? "Light";
             string baseTheme = savedTheme.Split('.')[0];
@@ -97,11 +99,7 @@ namespace Skriptorium.UI.Views
                     Properties.Settings.Default.UiZoom = zoom;
                     Properties.Settings.Default.Save();
 
-                    // Sofort anwenden
-                    if (Owner is MainWindow mw)
-                    {
-                        mw.SetUiZoom(zoom);
-                    }
+                    App.SetUiZoom(zoom);
                 }
             }
         }

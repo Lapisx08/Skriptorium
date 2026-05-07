@@ -18,6 +18,15 @@ namespace Skriptorium
 {
     public partial class App : Application
     {
+        // ===== UI-Skalierung =====
+        public static ScaleTransform UiScale { get; } = new ScaleTransform(1.0, 1.0);
+
+        public static void SetUiZoom(double zoom)
+        {
+            UiScale.ScaleX = zoom;
+            UiScale.ScaleY = zoom;
+        }
+
         private const string ThemePathTemplate = "/AvalonDock.Themes.VS2013;component/{0}Theme.xaml";
         private const string DefaultTheme = "Light.Steel";
         private const string MutexName = "SkriptoriumSingleInstance";

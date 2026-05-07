@@ -3,121 +3,121 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Title="{DynamicResource Settings}" TitleCharacterCasing="Normal"
-        Height="360" Width="480"
-        WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
+        Height="360" Width="480" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid x:Name="RootGrid" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- TabControl -->
-        <TabControl Grid.Row="0">
-            <!-- Tab: Allgemein -->
-            <TabItem Header="{DynamicResource General}">
-                <TabItem.HeaderTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16"/>
-                    </DataTemplate>
-                </TabItem.HeaderTemplate>
+            <!-- TabControl -->
+            <TabControl Grid.Row="0">
+                <!-- Tab: Allgemein -->
+                <TabItem Header="{DynamicResource General}">
+                    <TabItem.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16"/>
+                        </DataTemplate>
+                    </TabItem.HeaderTemplate>
 
-                <Grid Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <!-- Anzeigemodus -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Sprache -->
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
                         <!-- Anzeigemodus -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Sprache -->
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Anzeigemodus -->
-                    <TextBlock Text="{DynamicResource Theme}" 
+                        <TextBlock Text="{DynamicResource Theme}" 
                                Grid.Row="0" Grid.Column="0" 
                                Margin="0,0,5,5" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="ComboTheme"
+                        <ComboBox x:Name="ComboTheme"
                               Grid.Row="0" Grid.Column="1" 
                               Margin="0,0,0,5"
                               SelectedIndex="0"
                               SelectionChanged="ComboTheme_SelectionChanged">
-                        <ComboBoxItem Content="{DynamicResource LightMode}" Tag="Light"/>
-                        <ComboBoxItem Content="{DynamicResource DarkMode}" Tag="Dark"/>
-                    </ComboBox>
+                            <ComboBoxItem Content="{DynamicResource LightMode}" Tag="Light"/>
+                            <ComboBoxItem Content="{DynamicResource DarkMode}" Tag="Dark"/>
+                        </ComboBox>
 
-                    <!-- UI Zoom -->
-                    <TextBlock Text="{DynamicResource UIZoom}"
+                        <!-- UI Zoom -->
+                        <TextBlock Text="{DynamicResource UIZoom}"
                                Grid.Row="1" Grid.Column="0"
                                Margin="0,0,5,5" VerticalAlignment="Center"/>
 
-                    <ComboBox x:Name="ComboUiZoom"
+                        <ComboBox x:Name="ComboUiZoom"
                               Grid.Row="1" Grid.Column="1"
                               Margin="0,0,0,5"
                               SelectionChanged="ComboUiZoom_SelectionChanged">
-                        <ComboBoxItem Content="100 %"/>
-                        <ComboBoxItem Content="125 %"/>
-                        <ComboBoxItem Content="150 %"/>
-                        <ComboBoxItem Content="200 %"/>
-                        <ComboBoxItem Content="300 %"/>
-                        <ComboBoxItem Content="400 %"/>
-                    </ComboBox>
+                            <ComboBoxItem Content="100 %"/>
+                            <ComboBoxItem Content="125 %"/>
+                            <ComboBoxItem Content="150 %"/>
+                            <ComboBoxItem Content="200 %"/>
+                            <ComboBoxItem Content="300 %"/>
+                            <ComboBoxItem Content="400 %"/>
+                        </ComboBox>
 
-                    <!-- Sprache -->
-                    <TextBlock Text="{DynamicResource Language}" 
+                        <!-- Sprache -->
+                        <TextBlock Text="{DynamicResource Language}" 
                                Grid.Row="2" Grid.Column="0" 
                                Margin="0,0,5,5" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="ComboLanguage"
+                        <ComboBox x:Name="ComboLanguage"
                               Grid.Row="2" Grid.Column="1" 
                               Margin="0,0,0,5"
                               SelectionChanged="ComboLanguage_SelectionChanged">
-                        <ComboBoxItem Content="Deutsch" Tag="de"/>
-                        <ComboBoxItem Content="English" Tag="en"/>
-                        <ComboBoxItem Content="Polski" Tag="pl"/>
-                        <ComboBoxItem Content="Pусский" Tag="ru"/>
-                    </ComboBox>
-                </Grid>
-            </TabItem>
+                            <ComboBoxItem Content="Deutsch" Tag="de"/>
+                            <ComboBoxItem Content="English" Tag="en"/>
+                            <ComboBoxItem Content="Polski" Tag="pl"/>
+                            <ComboBoxItem Content="Pусский" Tag="ru"/>
+                        </ComboBox>
+                    </Grid>
+                </TabItem>
 
-            <!-- Tab: Pfade -->
-            <TabItem Header="{DynamicResource Paths}">
-                <TabItem.HeaderTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16"/>
-                    </DataTemplate>
-                </TabItem.HeaderTemplate>
+                <!-- Tab: Pfade -->
+                <TabItem Header="{DynamicResource Paths}">
+                    <TabItem.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16"/>
+                        </DataTemplate>
+                    </TabItem.HeaderTemplate>
 
-                <Grid Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Skript-Pfad -->
-                    <TextBlock Text="{DynamicResource PathToGothicScripts}" 
+                        <!-- Skript-Pfad -->
+                        <TextBlock Text="{DynamicResource PathToGothicScripts}" 
                                Grid.Row="0" Grid.Column="0" 
                                Margin="0,0,5,5" VerticalAlignment="Center"/>
-                    <TextBox x:Name="TxtScriptPath"
+                        <TextBox x:Name="TxtScriptPath"
                              Grid.Row="0" Grid.Column="1" 
                              Margin="0,0,5,5"
                              IsReadOnly="True"/>
-                    <Button x:Name="BtnBrowse"
+                        <Button x:Name="BtnBrowse"
                             Grid.Row="0" Grid.Column="2"
                             Content="…"
                             Width="25" Margin="0,0,0,5"
                             Click="BtnBrowse_Click"/>
-                </Grid>
-            </TabItem>
-        </TabControl>
-    </Grid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </ScrollViewer>
 </mah:MetroWindow>

@@ -14,6 +14,8 @@ namespace Skriptorium.UI.Views.Tools
         {
             InitializeComponent();
 
+            RootGrid.LayoutTransform = App.UiScale;
+
             // Eingabefelder einschränken
             RestrictToNoDigits(nameEntry);
             RestrictToNumbers(idEntry);
@@ -141,7 +143,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("\tattribute[ATR_MANA]\t\t\t = 0;");
             sb.AppendLine();
 
-            sb.AppendLine("\t//----- Protections ----");
+            sb.AppendLine("\t// ------ Protections ------");
             sb.AppendLine("\tprotection[PROT_BLUNT] = 150;");
             sb.AppendLine("\tprotection[PROT_EDGE]  = 150;");
             sb.AppendLine("\tprotection[PROT_POINT] = 150;");
@@ -150,7 +152,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("\tprotection[PROT_MAGIC] = 20;");
             sb.AppendLine();
 
-            sb.AppendLine("\t//----- HitChances -----");
+            sb.AppendLine("\t// ------ HitChances ------");
             sb.AppendLine("\tHitChance[NPC_TALENT_1H]\t   = 0;");
             sb.AppendLine("\tHitChance[NPC_TALENT_2H]\t   = 0;");
             sb.AppendLine("\tHitChance[NPC_TALENT_BOW]\t   = 0;");

@@ -12,6 +12,8 @@ namespace Skriptorium.UI.Views.Tools
         {
             InitializeComponent();
 
+            RootGrid.LayoutTransform = App.UiScale;
+
             // Nur Ganzzahlen in idEntry und voiceEntry erlauben
             RestrictToNumbers(idEntry);
             RestrictToNumbers(voiceEntry);

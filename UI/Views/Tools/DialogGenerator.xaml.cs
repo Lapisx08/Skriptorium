@@ -29,6 +29,7 @@ namespace Skriptorium.UI.Views.Tools
         public DialogGenerator()
         {
             InitializeComponent();
+            RootGrid.LayoutTransform = App.UiScale;
             dialogNumberDropdown.SelectedIndex = 0;
             importantDropdown.SelectedIndex = 1;
             permanentDropdown.SelectedIndex = 1;

@@ -3,32 +3,35 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Title="{DynamicResource AboutSkriptorium}" TitleCharacterCasing="Normal"
-        Height="250" Width="400" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <!-- Infos -->
-            <RowDefinition Height="Auto"/>
-            <!-- Button -->
-            <RowDefinition Height="*"/>
-            <!-- Rest / Auffüllung -->
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        Height="250" Width="400" WindowStartupLocation="CenterOwner">
 
-        <!-- TextBlöcke -->
-        <StackPanel Grid.Row="0">
-            <TextBlock Text="Skriptorium" FontWeight="Bold" FontSize="16" Margin="0,0,0,5" />
-            <TextBlock Text="{DynamicResource Version}" Margin="0,0,0,5"/>
-            <TextBlock Text="{DynamicResource Developer}" Margin="0,0,0,5" />
-            <TextBlock x:Name="TextBlockDatum" Margin="0,0,0,10"/>
-            <TextBlock Text="{DynamicResource Licensing}" TextWrapping="Wrap" Margin="0,0,0,10"/>
-        </StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid x:Name="RootGrid" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Infos -->
+                <RowDefinition Height="Auto"/>
+                <!-- Button -->
+                <RowDefinition Height="*"/>
+                <!-- Rest / Auffüllung -->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- Lizenz-Button weiter unten -->
-        <Button Grid.Row="1" Width="100" HorizontalAlignment="Left" Click="LicenseButton_Click" Margin="0,10,0,0">
-            <TextBlock Text="{DynamicResource ViewLicense}" />
-        </Button>
-    </Grid>
+            <!-- TextBlöcke -->
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="Skriptorium" FontWeight="Bold" FontSize="16" Margin="0,0,0,5" />
+                <TextBlock Text="{DynamicResource Version}" Margin="0,0,0,5"/>
+                <TextBlock Text="{DynamicResource Developer}" Margin="0,0,0,5" />
+                <TextBlock x:Name="TextBlockDatum" Margin="0,0,0,10"/>
+                <TextBlock Text="{DynamicResource Licensing}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+            </StackPanel>
+
+            <!-- Lizenz-Button weiter unten -->
+            <Button Grid.Row="1" Width="100" HorizontalAlignment="Left" Click="LicenseButton_Click" Margin="0,10,0,0">
+                <TextBlock Text="{DynamicResource ViewLicense}" />
+            </Button>
+        </Grid>
+    </ScrollViewer>
 </mah:MetroWindow>

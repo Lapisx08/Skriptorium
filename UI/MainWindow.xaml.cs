@@ -40,9 +40,11 @@ namespace Skriptorium.UI
         {
             InitializeComponent();
 
-            // UI-Zoom laden
+            RootGrid.LayoutTransform = App.UiScale;
+
+            // UI-Zoom laden und anwenden
             double uiZoom = Properties.Settings.Default.UiZoom;
-            SetUiZoom(uiZoom);
+            App.SetUiZoom(uiZoom > 0 ? uiZoom : 1.0);
 
             this.AddHandler(
                 Keyboard.PreviewKeyDownEvent,
@@ -674,7 +676,7 @@ namespace Skriptorium.UI
             var editor = GetActiveScriptEditor();
             if (editor?.Avalon != null)
             {
-                editor.Avalon.Document.Insert(editor.Avalon.CaretOffset, text + Environment.NewLine);
+                editor.Avalon.Document.Insert(editor.Avalon.CaretOffset, text);
             }
         }
 
@@ -1154,10 +1156,7 @@ namespace Skriptorium.UI
 
         public void SetUiZoom(double zoom)
         {
-            if (RootGrid != null)
-            {
-                RootGrid.LayoutTransform = new ScaleTransform(zoom, zoom);
-            }
+            App.SetUiZoom(zoom);
         }
     }
 }

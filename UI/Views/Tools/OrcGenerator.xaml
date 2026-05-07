@@ -7,7 +7,7 @@
                  Height="730" Width="700" MinHeight="460" MinWidth="500">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-        <Grid Margin="10">
+        <Grid x:Name="RootGrid" Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>

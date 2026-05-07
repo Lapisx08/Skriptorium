@@ -12,6 +12,8 @@ namespace Skriptorium.UI.Views
         {
             InitializeComponent();
 
+            RootGrid.LayoutTransform = App.UiScale;
+
             // Pfad zur aktuellen EXE
             string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             string lastModified = File.GetLastWriteTime(exePath).ToString("dd.MM.yyyy");
