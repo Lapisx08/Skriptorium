@@ -5,8 +5,14 @@
              xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
              xmlns:views="clr-namespace:Skriptorium.UI.Views"
              Height="Auto" Width="Auto">
-    <Grid>
+    
+    <UserControl.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Save"
+                        Executed="SaveCommand_Executed"
+                        CanExecute="SaveCommand_CanExecute"/>
+    </UserControl.CommandBindings>
 
+    <Grid>
         <!-- 1. Zeilen definieren: SearchPanel fix, Editor scrollable -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

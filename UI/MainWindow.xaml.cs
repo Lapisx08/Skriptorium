@@ -204,7 +204,7 @@ namespace Skriptorium.UI
         }
 
         // Ausgelagerte Logik für bessere Übersicht
-        private void RunBackgroundIndexing(string startPath)
+        private async void RunBackgroundIndexing(string startPath)
         {
             try
             {
@@ -213,16 +213,15 @@ namespace Skriptorium.UI
                 if (!string.IsNullOrEmpty(root) && Directory.Exists(root))
                 {
                     System.Diagnostics.Debug.WriteLine($"[Background] Indiziere Projekt: {root}");
-                    ProjectManager.Instance.LoadProject(root);
+                    await ProjectManager.Instance.LoadProjectAsync(root);
                 }
                 else if (File.Exists(startPath))
                 {
-                    ProjectManager.Instance.RefreshSingleFile(startPath);
+                    await ProjectManager.Instance.RefreshSingleFileAsync(startPath);
                 }
 
-                // Erfolg in der UI melden (optional)
                 Dispatcher.Invoke(() => {
-                    // Hier könnte ein Status-Update stehen
+                    // UI-Update
                 });
             }
             catch (Exception ex)

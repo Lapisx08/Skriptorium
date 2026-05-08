@@ -10,41 +10,55 @@ namespace Skriptorium.Parsing
         public SymbolTable GlobalSymbols { get; private set; } = new SymbolTable();
         public List<Declaration> FullAst { get; private set; } = new List<Declaration>();
 
+        public void RemoveAstByFile(string filePath)
+        {
+            FullAst.RemoveAll(d =>
+                d != null &&
+                d.FilePath != null &&
+                d.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public void RemoveSymbolsByFile(string filePath)
+        {
+            GlobalSymbols.RemoveByFile(filePath);
+        }
+
         public void CompileFiles(List<string> filePaths)
         {
-            ClearSymbols();
-
             foreach (string path in filePaths)
             {
-                if (!File.Exists(path)) continue;
+                if (!File.Exists(path))
+                    continue;
 
                 try
                 {
-                    // Lösung A: Direkt zeilenweise einlesen (Besser für Line-Numbers im Go-To)
+                    // 1) Alte Daten dieser Datei entfernen
+                    RemoveAstByFile(path);
+                    RemoveSymbolsByFile(path);
+
+                    // 2) Datei neu einlesen
                     string[] lines = File.ReadAllLines(path, Encoding.GetEncoding(1252));
 
                     var lexer = new DaedalusLexer();
-                    // Jetzt passt der Typ: lines ist string[], Tokenize erwartet string[]
                     var tokens = lexer.Tokenize(lines);
 
                     var parser = new DaedalusParser(tokens);
                     var fileAst = parser.ParseScript();
 
+                    // 3) AST + Symbole registrieren
                     if (fileAst != null)
                     {
                         foreach (var decl in fileAst)
                         {
                             SetFilePathRecursive(decl, path);
                             FullAst.Add(decl);
-
-                            // Registrierung im globalen Index
                             RegisterInTable(decl);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Fehler in {path}: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"Fehler in {path}: {ex}");
                 }
             }
         }

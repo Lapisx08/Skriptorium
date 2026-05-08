@@ -55,6 +55,23 @@ namespace Skriptorium.Parsing
             return globalDecl;
         }
 
+        public void RemoveByFile(string filePath)
+        {
+            var toRemove = new List<string>();
+
+            foreach (var kv in _globalIndex)
+            {
+                if (kv.Value.FilePath != null &&
+                    kv.Value.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    toRemove.Add(kv.Key);
+                }
+            }
+
+            foreach (var key in toRemove)
+                _globalIndex.Remove(key);
+        }
+
         public void EnterScope() => _scopes.Push(new Dictionary<string, Declaration>(StringComparer.OrdinalIgnoreCase));
 
         public void ExitScope()

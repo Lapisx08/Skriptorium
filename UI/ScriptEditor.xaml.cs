@@ -521,6 +521,31 @@ namespace Skriptorium.UI
             }
         }
 
+        public async void SaveFile()
+        {
+            if (string.IsNullOrEmpty(FilePath))
+                return;
+
+            // Datei speichern
+            File.WriteAllText(FilePath, avalonEditor.Text);
+
+            // Datei inkrementell neu kompilieren
+            await ProjectManager.Instance.RefreshSingleFileAsync(FilePath);
+
+            // Modified-Flag zurücksetzen
+            ResetModifiedFlag();
+        }
+
+        private void SaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            SaveFile();
+        }
+
+        private void SaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = IsModified;
+        }
+
         public void SetTextAndResetModified(string text)
         {
             _suppressChangeTracking = true;
@@ -1082,6 +1107,7 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
             avalonEditor.TextArea.TextView.Redraw();
         }
+
         private void AvalonEditor_MouseLeave(object sender, MouseEventArgs e)
         {
             if (_hoverUnderlineMarker != null)
@@ -1093,79 +1119,63 @@ namespace Skriptorium.UI
             avalonEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
         }
 
-        private bool _initialIndexingAttempted = false;
         private readonly object _indexingLock = new object();
+        private string? _lastIndexedFile = null;
 
-        private void AvalonEditor_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private async void AvalonEditor_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (Keyboard.Modifiers != ModifierKeys.Control)
                 return;
+
             var pos = avalonEditor.GetPositionFromPoint(e.GetPosition(avalonEditor));
             if (!pos.HasValue)
                 return;
+
             int offset = avalonEditor.Document.GetOffset(pos.Value.Line, pos.Value.Column);
             string clickedWord = GetWholeWordAtOffset(avalonEditor.Document, offset);
             if (string.IsNullOrWhiteSpace(clickedWord))
                 return;
+
             var compiler = ProjectManager.Instance.Compiler;
             var definition = compiler.GlobalSymbols.Resolve(clickedWord);
+
             if (definition != null)
             {
                 e.Handled = true;
                 JumpToDefinition(definition, clickedWord);
                 return;
             }
-            if (_initialIndexingAttempted)
-            {
-                return;
-            }
+
+            // Indexierung pro Datei
             lock (_indexingLock)
             {
-                if (_initialIndexingAttempted)
+                if (_lastIndexedFile == this.FilePath)
                     return;
-                _initialIndexingAttempted = true;
+
+                _lastIndexedFile = this.FilePath;
             }
-            Dispatcher.Invoke(() => { });
-            Task.Run(() =>
+
+            string? filePath = this.FilePath;
+            string? rootPath = FindScriptsRoot(filePath);
+
+            if (!string.IsNullOrEmpty(rootPath))
             {
-                try
-                {
-                    string? filePath = this.FilePath;
-                    string? rootPath = null;
-                    if (!string.IsNullOrEmpty(filePath))
-                    {
-                        rootPath = FindScriptsRoot(filePath);
-                    }
-                    if (!string.IsNullOrEmpty(rootPath) && Directory.Exists(rootPath))
-                    {
-                        ProjectManager.Instance.LoadProject(rootPath);
-                    }
-                    else if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
-                    {
-                        ProjectManager.Instance.RefreshSingleFile(filePath);
-                    }
-                    else
-                    {
-                        string? savedPath = Properties.Settings.Default.ScriptSearchPath;
-                        if (!string.IsNullOrEmpty(savedPath) && Directory.Exists(savedPath))
-                        {
-                            ProjectManager.Instance.LoadProject(savedPath);
-                        }
-                    }
-                    definition = compiler.GlobalSymbols.Resolve(clickedWord);
-                    if (definition != null)
-                    {
-                        Dispatcher.Invoke(() =>
-                        {
-                            JumpToDefinition(definition, clickedWord);
-                        });
-                    }
-                }
-                catch (Exception)
-                {
-                }
-            });
+                await ProjectManager.Instance.LoadProjectAsync(rootPath);
+            }
+            else if (!string.IsNullOrEmpty(filePath))
+            {
+                await ProjectManager.Instance.RefreshSingleFileAsync(filePath);
+            }
+
+            definition = compiler.GlobalSymbols.Resolve(clickedWord);
+
+            if (definition != null)
+            {
+                e.Handled = true;
+                JumpToDefinition(definition, clickedWord);
+            }
         }
+
         private string? FindScriptsRoot(string path)
         {
             DirectoryInfo? current = new DirectoryInfo(path);
@@ -1179,6 +1189,7 @@ namespace Skriptorium.UI
             }
             return Path.GetDirectoryName(path);
         }
+
         private string GetWholeWordAtOffset(TextDocument document, int offset)
         {
             if (offset < 0 || offset >= document.TextLength) return string.Empty;
@@ -1191,6 +1202,7 @@ namespace Skriptorium.UI
             if (start == end) return string.Empty;
             return document.GetText(start, end - start);
         }
+
         private (int startOffset, int length) GetWordBoundsAtOffset(int offset)
         {
             if (offset < 0 || offset >= avalonEditor.Document.TextLength)
@@ -1203,7 +1215,9 @@ namespace Skriptorium.UI
                 end++;
             return (start, end - start);
         }
+
         private bool IsDaedalusIdentifierChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+
         private void JumpToDefinition(Declaration definition, string symbolName)
         {
             if (Application.Current.MainWindow is MainWindow mainWin)
@@ -1217,6 +1231,7 @@ namespace Skriptorium.UI
             }
         }
     }
+
     public class TextMarker : TextSegment
     {
         public TextMarker(IDocument document, int startOffset, int length)

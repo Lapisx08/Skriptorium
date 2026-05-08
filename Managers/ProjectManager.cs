@@ -15,56 +15,65 @@ namespace Skriptorium.Managers
         public DaedalusCompiler Compiler { get; } = new DaedalusCompiler();
         public List<string> CurrentProjectFiles { get; set; } = new List<string>();
 
-        private bool _isRecompiling = false;
+        private readonly SemaphoreSlim _compileLock = new SemaphoreSlim(1, 1);
+
 
         public ProjectManager()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
-        public void LoadProject(string rootPath)
+        public async Task LoadProjectAsync(string rootPath)
         {
-            if (_isRecompiling) return;
-
-            if (string.IsNullOrEmpty(rootPath) || !Directory.Exists(rootPath)) return;
+            if (string.IsNullOrEmpty(rootPath) || !Directory.Exists(rootPath))
+                return;
 
             var allFiles = Directory.GetFiles(rootPath, "*.d", SearchOption.AllDirectories);
-
             CurrentProjectFiles = allFiles.ToList();
 
-            Recompile();
+            await RecompileAsync();
         }
 
-        public void Recompile()
+        public async Task RecompileAsync()
         {
-            if (_isRecompiling || CurrentProjectFiles == null || CurrentProjectFiles.Count == 0) return;
+            if (!await _compileLock.WaitAsync(0))
+                return;
 
             try
             {
-                _isRecompiling = true;
-                Compiler.ClearSymbols();
-
+                Compiler.ClearSymbols();                 // Nur beim Full-Rebuild!
                 Compiler.CompileFiles(CurrentProjectFiles);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[Recompile] Fehler: {ex}");
             }
             finally
             {
-                _isRecompiling = false;
+                _compileLock.Release();
             }
         }
 
-        public void RefreshSingleFile(string filePath)
+        public async Task RefreshSingleFileAsync(string filePath)
         {
-            if (_isRecompiling || !File.Exists(filePath)) return;
+            if (!File.Exists(filePath))
+                return;
+
+            if (!await _compileLock.WaitAsync(0))
+                return;
 
             try
             {
+                // Wichtig: KEIN ClearSymbols() hier!
                 Compiler.CompileFiles(new List<string> { filePath });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[RefreshSingleFile] Fehler: {ex}");
+            }
+            finally
+            {
+                _compileLock.Release();
             }
         }
     }
