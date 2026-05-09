@@ -733,36 +733,20 @@ namespace Skriptorium.UI
             ClearHighlighting();
             ApplySyntaxHighlighting();
             var errors = new List<string>();
-            try
+
+            var parser = new DaedalusParser(_cachedTokens);
+            parser.ParseScript();
+
+            if (parser.Errors.Any())
             {
-                var tokens = _cachedTokens;
-                new DaedalusParser(tokens).ParseScript();
-            }
-            catch (ParseException ex)
-            {
-                HighlightError(ex.Line, ex.Column, ex.Found?.Length ?? 1);
-                errors.Add(ex.Message);
+                foreach (var ex in parser.Errors)
+                {
+                    errors.Add(ex.Message);
+                    HighlightError(ex.Line, ex.Column, ex.Found?.Length ?? 1);
+                }
                 return errors;
             }
-            try
-            {
-                var parsingDecls = new DaedalusParser(_cachedTokens).ParseScript();
-            }
-            catch (Exception ex)
-            {
-                errors.Add(ex.Message);
-                var lines = ex.Message.Split(new[] { "\n" }, StringSplitOptions.None);
-                foreach (var msg in lines)
-                {
-                    var m = ErrorPositionRegex().Match(msg);
-                    if (m.Success)
-                    {
-                        int line = int.Parse(m.Groups[1].Value);
-                        int column = int.Parse(m.Groups[2].Value);
-                        HighlightError(line, column, 1);
-                    }
-                }
-            }
+
             return errors;
         }
 

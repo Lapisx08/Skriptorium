@@ -364,7 +364,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("// ************************************************************");
 
             // WICHTIG: Hier nutzen wir jetzt dialogInstance (da ist das DIA_ schon drin)
-            sb.AppendLine($"instance {dialogInstance} (C_INFO) ");
+            sb.AppendLine($"instance {dialogInstance}(C_INFO) ");
             sb.AppendLine("{");
             sb.AppendLine($"\tnpc\t\t\t= {npcInstance};");
             sb.AppendLine($"\tnr\t\t\t= {dialogNumber};");
@@ -376,13 +376,13 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("};");
             sb.AppendLine();
 
-            sb.AppendLine($"func int {dialogInstance}_Condition ()");
+            sb.AppendLine($"func int {dialogInstance}_Condition()");
             sb.AppendLine("{");
             sb.AppendLine("\treturn TRUE;");
             sb.AppendLine("};");
             sb.AppendLine();
 
-            sb.AppendLine($"func void {dialogInstance}_Info ()");
+            sb.AppendLine($"func void {dialogInstance}_Info()");
             sb.AppendLine("{");
 
             int dialogIndex = 0;

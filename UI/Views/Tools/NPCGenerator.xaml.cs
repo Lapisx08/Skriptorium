@@ -251,7 +251,7 @@ namespace Skriptorium.UI.Views.Tools
 
             string guildShort = guildText.Length > 4 ? guildText.Substring(4) : guildText;
 
-            sb.AppendLine($"instance {guildShort}_{idEntry.Text}_{nameEntry.Text.Replace(" ", "_")} (Npc_Default)");
+            sb.AppendLine($"instance {guildShort}_{idEntry.Text}_{nameEntry.Text.Replace(" ", "_")}(Npc_Default)");
             sb.AppendLine("{");
             sb.AppendLine("\t// ------ NSC ------");
             sb.AppendLine($"\tname\t= \"{nameEntry.Text}\";");
@@ -362,7 +362,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine();
 
             // Tagesroutine-Funktion
-            sb.AppendLine($"func void Rtn_Start_{idEntry.Text} (){(includeComments && cDailyRoutine != null ? $" // {cDailyRoutine}" : "")}");
+            sb.AppendLine($"func void Rtn_Start_{idEntry.Text}(){(includeComments && cDailyRoutine != null ? $" // {cDailyRoutine}" : "")}");
             sb.AppendLine("{");
             sb.AppendLine("\tTA_Stand_ArmsCrossed(08,00, 20,00, \"WP_Platzhalter\");");
             sb.AppendLine("\tTA_Stand_ArmsCrossed(20,00, 08,00, \"WP_Platzhalter\");");

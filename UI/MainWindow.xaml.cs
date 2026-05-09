@@ -11,6 +11,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
@@ -654,20 +655,24 @@ namespace Skriptorium.UI
 
         private void MittleresKommentarfeld_Click(object sender, RoutedEventArgs e)
         {
-            KommentarblockEinfügen(
-        @"//**************************************************************
-//   
-//**************************************************************");
+            var sb = new StringBuilder();
+            sb.AppendLine("//**************************************************************");
+            sb.AppendLine("//   ");
+            sb.AppendLine("//**************************************************************");
+
+            KommentarblockEinfügen(sb.ToString());
         }
 
         private void GroßesKommentarfeld_Click(object sender, RoutedEventArgs e)
         {
-            KommentarblockEinfügen(
-        @"//##############################################################
-//###
-//###   
-//###
-//##############################################################");
+            var sb = new StringBuilder();
+            sb.AppendLine("//##############################################################");
+            sb.AppendLine("//###");
+            sb.AppendLine("//###   ");
+            sb.AppendLine("//###");
+            sb.AppendLine("//##############################################################");
+
+            KommentarblockEinfügen(sb.ToString());
         }
 
         private void KommentarblockEinfügen(string text)

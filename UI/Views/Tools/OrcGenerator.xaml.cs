@@ -121,7 +121,7 @@ namespace Skriptorium.UI.Views.Tools
             // Instance-Name
             string nameSafe = nameEntry.Text.Replace(" ", "_");
 
-            sb.AppendLine($"instance {idEntry.Text}_{nameSafe}_Ork (Npc_Default)");
+            sb.AppendLine($"instance {idEntry.Text}_{nameSafe}_Ork(Npc_Default)");
             sb.AppendLine("{");
             sb.AppendLine("\t// ------ NSC ------");
             sb.AppendLine($"\tname\t\t\t\t  = \"{nameEntry.Text}\";");
@@ -181,7 +181,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine("};");
             sb.AppendLine();
 
-            sb.AppendLine($"func void Rtn_Start_{idEntry.Text} ()");
+            sb.AppendLine($"func void Rtn_Start_{idEntry.Text}()");
             sb.AppendLine("{");
             sb.AppendLine("\tTA_Stand_ArmsCrossed(08,00, 20,00, \"WP_Platzhalter\");");
             sb.AppendLine("\tTA_Stand_ArmsCrossed(20,00, 08,00, \"WP_Platzhalter\");");
