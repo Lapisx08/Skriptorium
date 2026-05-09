@@ -372,7 +372,7 @@ namespace Skriptorium.UI.Views.Tools
             sb.AppendLine($"\tinformation = {dialogInstance}_Info;");
             sb.AppendLine($"\timportant\t= {important};");
             sb.AppendLine($"\tpermanent\t= {permanent};");
-            sb.AppendLine($"\tDescription = \"{description}\";");
+            sb.AppendLine($"\tdescription = \"{description}\";");
             sb.AppendLine("};");
             sb.AppendLine();
 
