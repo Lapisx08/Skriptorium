@@ -512,38 +512,13 @@ namespace Skriptorium.UI
             if (System.IO.File.Exists(path))
             {
                 this.FilePath = path;
-                string content = System.IO.File.ReadAllText(path, System.Text.Encoding.GetEncoding(1252));
+                string content = DataManager.ReadFileAutoEncoding(path);
                 _suppressChangeTracking = true;
                 avalonEditor.Text = content;
                 _originalText = content;
                 _suppressChangeTracking = false;
                 DoInitialHighlighting();
             }
-        }
-
-        public async void SaveFile()
-        {
-            if (string.IsNullOrEmpty(FilePath))
-                return;
-
-            // Datei speichern
-            File.WriteAllText(FilePath, avalonEditor.Text);
-
-            // Datei inkrementell neu kompilieren
-            await ProjectManager.Instance.RefreshSingleFileAsync(FilePath);
-
-            // Modified-Flag zurücksetzen
-            ResetModifiedFlag();
-        }
-
-        private void SaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            SaveFile();
-        }
-
-        private void SaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = IsModified;
         }
 
         public void SetTextAndResetModified(string text)

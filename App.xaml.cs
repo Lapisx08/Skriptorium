@@ -35,6 +35,9 @@ namespace Skriptorium
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            // Encoding-Provider registrieren (für CP1252, CP1250, CP1251)
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             // Settings laden
             Settings.Default.Reload();
 

@@ -87,7 +87,7 @@ namespace Skriptorium.UI.Views.Tools
 
             // B_CloseTopics.d
             OutCloseBox.Text =
-                $"B_CloseTopic({topic}, {mis}, {StartChapterBox.Text}, {EndChapterBox.Text});\n";
+                $"B_CloseTopic({topic}, {mis}, {QuestFlagBox.Text}, {EndChapterBox.Text});\n";
 
             // Questdialog
             var sb = new StringBuilder();
@@ -142,7 +142,7 @@ namespace Skriptorium.UI.Views.Tools
             QuestIdBox.Clear();
             QuestTitleBox.Clear();
 
-            StartChapterBox.Text = "1";
+            QuestFlagBox.Text = "1";
             EndChapterBox.Text = "6";
 
             LogStartBox.Clear();

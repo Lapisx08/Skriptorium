@@ -34,8 +34,8 @@
                     <TextBlock Text="{DynamicResource DisplayName}" Grid.Row="1" Grid.Column="0" Margin="5,2,5,2" VerticalAlignment="Center"/>
                     <TextBox x:Name="QuestTitleBox" Grid.Row="1" Grid.Column="1" Margin="5,2,5,2"/>
 
-                    <TextBlock Text="{DynamicResource StartChapter}" Grid.Row="2" Grid.Column="0" Margin="5,2,5,2" VerticalAlignment="Center"/>
-                    <TextBox x:Name="StartChapterBox" Grid.Row="2" Grid.Column="1" Margin="5,2,5,2" Text="1"/>
+                    <TextBlock Text="{DynamicResource QuestFlag}" Grid.Row="2" Grid.Column="0" Margin="5,2,5,2" VerticalAlignment="Center"/>
+                    <TextBox x:Name="QuestFlagBox" Grid.Row="2" Grid.Column="1" Margin="5,2,5,2" Text="0"/>
 
                     <TextBlock Text="{DynamicResource EndChapter}" Grid.Row="3" Grid.Column="0" Margin="5,2,5,2" VerticalAlignment="Center"/>
                     <TextBox x:Name="EndChapterBox" Grid.Row="3" Grid.Column="1" Margin="5,2,5,2" Text="6"/>

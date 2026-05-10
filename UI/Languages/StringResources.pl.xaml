@@ -183,7 +183,7 @@
     <sys:String x:Key="QuestDefinition">Definicja zadania</sys:String>
     <sys:String x:Key="InternalName">Nazwa wewnętrzna:</sys:String>
     <sys:String x:Key="DisplayName">Wyświetlana nazwa:</sys:String>
-    <sys:String x:Key="StartChapter">Rozpocznij rozdział:</sys:String>
+    <sys:String x:Key="QuestFlag">Flaga zadania:</sys:String>
     <sys:String x:Key="EndChapter">Koniec rozdziału:</sys:String>
     <sys:String x:Key="MandatoryLogEntries">Obowiązkowe wpisy do dziennika</sys:String>
     <sys:String x:Key="StartLogText">Rozpocznij tekst dziennika</sys:String>

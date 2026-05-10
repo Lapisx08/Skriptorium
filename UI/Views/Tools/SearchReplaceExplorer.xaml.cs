@@ -19,7 +19,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Windows.Services.Maps;
 
 namespace Skriptorium.UI.Views
 {
@@ -35,7 +34,6 @@ namespace Skriptorium.UI.Views
         private readonly DispatcherTimer _searchTimer;
         private CancellationTokenSource? _cts;
         private readonly List<string> _errors = new List<string>();
-        private static readonly ConcurrentDictionary<string, Encoding> _fileEncodings = new();
 
         public SearchReplaceExplorer(ScriptTabManager tabManager)
         {
@@ -45,6 +43,9 @@ namespace Skriptorium.UI.Views
 
             SearchResultsTree.SetValue(VirtualizingStackPanel.IsVirtualizingProperty, true);
             SearchResultsTree.SetValue(VirtualizingStackPanel.VirtualizationModeProperty, VirtualizationMode.Recycling);
+
+            // Cache-Eintrag entfernen wenn eine Datei extern gespeichert wurde
+            DataManager.FileSaved += filePath => _fileCache.TryRemove(filePath, out _);
 
             _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
             _searchTimer.Tick += (s, e) =>
@@ -323,21 +324,18 @@ namespace Skriptorium.UI.Views
 
                     if (replacedCount > 0)
                     {
-                        // Datei speichern
+                        // Datei speichern — Encoding wird intern von DataManager verwaltet
                         DataManager.WriteFileAutoEncoding(node.FullPath, newText);
 
-                        // Cache aktualisieren
+                        // Cache wird über FileSaved-Event automatisch invalidiert,
+                        // aber wir aktualisieren ihn hier zusätzlich mit dem neuen Inhalt
                         var newLastModified = File.GetLastWriteTime(node.FullPath);
                         _fileCache.AddOrUpdate(node.FullPath,
                             (newText, newLastModified),
                             (k, v) => (newText, newLastModified));
 
-                        _fileEncodings[node.FullPath] = Encoding.GetEncoding("ISO-8859-1");
-
                         totalReplacedCount += replacedCount;
 
-                        // *** NEU: Offene Tabs über den TabManager aktualisieren ***
-                        // Wir suchen in allen offenen Editoren nach dem passenden Dateipfad
                         var openEditor = _tabManager.GetAllOpenEditors().FirstOrDefault(ed =>
                             string.Equals(ed.FilePath, node.FullPath, StringComparison.OrdinalIgnoreCase));
 
@@ -345,11 +343,7 @@ namespace Skriptorium.UI.Views
                         {
                             Dispatcher.Invoke(() =>
                             {
-                                // Den Text im Editor aktualisieren
-                                // Nutze die Methode deines ScriptEditors, um den Status korrekt zu setzen
                                 openEditor.SetTextAndResetModified(newText);
-
-                                // Falls der TabManager den Titel (mit/ohne Sternchen) verwalten soll:
                                 _tabManager.UpdateTabTitle(openEditor);
                             });
                         }
@@ -384,7 +378,6 @@ namespace Skriptorium.UI.Views
             StartSearch(searchTerm);
         }
 
-
         private void SearchResultsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (SearchResultsTree.SelectedItem is FileMatch match)
@@ -415,41 +408,17 @@ namespace Skriptorium.UI.Views
             }
         }
 
+        private static string ReadFileAutoEncoding(string filePath)
+            => DataManager.ReadFileAutoEncoding(filePath);
+
         private static async Task<string> ReadFileAutoEncodingAsync(string filePath, CancellationToken ct)
         {
-            try
-            {
-                var result = UtfUnknown.CharsetDetector.DetectFromFile(filePath);
-                Encoding encoding = result.Detected?.Encoding ?? Encoding.UTF8;
-                _fileEncodings[filePath] = encoding;
-                using var reader = new StreamReader(filePath, encoding);
-                return await reader.ReadToEndAsync(ct);
-            }
-            catch
-            {
-                _fileEncodings[filePath] = Encoding.Latin1;
-                using var reader = new StreamReader(filePath, Encoding.Latin1);
-                return await reader.ReadToEndAsync(ct);
-            }
+            Encoding encoding = EncodingDetector.Detect(filePath);
+            DataManager.fileEncodings[filePath] = encoding;
+            using var reader = new StreamReader(filePath, encoding);
+            return await reader.ReadToEndAsync(ct);
         }
 
-        private static string ReadFileAutoEncoding(string filePath)
-        {
-            try
-            {
-                var result = UtfUnknown.CharsetDetector.DetectFromFile(filePath);
-                Encoding encoding = result.Detected?.Encoding ?? Encoding.UTF8;
-                _fileEncodings[filePath] = encoding;
-                return File.ReadAllText(filePath, encoding);
-            }
-            catch
-            {
-                _fileEncodings[filePath] = Encoding.Latin1;
-                return File.ReadAllText(filePath, Encoding.Latin1);
-            }
-        }
-
-        // *** Collapse-Button ***
         private void BtnCollapseMatches_Click(object sender, RoutedEventArgs e)
         {
             foreach (var node in SearchResults)
@@ -459,7 +428,7 @@ namespace Skriptorium.UI.Views
         private void CollapseNodeRecursively(FileSearchNode node)
         {
             node.IsExpanded = false;
-            foreach (var child in node.Matches) { /* Leaf nodes haben keine Kinder */ }
+            foreach (var child in node.Matches) { }
         }
     }
 

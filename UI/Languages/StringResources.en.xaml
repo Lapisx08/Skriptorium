@@ -183,7 +183,7 @@
     <sys:String x:Key="QuestDefinition">Quest Definition</sys:String>
     <sys:String x:Key="InternalName">Internal Name:</sys:String>
     <sys:String x:Key="DisplayName">Display Name:</sys:String>
-    <sys:String x:Key="StartChapter">Start Chapter:</sys:String>
+    <sys:String x:Key="QuestFlag">Quest Flag:</sys:String>
     <sys:String x:Key="EndChapter">End Chapter:</sys:String>
     <sys:String x:Key="MandatoryLogEntries">Mandatory Log Entries</sys:String>
     <sys:String x:Key="StartLogText">Start Log Text</sys:String>

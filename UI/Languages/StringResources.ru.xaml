@@ -183,7 +183,7 @@
     <sys:String x:Key="QuestDefinition">Определение квеста</sys:String>
     <sys:String x:Key="InternalName">Внутреннее название:</sys:String>
     <sys:String x:Key="DisplayName">Отображаемое имя:</sys:String>
-    <sys:String x:Key="StartChapter">Начать главу:</sys:String>
+    <sys:String x:Key="QuestFlag">Флаг квеста:</sys:String>
     <sys:String x:Key="EndChapter">Конец главы:</sys:String>
     <sys:String x:Key="MandatoryLogEntries">Обязательные записи в журнале</sys:String>
     <sys:String x:Key="StartLogText">Начать журнал Текст</sys:String>

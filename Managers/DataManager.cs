@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
-using UtfUnknown;
+using System.Diagnostics;
 
 namespace Skriptorium.Managers
 {
@@ -30,36 +30,41 @@ namespace Skriptorium.Managers
         // Speichert erkannte Kodierungen pro Datei
         public static readonly ConcurrentDictionary<string, Encoding> fileEncodings = new();
 
-        // Liest Datei mit automatischer Kodierungserkennung via UtfUnknown
+        private static readonly Encoding Cp1252 = Encoding.GetEncoding(1252);
+
+        // Wird gefeuert wenn eine Datei gespeichert wurde (für Cache-Invalidierung)
+        public static event Action<string>? FileSaved;
+
+        // Liest Datei mit automatischer Kodierungserkennung via EncodingDetector
         public static string ReadFileAutoEncoding(string filePath)
         {
             try
             {
-                var result = CharsetDetector.DetectFromFile(filePath);
-                Encoding encoding = result.Detected?.Encoding ?? Encoding.UTF8;
+                Encoding encoding = EncodingDetector.Detect(filePath);
                 fileEncodings[filePath] = encoding;
                 return File.ReadAllText(filePath, encoding);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Fehler beim Lesen der Datei '{filePath}': {ex.Message}");
-                fileEncodings[filePath] = Encoding.Latin1;
-                return File.ReadAllText(filePath, Encoding.Latin1);
+                throw;
             }
         }
 
-        // Speichert Datei
+        // Speichert Datei mit dem beim Laden erkannten Encoding, sonst CP1252
         public static void WriteFileAutoEncoding(string filePath, string content)
         {
             try
             {
-                // Immer Latin-1 verwenden
-                Encoding encodingToUse = Encoding.GetEncoding("ISO-8859-1");
-                File.WriteAllText(filePath, content, encodingToUse);
+                Encoding encoding = fileEncodings.TryGetValue(filePath, out var enc) ? enc : Cp1252;
+
+                File.WriteAllText(filePath, content, encoding);
+                FileSaved?.Invoke(filePath);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Fehler beim Speichern der Datei '{filePath}': {ex.Message}");
+                throw;
             }
         }
 
@@ -127,7 +132,6 @@ namespace Skriptorium.Managers
             if (dlg.ShowDialog() == true)
                 OpenFile(dlg.FileName, onFileLoaded);
         }
-
 
         public static void OpenFile(string filePath, Action<string, string> onFileLoaded, Action<string>? onError = null)
         {
@@ -251,7 +255,7 @@ namespace Skriptorium.Managers
 
         public static void LoadRecentFiles()
         {
-            const int MaxRecentFiles = 30; // Maximale Anzahl an zuletzt geöffneten Dateien
+            const int MaxRecentFiles = 30;
 
             if (File.Exists(RecentFilesPath))
             {
@@ -260,7 +264,6 @@ namespace Skriptorium.Managers
                     var content = ReadFileAutoEncoding(RecentFilesPath);
                     var lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
-                    // Liste zurücksetzen und nur die ersten MaxRecentFiles gültigen Dateien hinzufügen
                     recentFiles.Clear();
                     recentFiles.AddRange(lines
                         .Where(File.Exists)

@@ -5,6 +5,7 @@
         xmlns:local="clr-namespace:Skriptorium.UI.Views.Tools"
         Title="{DynamicResource DialogGenerator}" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen"
         Height="770" Width="700" MinHeight="500" MinWidth="500">
+    
     <!-- Haupt-ScrollViewer für das gesamte Fenster -->
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
         <Grid x:Name="RootGrid" Margin="10">
