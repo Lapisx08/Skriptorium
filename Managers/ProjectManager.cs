@@ -21,6 +21,11 @@ namespace Skriptorium.Managers
         public ProjectManager()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            DataManager.FileSaved += async (path) =>
+            {
+                await RefreshSingleFileAsync(path);
+            };
         }
 
         public async Task LoadProjectAsync(string rootPath)
