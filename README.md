@@ -8,7 +8,9 @@ Wenn das Programm Skriptorium als Standardprogramm für Daedalus-Skripte gesetzt
 - Moderne WPF-Oberfläche mit hellem und dunklem Anzeigemodus
 - Effiziente Tabverwaltung und Docking der Skripte
 - Daedalus-Syntax-Highlighting für bessere Lesbarkeit
-- NPC und Dialog Generator zur Zeitersparnis beim Skripten
+- NPC, Dialog Ork und Quest Generator zur Zeitersparnis beim Skripten
+- GoTo-Funktion zum schnellen Navigieren über Strg + Linksklick
+- Spaltenauswahl über Alt + Linksklick
 - Weitere gängige Funktionen
 
 ## Systemanforderungen
@@ -58,6 +60,8 @@ Kontaktmöglichkeit bei Fragen, Kritik oder Interesse an einer Mitwirkung des Pr
 ### Einstellungen
 Allgemein:
 - Änderung des Anzeigemodus (Tag- und Nachtmodus)
+- UI-Skalierung
+- Sprache: Deutsch, Englisch, Polnisch, Russisch
 
 Pfade:
 - Hier wird das Skriptverzeichnis des Gothic-Ordners gesetzt. Dieses dient als Stammverzeichnis. Datei Explorer, Explorer Suche, Suchen und Ersetzen beziehen sich bei der Suche auf dieses Stammverzeichnis
@@ -96,7 +100,7 @@ Autovervollständigung umschalten:
 - Kann ein und ausgeschalten werden
 
 Text einrücken:
-- Text innerhalb einer geschweiften Klammer wird um 4 Leerzeichen eingerückt
+- Text innerhalb einer geschweiften Klammer wird um einen Tab eingerückt
 
 Syntax prüfen:
 - Prüft Syntax des Skripts. Dieses Tool funktioniert noch nicht einwandfrei, weshalb man sich darauf nicht verlassen sollte
@@ -107,7 +111,6 @@ Datei Explorer:
 
 Explorer Suche:
 - Bietet ein angenehmes Sucherlebnis zur Laufzeit im Stammverzeichnis. Treffer werden im Fenster gelb markiert
-- Macht im Grunde dasselbe wie die Funktion "Suchen in" in Suchen und Ersetzen, aber die Explorer Suche ist für Suchen zur Laufzeit optimiert
 
 Code Struktur:
 - Der Parser erkennt Instanzen, Funktionen, Variablen und Konstanten in einem Skript. Die Struktur wird in dem Fenster übersichtlich aufgeschlüsselt (siehe Hinweise)
@@ -133,7 +136,7 @@ Flags:
 
 NPC Type:
 - Auswahl wie der NPC gegenüber dem Helden eingestellt ist
-- NPCTYPE_MAIN neutrales Verhalten und NPCTYPE_FRIEND vertrautes Verhalten
+- NPCTYPE_MAIN, NPCTYPE_Ambient und NPCTYPE_FRIEND
 
 AIVARs:
 - Fügt bei "Ja", AIVARs hinzu
@@ -141,7 +144,7 @@ AIVARs:
 
 Individuelle Attribute:
 - Fügt bei "Ja" individuelle Attribute hinzu
-- Individuelle Anpassung von Stärke, Gesichklichkeit usw. unabhängig vom Kapitel (bei Nutzung der individuellen Attribute "B_SetAttributesToChapter" löschen)
+- Individuelle Anpassung von Stärke, Gesicklichkeit usw. unabhängig vom Kapitel (bei Nutzung der individuellen Attribute "B_SetAttributesToChapter" löschen)
 
 Individuelle Kampf-Talente:
 - Fügt bei "Ja" individuelle Kampftalente hinzu (individuelle Anpassung von Einhand-, Zweihand-Talent usw; Bei Nutzung der individuellen Kampftalente "B_SetFightSkills" löschen)
@@ -217,8 +220,8 @@ Interner Name:
 Anzeigename:
 - Vergabe des Anzeigenamens
 
-Start-Kapitel:
-- Gibt an, ab welchem Kapitel eine Quest erhältlich ist
+Quest-Flag:
+- Gibt an, ob die Quest aktiv oder abgeschlossen beziehungsweise gescheitert ist
 
 End-Kapitel:
 - Gibt an, bis zu welchem Kapitel die Quest verfügbar ist
